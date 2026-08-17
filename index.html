@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Find the Dirt. Find the Deal.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --white:    #FFFFFF;
+    --danger:   #C0392B;
+    --success:  #27AE60;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--soil);
+    color: var(--chalk);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(28,20,16,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(232,137,42,0.15);
+  }
+
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--amber); }
+
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+
+  .nav-links a {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dust);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--amber); }
+
+  .btn-nav {
+    background: var(--amber);
+    color: var(--soil) !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 3px;
+    font-weight: 700 !important;
+    transition: background 0.2s !important;
+  }
+
+  .btn-nav:hover { background: var(--amber-lt) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% 40%, rgba(232,137,42,0.08) 0%, transparent 70%),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 60px,
+        rgba(255,255,255,0.012) 60px,
+        rgba(255,255,255,0.012) 61px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 60px,
+        rgba(255,255,255,0.012) 60px,
+        rgba(255,255,255,0.012) 61px
+      );
+  }
+
+  /* Caterpillar-yellow hazard stripe accent */
+  .hero-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--amber) 0px,
+      var(--amber) 32px,
+      var(--soil) 32px,
+      var(--soil) 48px
+    );
+  }
+
+  .hero-inner {
+    position: relative;
+    max-width: 900px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 2px;
+    background: var(--amber);
+  }
+
+  .hero-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3.5rem, 9vw, 7.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    color: var(--amber);
+    display: block;
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--dust);
+    max-width: 520px;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--amber);
+    color: var(--soil);
+    border: none;
+    padding: 0.9rem 2rem;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-primary:hover { background: var(--amber-lt); transform: translateY(-1px); }
+
+  .btn-secondary {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--chalk);
+    border: 1.5px solid rgba(196,168,130,0.4);
+    padding: 0.9rem 2rem;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--amber); color: var(--amber); }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 4rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(196,168,130,0.15);
+  }
+
+  .stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 2.2rem;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .stat-num span { color: var(--amber); }
+
+  .stat-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-top: 0.3rem;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .section {
+    padding: 5rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 1rem;
+  }
+
+  .section-sub {
+    color: var(--dust);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 540px;
+    margin-bottom: 3.5rem;
+  }
+
+  /* ── ROLE TOGGLE ── */
+  .role-toggle {
+    display: flex;
+    gap: 0;
+    background: var(--dig);
+    border-radius: 4px;
+    padding: 4px;
+    width: fit-content;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(196,168,130,0.1);
+  }
+
+  .role-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: var(--stone);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+
+  .role-btn.active {
+    background: var(--amber);
+    color: var(--soil);
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5px;
+    background: rgba(196,168,130,0.08);
+    border: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .step {
+    background: var(--dig);
+    padding: 2rem 1.75rem;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .step:hover { background: var(--clay); }
+
+  .step-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: rgba(232,137,42,0.15);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .step-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .step-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .step-desc {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--stone);
+  }
+
+  /* ── FOR WHO ── */
+  .who-section {
+    background: var(--dig);
+    border-top: 1px solid rgba(196,168,130,0.08);
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    padding: 5rem 2rem;
+  }
+
+  .who-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    background: rgba(196,168,130,0.08);
+  }
+
+  .who-card {
+    background: var(--dig);
+    padding: 3rem 2.5rem;
+  }
+
+  .who-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    background: rgba(232,137,42,0.1);
+    border: 1px solid rgba(232,137,42,0.2);
+    padding: 0.25rem 0.75rem;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+  }
+
+  .who-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+
+  .who-desc {
+    color: var(--dust);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.75rem;
+  }
+
+  .who-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .who-list li {
+    font-size: 0.9rem;
+    color: var(--dust);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .who-list li::before {
+    content: '▸';
+    color: var(--amber);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── PAYMENT TRUST BAND ── */
+  .trust-band {
+    background: var(--clay);
+    border-top: 3px solid var(--amber);
+    padding: 3rem 2rem;
+  }
+
+  .trust-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+    flex-wrap: wrap;
+  }
+
+  .trust-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+
+  .trust-items {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .trust-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .trust-text {
+    font-size: 0.88rem;
+    color: var(--dust);
+  }
+
+  /* ── EQUIPMENT TYPES ── */
+  .equip-section {
+    padding: 5rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .equip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5px;
+    background: rgba(196,168,130,0.08);
+    border: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .equip-card {
+    background: var(--dig);
+    padding: 2rem 1.25rem;
+    text-align: center;
+    cursor: default;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+  }
+
+  .equip-card:hover { background: var(--clay); }
+
+  .equip-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--chalk);
+    text-align: center;
+  }
+
+  /* ── JOB TYPES ── */
+  .jobs-section {
+    background: var(--dig);
+    padding: 5rem 2rem;
+    border-top: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .jobs-inner { max-width: 1100px; margin: 0 auto; }
+
+  .jobs-pills {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .pill {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.1rem;
+    border: 1.5px solid rgba(232,137,42,0.25);
+    color: var(--dust);
+    border-radius: 2px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .pill:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* ── REFERRAL PARTNERS ── */
+  .partners-section {
+    padding: 4rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .partners-label {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 1.5rem;
+  }
+
+  .partners-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .partner-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--stone);
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .partner-logo:hover { opacity: 1; }
+
+  /* ── CTA SECTION ── */
+  .cta-section {
+    padding: 6rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(232,137,42,0.07) 0%, transparent 70%);
+  }
+
+  .cta-inner { position: relative; }
+
+  .cta-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    text-transform: uppercase;
+    line-height: 0.95;
+    color: var(--white);
+    margin-bottom: 1.25rem;
+  }
+
+  .cta-title span { color: var(--amber); }
+
+  .cta-sub {
+    color: var(--dust);
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dig);
+    border-top: 1px solid rgba(196,168,130,0.1);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: var(--white);
+    letter-spacing: 0.04em;
+  }
+
+  .footer-logo span { color: var(--amber); }
+
+  .footer-tagline {
+    font-size: 0.8rem;
+    color: var(--stone);
+    margin-top: 0.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    font-size: 0.8rem;
+    color: var(--stone);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--amber); }
+
+  .footer-copy {
+    font-size: 0.75rem;
+    color: var(--clay);
+    margin-top: 1.5rem;
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0.9rem 1.25rem; }
+    .nav-links { display: none; }
+    .hero { padding: 7rem 1.25rem 3rem; }
+    .hero-stats { gap: 1.5rem; }
+    .who-inner { grid-template-columns: 1fr; }
+    .trust-inner { gap: 2rem; }
+    .section { padding: 3.5rem 1.25rem; }
+    .equip-section, .partners-section { padding: 3rem 1.25rem; }
+    .cta-section { padding: 4rem 1.25rem; }
+  }
+
+  /* ── STEP PANELS (JS toggled) ── */
+  .steps-panel { display: none; }
+  .steps-panel.active { display: grid; }
+
+  /* ── CHATBOT WIDGET ── */
+  .db-chat-btn { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 60px; height: 60px; border-radius: 50%; background: var(--amber); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(232,137,42,0.4); z-index: 999; transition: transform 0.2s, box-shadow 0.2s; }
+  .db-chat-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(232,137,42,0.55); }
+  .db-chat-btn svg { width: 26px; height: 26px; fill: var(--soil); }
+  .db-unread { position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%; background: #E74C3C; border: 2px solid var(--soil); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.65rem; color: white; }
+  .db-chat-window { position: fixed; bottom: 5.5rem; right: 1.5rem; width: 360px; max-height: 560px; background: var(--dig); border: 1px solid rgba(196,168,130,0.12); border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,0.5); display: flex; flex-direction: column; z-index: 998; overflow: hidden; transform: scale(0.92) translateY(10px); opacity: 0; pointer-events: none; transition: transform 0.2s ease, opacity 0.2s ease; }
+  .db-chat-window.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+  .db-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: var(--soil); border-bottom: 1px solid rgba(196,168,130,0.08); flex-shrink: 0; }
+  .db-bot-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; position: relative; }
+  .db-online { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; background: #27AE60; border: 2px solid var(--soil); }
+  .db-header-info { flex: 1; }
+  .db-bot-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--chalk); }
+  .db-bot-status { font-size: 0.72rem; color: #27AE60; display: flex; align-items: center; gap: 0.3rem; }
+  .db-bot-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #27AE60; display: block; }
+  .db-close { background: none; border: none; color: var(--stone); font-size: 1.1rem; cursor: pointer; transition: color 0.2s; padding: 0.2rem; line-height: 1; }
+  .db-close:hover { color: var(--chalk); }
+  .db-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; scroll-behavior: smooth; }
+  .db-msg { display: flex; gap: 0.5rem; align-items: flex-end; max-width: 88%; }
+  .db-msg.bot { align-self: flex-start; }
+  .db-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .db-msg-av { width: 24px; height: 24px; border-radius: 50%; background: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; margin-bottom: 0.15rem; }
+  .db-bubble { padding: 0.6rem 0.9rem; border-radius: 12px; font-size: 0.85rem; line-height: 1.5; word-break: break-word; }
+  .db-msg.bot .db-bubble { background: var(--clay); color: var(--chalk); border-bottom-left-radius: 3px; border: 1px solid rgba(196,168,130,0.1); }
+  .db-msg.user .db-bubble { background: var(--amber); color: var(--soil); border-bottom-right-radius: 3px; font-weight: 500; }
+  .db-typing { display: none; align-items: center; gap: 0.5rem; align-self: flex-start; padding: 0 0 0.25rem; }
+  .db-typing.visible { display: flex; }
+  .db-typing-dots { background: var(--clay); border: 1px solid rgba(196,168,130,0.1); border-radius: 12px; border-bottom-left-radius: 3px; padding: 0.6rem 0.85rem; display: flex; gap: 4px; align-items: center; }
+  .db-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--stone); animation: dbBounce 1.2s infinite; }
+  .db-dot:nth-child(2) { animation-delay: 0.2s; }
+  .db-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dbBounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+  .db-quick-replies { padding: 0.5rem 0.75rem; display: flex; gap: 0.4rem; flex-wrap: wrap; border-top: 1px solid rgba(196,168,130,0.06); flex-shrink: 0; }
+  .db-chip { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.7rem; border-radius: 12px; border: 1.5px solid rgba(196,168,130,0.2); background: transparent; color: var(--dust); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .db-chip:hover { border-color: var(--amber); color: var(--amber); background: rgba(232,137,42,0.08); }
+  .db-input-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgba(196,168,130,0.08); background: var(--soil); flex-shrink: 0; }
+  .db-input { flex: 1; background: var(--dig); border: 1.5px solid rgba(196,168,130,0.18); color: var(--chalk); font-family: 'Barlow', sans-serif; font-size: 0.88rem; padding: 0.55rem 0.9rem; border-radius: 20px; outline: none; transition: border-color 0.2s; }
+  .db-input:focus { border-color: var(--amber); }
+  .db-input::placeholder { color: var(--stone); }
+  .db-send { width: 34px; height: 34px; border-radius: 50%; background: var(--amber); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background 0.2s; font-size: 0.9rem; color: var(--soil); }
+  .db-send:hover { background: var(--amber-lt); }
+  .db-bubble a { color: var(--amber); text-decoration: underline; font-weight: 600; }
+  .db-msg.user .db-bubble a { color: var(--soil); }
+  @media (max-width: 480px) { .db-chat-window { width: calc(100vw - 2rem); right: 1rem; bottom: 5rem; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><span>Dirt</span>Bidder</a>
+  <div class="nav-links">
+    <a href="#how-it-works">How It Works</a>
+    <a href="#for-who">Who It's For</a>
+    <a href="#jobs">Job Types</a>
+    <a href="#register" class="btn-nav">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-stripe"></div>
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Heavy Equipment Marketplace</div>
+    <h1 class="hero-headline">
+      Move Dirt.<br>
+      <em>Make Deals.</em>
+    </h1>
+    <p class="hero-sub">
+      DirtBidder connects excavators, dozer operators, and site prep crews 
+      with landowners and developers who need the work done — fast, local, and fair.
+    </p>
+    <div class="hero-ctas">
+      <a href="#register" class="btn-primary">Post a Job</a>
+      <a href="#register" class="btn-secondary">I'm an Operator</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">10<span>%</span></div>
+        <div class="stat-label">Platform fee — only when you get paid</div>
+      </div>
+      <div>
+        <div class="stat-num">$0</div>
+        <div class="stat-label">To post a job or list your services</div>
+      </div>
+      <div>
+        <div class="stat-num">72<span>hr</span></div>
+        <div class="stat-label">Max time to get bids on your job</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="section">
+  <div class="section-label">How DirtBidder Works</div>
+  <h2 class="section-title">Simple From Both Sides</h2>
+  <p class="section-sub">Whether you're moving dirt or need dirt moved, DirtBidder keeps it straight.</p>
+
+  <div class="role-toggle">
+    <button class="role-btn active" onclick="showSteps('client', this)">I Need Work Done</button>
+    <button class="role-btn" onclick="showSteps('operator', this)">I'm an Operator</button>
+  </div>
+
+  <!-- CLIENT STEPS -->
+  <div class="steps-grid steps-panel active" id="steps-client">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">📍</div>
+      <div class="step-title">Post Your Job</div>
+      <div class="step-desc">Describe the work — location, acreage, job type, timeline, and budget. Add photos if you have them.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">📬</div>
+      <div class="step-title">Get Bids</div>
+      <div class="step-desc">Local operators see your job and submit competitive bids. Compare pricing, reviews, and equipment.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">🤝</div>
+      <div class="step-title">Hire the Right Crew</div>
+      <div class="step-desc">Accept the bid that fits. Payment is held securely in escrow — your operator gets paid when the job is done right.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-icon">✅</div>
+      <div class="step-title">Release & Review</div>
+      <div class="step-desc">Confirm the job is complete, release payment, and leave a review. Your money never moves until you say so.</div>
+    </div>
+  </div>
+
+  <!-- OPERATOR STEPS -->
+  <div class="steps-grid steps-panel" id="steps-operator">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">🚜</div>
+      <div class="step-title">Build Your Profile</div>
+      <div class="step-desc">List your equipment, set your service area, and show your work. Free to join — no monthly fees to start.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">🗺️</div>
+      <div class="step-title">Browse Local Jobs</div>
+      <div class="step-desc">See open jobs in your area filtered by job type and equipment match. No chasing leads — they come to you.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">💰</div>
+      <div class="step-title">Submit Your Bid</div>
+      <div class="step-desc">Name your price, set your timeline, add notes. Clients compare bids and hire the operator that fits best.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-icon">🏦</div>
+      <div class="step-title">Get Paid Fast</div>
+      <div class="step-desc">Complete the job, mark it done, and get paid direct to your bank account within 2 business days via Stripe.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAND -->
+<div class="trust-band">
+  <div class="trust-inner">
+    <div class="trust-headline">🔒 Escrow Protected</div>
+    <div class="trust-items">
+      <div class="trust-item">
+        <div class="trust-dot"></div>
+        <div class="trust-text">Client pays upfront — funds held by Stripe</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-dot"></div>
+        <div class="trust-text">Operator gets paid only when job is confirmed complete</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-dot"></div>
+        <div class="trust-text">Disputes reviewed and resolved within 5 business days</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-dot"></div>
+        <div class="trust-text">No broker license needed — Stripe is the licensed transmitter</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOR WHO -->
+<section id="for-who" class="who-section">
+  <div class="who-inner">
+    <div class="who-card">
+      <span class="who-tag">For Clients</span>
+      <h3 class="who-title">Need Land Cleared?<br>Post in 5 Minutes.</h3>
+      <p class="who-desc">Homeowners, developers, farmers, and builders use DirtBidder to find vetted operators for any scale of earthwork — from a backyard pond to a 200-acre site prep.</p>
+      <ul class="who-list">
+        <li>Post your job for free — no credit card required</li>
+        <li>Get bids from operators in your area within 72 hours</li>
+        <li>Compare equipment, reviews, and pricing side by side</li>
+        <li>Your payment is protected by escrow until the job is done</li>
+        <li>Leave a review and build the marketplace community</li>
+      </ul>
+      <a href="#register" class="btn-primary">Post a Job Free</a>
+    </div>
+    <div class="who-card">
+      <span class="who-tag">For Operators</span>
+      <h3 class="who-title">Run Your Equipment.<br>We'll Find the Work.</h3>
+      <p class="who-desc">Excavator operators, dozer crews, and site prep contractors use DirtBidder to fill their calendar with local jobs — no advertising spend, no cold calls.</p>
+      <ul class="who-list">
+        <li>Free to join — only pay 5% when you get paid</li>
+        <li>Browse jobs matched to your equipment and location</li>
+        <li>Bid on your terms — you set the price and timeline</li>
+        <li>Get paid to your bank account within 2 business days</li>
+        <li>Access Cat Financial and rental partners from your dashboard</li>
+      </ul>
+      <a href="#register" class="btn-primary">Join as an Operator</a>
+    </div>
+  </div>
+</section>
+
+<!-- EQUIPMENT -->
+<section class="equip-section">
+  <div class="section-label">Equipment on the Platform</div>
+  <h2 class="section-title">Every Machine. One Marketplace.</h2>
+  <p class="section-sub" style="margin-bottom:2rem">Operators list what they run. Clients find exactly the iron they need.</p>
+  <div class="equip-grid">
+    <div class="equip-card"><div class="equip-name">Excavator</div></div>
+    <div class="equip-card"><div class="equip-name">Bulldozer</div></div>
+    <div class="equip-card"><div class="equip-name">Dump Truck</div></div>
+    <div class="equip-card"><div class="equip-name">Skid Steer</div></div>
+    <div class="equip-card"><div class="equip-name">Motor Grader</div></div>
+    <div class="equip-card"><div class="equip-name">Compactor</div></div>
+    <div class="equip-card"><div class="equip-name">Scraper</div></div>
+    <div class="equip-card"><div class="equip-name">Water Truck</div></div>
+    <div class="equip-card"><div class="equip-name">Frontend Loader</div></div>
+    <div class="equip-card"><div class="equip-name">Impact Hammer</div></div>
+  </div>
+</section>
+
+<!-- JOB TYPES -->
+<section id="jobs" class="jobs-section">
+  <div class="jobs-inner">
+    <div class="section-label">Job Types</div>
+    <h2 class="section-title">If It Moves Dirt,<br>It's on DirtBidder.</h2>
+    <div class="jobs-pills">
+      <span class="pill">Land Clearing</span>
+      <span class="pill">Rough Grading</span>
+      <span class="pill">Fine Grading</span>
+      <span class="pill">Excavation</span>
+      <span class="pill">Trenching</span>
+      <span class="pill">Pond Digging</span>
+      <span class="pill">Road Building</span>
+      <span class="pill">Foundation Prep</span>
+      <span class="pill">Topsoil Strip</span>
+      <span class="pill">Cut & Fill</span>
+      <span class="pill">Haul Off</span>
+      <span class="pill">Site Prep</span>
+      <span class="pill">Drainage Work</span>
+      <span class="pill">Demolition Dig</span>
+      <span class="pill">Septic Excavation</span>
+    </div>
+  </div>
+</section>
+
+<!-- PARTNERS -->
+<section class="partners-section">
+  <div class="partners-label">Equipment Financing & Rental Resources</div>
+  <div class="partners-logos">
+    <div class="partner-logo">Cat Financial</div>
+    <div class="partner-logo">Cat Rental Store</div>
+    <div class="partner-logo">United Rentals</div>
+    <div class="partner-logo">Sunbelt Rentals</div>
+    <div class="partner-logo">BlueLine Rental</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="register" class="cta-section">
+  <div class="cta-bg"></div>
+  <div class="cta-inner">
+    <h2 class="cta-title">Ready to<br><span>Get to Work?</span></h2>
+    <p class="cta-sub">Join DirtBidder free. Post your first job or list your equipment in under 5 minutes.</p>
+    <div class="cta-buttons">
+      <a href="#" class="btn-primary">Post a Job — It's Free</a>
+      <a href="#" class="btn-secondary">Join as an Operator</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><span>Dirt</span>Bidder</div>
+  <div class="footer-tagline">Find the dirt. Find the deal.</div>
+  <div class="footer-links">
+    <a href="#">How It Works</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Payment Policy</a>
+    <a href="#">Support</a>
+    <a href="#">For Operators</a>
+  </div>
+  <div class="footer-copy">© 2026 DirtBidder LLC. All rights reserved.</div>
+</footer>
+
+<script>
+  function showSteps(role, btn) {
+    document.querySelectorAll('.steps-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('steps-' + role).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+</script>
+
+<!-- CHATBOT WIDGET -->
+<button class="db-chat-btn" onclick="toggleChat()" id="dbChatBtn" title="Chat with DirtBidder Support">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+  <div class="db-unread" id="dbUnread">1</div>
+</button>
+<div class="db-chat-window" id="dbChatWindow">
+  <div class="db-header">
+    <div class="db-bot-avatar">🚜<div class="db-online"></div></div>
+    <div class="db-header-info">
+      <div class="db-bot-name">DirtBidder Support</div>
+      <div class="db-bot-status">Online — replies instantly</div>
+    </div>
+    <button class="db-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="db-messages" id="dbMessages">
+    <div class="db-msg bot"><div class="db-msg-av">🚜</div><div class="db-bubble">Hey! 👋 I'm the DirtBidder assistant. I can help with signing up, posting jobs, bidding, payments, and anything else about the app.<br><br>What can I help you with?</div></div>
+  </div>
+  <div class="db-typing" id="dbTyping"><div style="width:24px"></div><div class="db-typing-dots"><div class="db-dot"></div><div class="db-dot"></div><div class="db-dot"></div></div></div>
+  <div class="db-quick-replies" id="dbQuickReplies">
+    <button class="db-chip" onclick="quickReply('How do I sign up?')">How do I sign up?</button>
+    <button class="db-chip" onclick="quickReply('How does bidding work?')">How does bidding work?</button>
+    <button class="db-chip" onclick="quickReply('How do payments work?')">How do payments work?</button>
+    <button class="db-chip" onclick="quickReply('Is it free to post a job?')">Is it free to post?</button>
+    <button class="db-chip" onclick="quickReply('What is the platform fee?')">Platform fee?</button>
+    <button class="db-chip" onclick="quickReply('How do I become an operator?')">Become an operator</button>
+  </div>
+  <div class="db-input-row">
+    <input class="db-input" type="text" id="dbInput" placeholder="Ask anything about DirtBidder..." onkeydown="handleDbKey(event)" />
+    <button class="db-send" onclick="sendDbMessage()">➤</button>
+  </div>
+</div>
+<script>
+const kb=[{patterns:['sign up','register','create account','join','get started','how do i start'],answer:"Signing up is free and takes 2 minutes!\n\n1. Click Get Started on the homepage\n2. Choose Client (need work done) or Operator (run equipment)\n3. Enter your name, email, and password\n4. Fill in your profile\n5. You're in!\n\n<a href='dirtbidder-register.html'>→ Create your free account</a>"},{patterns:['free to post','cost to post','posting fee'],answer:"Posting a job is completely <strong>free</strong>! You pay nothing until you hire an operator and accept their bid.\n\nDirtBidder only charges a 5% platform fee when payment is released at job completion."},{patterns:['platform fee','fee','how much','cost','charge','percent','commission'],answer:"DirtBidder charges a <strong>10% total platform fee</strong>, split evenly:\n\n• 5% from the Client (added at checkout)\n• 5% from the Operator (deducted from payout)\n\nExample on a $5,000 job:\n• Client pays $5,250\n• Operator receives $4,750\n• DirtBidder earns $500\n\nNo monthly fees. No signup fees."},{patterns:['bidding','how does bidding','bid','submit bid','sealed'],answer:"DirtBidder uses a <strong>sealed bid system</strong> — operators cannot see each other's bids.\n\n1. You post a job for free\n2. Operators submit private bids\n3. You see all bids with prices, equipment, and reviews\n4. Accept the bid that fits best\n5. Operator gets notified and work begins!"},{patterns:['escrow','payment work','how do i pay','pay','money','funds','stripe'],answer:"Payments are secured through <strong>Stripe escrow</strong>:\n\n🔒 You pay when hiring — funds held by Stripe\n🚜 Operator completes the job\n✅ You confirm and release payment\n💸 Operator gets paid in 2 business days\n\nYour money never moves until YOU say so."},{patterns:['operator','become operator','run equipment','contractor'],answer:"As a DirtBidder Operator you:\n\n✅ Browse local jobs matched to your equipment\n✅ Submit sealed bids on your terms\n✅ Get paid within 2 business days via Stripe\n✅ Access equipment financing and rental resources\n✅ Build reviews and grow your reputation\n\n<a href='dirtbidder-register.html'>→ Join as an Operator</a>"},{patterns:['equipment','machine','excavator','dozer','bulldozer','dump truck'],answer:"DirtBidder supports all major earthwork equipment:\n\n🏗️ Excavators · 🚜 Bulldozers · 🚛 Dump Trucks\n🔧 Skid Steers · 📐 Motor Graders · ⚙️ Compactors\n🏗️ Frontend Loaders · 🔨 Impact Hammers\n💧 Water Trucks · 🚧 Scrapers"},{patterns:['dispute','problem','issue','bad job','not happy','incomplete'],answer:"If there's a problem:\n\n1. Message the operator in-app to resolve it\n2. If unresolved within 48 hours, file a formal dispute\n3. DirtBidder reviews within <strong>5 business days</strong>\n4. Funds stay frozen in escrow during review\n\nDon't release payment until you're satisfied with the work!"},{patterns:['safe','secure','trust','legitimate','scam'],answer:"DirtBidder is built with security at every step:\n\n🔒 Escrow payments via Stripe (licensed in all 50 states)\n🔒 Sealed bids — operators can't see competitor prices\n✅ Insurance and license confirmation required\n⭐ Reviews only from verified completed jobs\n\nDirtBidder LLC is a registered US company."},{patterns:['cancel','cancellation','refund'],answer:"Cancellation policy:\n\n✅ Before hiring: Cancel anytime — free\n✅ After hiring, before work starts: Full refund\n⚠️ After work starts: Proportional refund based on completion\n✅ Job never started: Full refund including platform fee"},{patterns:['contact','support','help','email'],answer:"Need help?\n\n📧 <strong>Email:</strong> support@dirtbidder.com\n\nWe typically respond within a few hours during business hours."}];
+const fallback=["I'm not sure about that — try one of the quick reply buttons below, or email <strong>support@dirtbidder.com</strong> for help.","Great question! For detailed help, email <strong>support@dirtbidder.com</strong> and we'll get back to you shortly.","I couldn't find an exact answer. Try rephrasing or email <strong>support@dirtbidder.com</strong>."];
+let fbIdx=0,isOpen=false,isTyping=false;
+function toggleChat(){isOpen=!isOpen;document.getElementById('dbChatWindow').classList.toggle('open',isOpen);document.getElementById('dbUnread').style.display='none';if(isOpen){setTimeout(()=>document.getElementById('dbInput').focus(),300);scrollToBottom();}}
+function quickReply(t){addUserMessage(t);processMessage(t);}
+function sendDbMessage(){const i=document.getElementById('dbInput');const t=i.value.trim();if(!t||isTyping)return;i.value='';addUserMessage(t);processMessage(t);}
+function handleDbKey(e){if(e.key==='Enter')sendDbMessage();}
+function addUserMessage(t){const m=document.getElementById('dbMessages');const d=document.createElement('div');d.className='db-msg user';d.innerHTML=`<div class="db-msg-av" style="background:#3D2B1F;color:#E8892A;font-size:0.65rem">You</div><div class="db-bubble">${t}</div>`;m.appendChild(d);scrollToBottom();}
+function addBotMessage(h){const m=document.getElementById('dbMessages');const d=document.createElement('div');d.className='db-msg bot';d.innerHTML=`<div class="db-msg-av">🚜</div><div class="db-bubble">${h.replace(/\n/g,'<br>')}</div>`;m.appendChild(d);scrollToBottom();}
+function showTyping(){isTyping=true;document.getElementById('dbTyping').classList.add('visible');scrollToBottom();}
+function hideTyping(){isTyping=false;document.getElementById('dbTyping').classList.remove('visible');}
+function scrollToBottom(){const m=document.getElementById('dbMessages');setTimeout(()=>m.scrollTop=m.scrollHeight,50);}
+function processMessage(text){const lower=text.toLowerCase();showTyping();let answer=null;for(const e of kb){if(e.patterns.some(p=>lower.includes(p))){answer=e.answer;break;}}const delay=answer?Math.min(800+answer.length*2,2000):1200;setTimeout(()=>{hideTyping();addBotMessage(answer||fallback[fbIdx++%fallback.length]);},delay);}
+setTimeout(()=>{if(!isOpen)document.getElementById('dbUnread').style.display='flex';},5000);
+</script>
+
+</body>
+</html>

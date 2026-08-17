@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Earthwork Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+    --info:     #3498DB;
+    --sidebar:  240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--chalk); min-height: 100vh; display: flex; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar); flex-shrink: 0; background: var(--dig); border-right: 1px solid rgba(196,168,130,0.08); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+  .sidebar-logo { padding: 1.4rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; display: block; }
+  .sidebar-logo span { color: var(--amber); }
+  .sidebar-user { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); display: flex; align-items: center; gap: 0.75rem; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--clay); border: 2px solid var(--amber); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--amber); flex-shrink: 0; }
+  .user-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: var(--chalk); }
+  .user-role { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+  .nav-section { padding: 1rem 0; flex: 1; overflow-y: auto; }
+  .nav-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--stone); padding: 0.5rem 1.5rem 0.3rem; }
+  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; font-size: 0.88rem; color: var(--stone); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav-item:hover { color: var(--chalk); background: rgba(196,168,130,0.05); }
+  .nav-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(232,137,42,0.07); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(196,168,130,0.08); }
+  .signout-btn { font-size: 0.82rem; color: var(--stone); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s; background: none; border: none; padding: 0; font-family: 'Barlow', sans-serif; }
+  .signout-btn:hover { color: var(--error); }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: var(--dig); border-bottom: 1px solid rgba(196,168,130,0.08); position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.3rem; text-transform: uppercase; color: var(--chalk); }
+
+  /* CALC TABS */
+  .calc-tabs { display: flex; gap: 0; overflow-x: auto; background: var(--dig); border-bottom: 1px solid rgba(196,168,130,0.08); padding: 0 2rem; }
+  .calc-tab { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.85rem 1.1rem; border: none; background: transparent; color: var(--stone); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem; }
+  .calc-tab:hover { color: var(--chalk); }
+  .calc-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+  /* CONTENT */
+  .content { padding: 2rem; flex: 1; max-width: 900px; }
+
+  /* SECTION */
+  .calc-section { display: none; }
+  .calc-section.active { display: block; }
+
+  .section-header { margin-bottom: 1.75rem; }
+  .section-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+  .section-eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--amber); display: block; }
+  .section-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.8rem; text-transform: uppercase; color: var(--chalk); }
+  .section-title span { color: var(--amber); }
+  .section-sub { font-size: 0.85rem; color: var(--stone); margin-top: 0.3rem; line-height: 1.5; }
+
+  /* CALC LAYOUT */
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+  /* CARD */
+  .card { background: var(--dig); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; }
+  .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); }
+  .card-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--chalk); }
+  .card-body { padding: 1.5rem; }
+
+  /* FIELDS */
+  .field { margin-bottom: 1.1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dust); display: block; margin-bottom: 0.4rem; }
+  .field-hint { font-size: 0.72rem; color: var(--stone); margin-top: 0.25rem; }
+
+  .input-wrap { position: relative; }
+  .calc-input { width: 100%; background: var(--clay); border: 1.5px solid rgba(196,168,130,0.18); color: var(--chalk); font-family: 'Barlow', sans-serif; font-size: 0.95rem; padding: 0.7rem 1rem; border-radius: 3px; outline: none; transition: border-color 0.2s; }
+  .calc-input:focus { border-color: var(--amber); }
+  .calc-input::placeholder { color: var(--stone); }
+  .input-unit { position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone); pointer-events: none; }
+
+  select.calc-input { cursor: pointer; -webkit-appearance: none; }
+  select.calc-input option { background: var(--dig); }
+
+  /* RESULTS */
+  .results-card { background: var(--clay); border: 1px solid rgba(232,137,42,0.2); border-radius: 4px; overflow: hidden; }
+  .results-header { padding: 0.85rem 1.25rem; background: rgba(232,137,42,0.1); border-bottom: 1px solid rgba(232,137,42,0.15); }
+  .results-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber); }
+  .results-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(196,168,130,0.08); }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { font-size: 0.82rem; color: var(--dust); }
+  .result-value { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.1rem; color: var(--chalk); }
+  .result-value.highlight { color: var(--amber); font-size: 1.3rem; }
+  .result-value.success { color: var(--success); }
+  .result-value.info { color: var(--info); }
+
+  .result-disclaimer { font-size: 0.72rem; color: var(--stone); line-height: 1.5; padding-top: 0.75rem; border-top: 1px solid rgba(196,168,130,0.08); }
+
+  /* CALC BUTTON */
+  .calc-btn { width: 100%; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--amber); color: var(--soil); border: none; padding: 0.85rem; border-radius: 3px; cursor: pointer; transition: background 0.2s; margin-top: 1.25rem; }
+  .calc-btn:hover { background: var(--amber-lt); }
+
+  .reset-btn { width: 100%; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; background: transparent; color: var(--stone); border: 1.5px solid rgba(196,168,130,0.2); padding: 0.65rem; border-radius: 3px; cursor: pointer; transition: all 0.2s; margin-top: 0.6rem; }
+  .reset-btn:hover { border-color: var(--dust); color: var(--dust); }
+
+  /* BID HELPER */
+  .bid-helper { background: rgba(39,174,96,0.08); border: 1px solid rgba(39,174,96,0.2); border-radius: 3px; padding: 1rem 1.25rem; margin-top: 1rem; display: none; }
+  .bid-helper.visible { display: block; }
+  .bid-helper-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--success); margin-bottom: 0.6rem; }
+  .bid-range { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--success); }
+  .bid-note { font-size: 0.75rem; color: var(--dust); margin-top: 0.3rem; line-height: 1.5; }
+
+  .use-bid-btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; background: var(--success); color: white; border: none; padding: 0.5rem 1.1rem; border-radius: 3px; cursor: pointer; margin-top: 0.75rem; transition: opacity 0.2s; }
+  .use-bid-btn:hover { opacity: 0.88; }
+
+  /* FORMULA BOX */
+  .formula-box { background: rgba(196,168,130,0.05); border: 1px solid rgba(196,168,130,0.1); border-radius: 3px; padding: 0.85rem 1rem; margin-top: 1rem; font-size: 0.78rem; color: var(--stone); line-height: 1.6; }
+  .formula-box strong { color: var(--dust); }
+
+  /* QUICK REF TABLE */
+  .ref-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  .ref-table th { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone); padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid rgba(196,168,130,0.1); background: var(--clay); }
+  .ref-table td { padding: 0.55rem 0.75rem; font-size: 0.82rem; color: var(--dust); border-bottom: 1px solid rgba(196,168,130,0.06); }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table td:last-child { color: var(--amber); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .calc-grid { grid-template-columns: 1fr; }
+    .content { padding: 1.25rem; }
+    .topbar { padding: 1rem; }
+    .calc-tabs { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <div class="sidebar-user">
+    <div class="avatar">JM</div>
+    <div>
+      <div class="user-name">Jake Miller</div>
+      <div class="user-role">Operator</div>
+    </div>
+  </div>
+  <nav class="nav-section">
+    <div class="nav-label">Work</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">📊</span> Overview</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🗺️</span> Browse Jobs</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">💰</span> My Bids</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🏦</span> Earnings</div>
+    <div class="nav-label" style="margin-top:0.5rem">Tools</div>
+    <div class="nav-item active"><span class="nav-icon">🧮</span> Calculators</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🔧</span> My Equipment</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🤝</span> Equipment Resources</div>
+    <div class="nav-label" style="margin-top:0.5rem">Account</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'"><span class="nav-icon">💬</span> Messages</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Earthwork Calculators</div>
+    <div style="font-size:0.8rem;color:var(--stone)">7 calculators · Free for all operators</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="calc-tabs">
+    <button class="calc-tab active" onclick="showCalc('cutfill', this)">⛏ Cut & Fill</button>
+    <button class="calc-tab" onclick="showCalc('hauloff', this)">🚛 Haul Off</button>
+    <button class="calc-tab" onclick="showCalc('jobcost', this)">💰 Job Cost</button>
+    <button class="calc-tab" onclick="showCalc('hourlyrate', this)">⏱ Hourly Rate</button>
+    <button class="calc-tab" onclick="showCalc('pond', this)">💧 Pond Volume</button>
+    <button class="calc-tab" onclick="showCalc('compaction', this)">🔧 Compaction</button>
+    <button class="calc-tab" onclick="showCalc('timeest', this)">📅 Time Estimate</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ── 1. CUT & FILL ── -->
+    <div class="calc-section active" id="calc-cutfill">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 1 of 7</div>
+        <div class="section-title">Cut &amp; <span>Fill</span></div>
+        <div class="section-sub">Calculate how much dirt needs to move based on site dimensions. Helps you estimate haul-off volume and fill requirements.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Site Dimensions</div></div>
+          <div class="card-body">
+            <div class="field">
+              <span class="field-label">Site Length</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="cf_length" placeholder="e.g. 200" /><span class="input-unit">ft</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Site Width</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="cf_width" placeholder="e.g. 150" /><span class="input-unit">ft</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Average Cut Depth</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="cf_cut" placeholder="e.g. 2" /><span class="input-unit">ft</span></div>
+              <div class="field-hint">How deep you're cutting on average across the site</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Average Fill Depth</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="cf_fill" placeholder="e.g. 1" /><span class="input-unit">ft</span></div>
+              <div class="field-hint">How deep you're filling on average (0 if cut only)</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Soil Swell Factor</span>
+              <select class="calc-input" id="cf_swell">
+                <option value="1.25">Sandy / Loose soil — 25% swell</option>
+                <option value="1.30" selected>Average soil — 30% swell</option>
+                <option value="1.35">Clay / Dense soil — 35% swell</option>
+                <option value="1.50">Rocky / Shale — 50% swell</option>
+              </select>
+              <div class="field-hint">Excavated dirt takes up more space than in the ground</div>
+            </div>
+            <button class="calc-btn" onclick="calcCutFill()">Calculate Cut & Fill →</button>
+            <button class="reset-btn" onclick="resetCalc('cutfill')">Reset</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="results-card" id="cf_results" style="display:none">
+            <div class="results-header"><div class="results-title">📊 Results</div></div>
+            <div class="results-body">
+              <div class="result-row"><span class="result-label">Site Area</span><span class="result-value" id="cf_area">—</span></div>
+              <div class="result-row"><span class="result-label">Total Cut Volume</span><span class="result-value" id="cf_cutVol">—</span></div>
+              <div class="result-row"><span class="result-label">Total Fill Volume</span><span class="result-value" id="cf_fillVol">—</span></div>
+              <div class="result-row"><span class="result-label">Net Dirt to Haul Off</span><span class="result-value highlight" id="cf_net">—</span></div>
+              <div class="result-row"><span class="result-label">Loose Volume (with swell)</span><span class="result-value info" id="cf_loose">—</span></div>
+              <div class="result-disclaimer">Results are estimates. Actual volumes vary based on terrain, soil type, and measurement accuracy. Always walk the site before finalizing a bid.</div>
+            </div>
+          </div>
+          <div class="formula-box">
+            <strong>Formula used:</strong><br>
+            Cut Volume = Length × Width × Cut Depth ÷ 27 (cubic yards)<br>
+            Fill Volume = Length × Width × Fill Depth ÷ 27<br>
+            Net Haul-Off = Cut − Fill<br>
+            Loose Volume = Net × Swell Factor
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2. HAUL OFF ── -->
+    <div class="calc-section" id="calc-hauloff">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 2 of 7</div>
+        <div class="section-title">Haul Off &amp; <span>Truck Loads</span></div>
+        <div class="section-sub">How many dump truck loads to remove spoils from the site. Price your haul-off accurately.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Haul Off Details</div></div>
+          <div class="card-body">
+            <div class="field">
+              <span class="field-label">Total Dirt Volume to Remove</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="ho_volume" placeholder="e.g. 500" /><span class="input-unit">cy</span></div>
+              <div class="field-hint">Cubic yards — use Cut & Fill calculator above to get this number</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Truck Bed Size</span>
+              <select class="calc-input" id="ho_trucksize">
+                <option value="10">10 cubic yards (small dump)</option>
+                <option value="14" selected>14 cubic yards (standard)</option>
+                <option value="18">18 cubic yards (tandem axle)</option>
+                <option value="22">22 cubic yards (semi/transfer)</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">Haul Distance (one way)</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="ho_distance" placeholder="e.g. 10" /><span class="input-unit">miles</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Your Cost Per Load</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="ho_costperload" placeholder="e.g. 150" /><span class="input-unit">$</span></div>
+              <div class="field-hint">Your fuel + time cost per round trip — typ. $100–$300</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Dump Fee Per Load (if any)</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="ho_dumpfee" placeholder="e.g. 50" /><span class="input-unit">$</span></div>
+            </div>
+            <button class="calc-btn" onclick="calcHaulOff()">Calculate Haul Off →</button>
+            <button class="reset-btn" onclick="resetCalc('hauloff')">Reset</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="results-card" id="ho_results" style="display:none">
+            <div class="results-header"><div class="results-title">📊 Results</div></div>
+            <div class="results-body">
+              <div class="result-row"><span class="result-label">Total Loads Required</span><span class="result-value highlight" id="ho_loads">—</span></div>
+              <div class="result-row"><span class="result-label">Total Haul Cost</span><span class="result-value" id="ho_totalcost">—</span></div>
+              <div class="result-row"><span class="result-label">Dump Fees Total</span><span class="result-value" id="ho_totalfees">—</span></div>
+              <div class="result-row"><span class="result-label">Total Haul Off Cost</span><span class="result-value success" id="ho_grandtotal">—</span></div>
+              <div class="result-row"><span class="result-label">Cost Per Cubic Yard</span><span class="result-value info" id="ho_percyd">—</span></div>
+              <div class="result-disclaimer">Add a 10–15% buffer for partial loads and unexpected volume. Always confirm dump site accepts your material type.</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:1.25rem">
+            <div class="card-header"><div class="card-title">Typical Haul Rates</div></div>
+            <div class="card-body" style="padding:0">
+              <table class="ref-table">
+                <thead><tr><th>Distance</th><th>Per Load Est.</th></tr></thead>
+                <tbody>
+                  <tr><td>Under 5 miles</td><td>$85–$120</td></tr>
+                  <tr><td>5–15 miles</td><td>$120–$200</td></tr>
+                  <tr><td>15–30 miles</td><td>$200–$320</td></tr>
+                  <tr><td>30+ miles</td><td>$320–$500+</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3. JOB COST ── -->
+    <div class="calc-section" id="calc-jobcost">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 3 of 7</div>
+        <div class="section-title">Job Cost <span>Estimator</span></div>
+        <div class="section-sub">Calculate your minimum bid price based on real costs — equipment, fuel, labor, overhead, and profit margin.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Your Job Costs</div></div>
+          <div class="card-body">
+            <div class="field">
+              <span class="field-label">Estimated Job Duration</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="jc_days" placeholder="e.g. 4" /><span class="input-unit">days</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Hours Per Day on Site</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="jc_hoursperday" placeholder="e.g. 10" /><span class="input-unit">hrs</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Equipment Cost Per Hour</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="jc_equip" placeholder="e.g. 85" /><span class="input-unit">$/hr</span></div>
+              <div class="field-hint">Ownership/rental cost + wear — typ. $50–$200/hr by machine</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Fuel Cost Per Hour</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="jc_fuel" placeholder="e.g. 35" /><span class="input-unit">$/hr</span></div>
+              <div class="field-hint">Diesel burn rate × price per gallon — typ. $25–$60/hr</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Operator Labor Per Hour</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="jc_labor" placeholder="e.g. 45" /><span class="input-unit">$/hr</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Haul Off Cost (total)</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="jc_haul" placeholder="e.g. 800" /><span class="input-unit">$</span></div>
+              <div class="field-hint">Use Haul Off calculator — enter 0 if not applicable</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Other Costs (mobilization, permits, etc.)</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="jc_other" placeholder="e.g. 200" /><span class="input-unit">$</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Your Profit Margin</span>
+              <select class="calc-input" id="jc_margin">
+                <option value="0.15">15% — Competitive market</option>
+                <option value="0.20" selected>20% — Standard</option>
+                <option value="0.25">25% — Good margin</option>
+                <option value="0.30">30% — Premium / specialty work</option>
+                <option value="0.35">35% — Highly specialized</option>
+              </select>
+            </div>
+            <button class="calc-btn" onclick="calcJobCost()">Calculate My Bid Price →</button>
+            <button class="reset-btn" onclick="resetCalc('jobcost')">Reset</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="results-card" id="jc_results" style="display:none">
+            <div class="results-header"><div class="results-title">📊 Results</div></div>
+            <div class="results-body">
+              <div class="result-row"><span class="result-label">Total Hours on Job</span><span class="result-value" id="jc_totalhours">—</span></div>
+              <div class="result-row"><span class="result-label">Equipment Cost</span><span class="result-value" id="jc_equipcost">—</span></div>
+              <div class="result-row"><span class="result-label">Fuel Cost</span><span class="result-value" id="jc_fuelcost">—</span></div>
+              <div class="result-row"><span class="result-label">Labor Cost</span><span class="result-value" id="jc_laborcost">—</span></div>
+              <div class="result-row"><span class="result-label">Haul Off + Other</span><span class="result-value" id="jc_extracost">—</span></div>
+              <div class="result-row"><span class="result-label">Total Job Cost</span><span class="result-value" id="jc_totalcost">—</span></div>
+              <div class="result-row"><span class="result-label">Profit (at selected margin)</span><span class="result-value success" id="jc_profit">—</span></div>
+              <div class="result-row"><span class="result-label">DirtBidder Fee (5%)</span><span class="result-value" id="jc_dbfee">—</span></div>
+            </div>
+          </div>
+          <div class="bid-helper" id="jc_bidhelper">
+            <div class="bid-helper-title">✓ Recommended Bid Range</div>
+            <div class="bid-range" id="jc_bidrange">—</div>
+            <div class="bid-note" id="jc_bidnote">This range covers your costs, your profit margin, and DirtBidder's 5% fee. The low end is your floor — don't go below it.</div>
+            <button class="use-bid-btn" onclick="alert('Opens the bid form with this price pre-filled — available when app goes live')">Use This Price in a Bid →</button>
+          </div>
+          <div class="card" style="margin-top:1.25rem">
+            <div class="card-header"><div class="card-title">Equipment Cost Reference</div></div>
+            <div class="card-body" style="padding:0">
+              <table class="ref-table">
+                <thead><tr><th>Machine</th><th>Typical $/hr</th></tr></thead>
+                <tbody>
+                  <tr><td>Mini Excavator</td><td>$45–$75</td></tr>
+                  <tr><td>Standard Excavator</td><td>$85–$150</td></tr>
+                  <tr><td>Large Excavator</td><td>$150–$250</td></tr>
+                  <tr><td>Dozer D4–D6</td><td>$75–$130</td></tr>
+                  <tr><td>Dozer D7–D9</td><td>$130–$220</td></tr>
+                  <tr><td>Motor Grader</td><td>$90–$160</td></tr>
+                  <tr><td>Skid Steer</td><td>$40–$70</td></tr>
+                  <tr><td>Compactor</td><td>$55–$100</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. HOURLY RATE ── -->
+    <div class="calc-section" id="calc-hourlyrate">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 4 of 7</div>
+        <div class="section-title">Hourly <span>Rate Builder</span></div>
+        <div class="section-sub">What should you charge per hour? Build your rate from the ground up based on your real costs.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Your Annual Costs</div></div>
+          <div class="card-body">
+            <div class="field">
+              <span class="field-label">Billable Days Per Year</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_days" placeholder="e.g. 200" /><span class="input-unit">days</span></div>
+              <div class="field-hint">Days you actually work and bill — not weekends or downtime</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Billable Hours Per Day</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_hoursday" placeholder="e.g. 9" /><span class="input-unit">hrs</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Annual Equipment Payment / Rental</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_equipcost" placeholder="e.g. 36000" /><span class="input-unit">$/yr</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Annual Fuel Cost</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_fuelcost" placeholder="e.g. 18000" /><span class="input-unit">$/yr</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Annual Insurance Cost</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_insurance" placeholder="e.g. 6000" /><span class="input-unit">$/yr</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Annual Maintenance & Repairs</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_maintenance" placeholder="e.g. 8000" /><span class="input-unit">$/yr</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Your Annual Salary Target</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_salary" placeholder="e.g. 80000" /><span class="input-unit">$/yr</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Other Annual Overhead</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="hr_overhead" placeholder="e.g. 5000" /><span class="input-unit">$/yr</span></div>
+              <div class="field-hint">Accounting, phone, software, truck, etc.</div>
+            </div>
+            <button class="calc-btn" onclick="calcHourlyRate()">Calculate My Hourly Rate →</button>
+            <button class="reset-btn" onclick="resetCalc('hourlyrate')">Reset</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="results-card" id="hr_results" style="display:none">
+            <div class="results-header"><div class="results-title">📊 Results</div></div>
+            <div class="results-body">
+              <div class="result-row"><span class="result-label">Total Billable Hours/Year</span><span class="result-value" id="hr_totalhours">—</span></div>
+              <div class="result-row"><span class="result-label">Total Annual Costs</span><span class="result-value" id="hr_totalcosts">—</span></div>
+              <div class="result-row"><span class="result-label">Break-Even Rate</span><span class="result-value" id="hr_breakeven">—</span></div>
+              <div class="result-row"><span class="result-label">Rate with 20% Profit</span><span class="result-value success" id="hr_with20">—</span></div>
+              <div class="result-row"><span class="result-label">Rate with 30% Profit</span><span class="result-value highlight" id="hr_with30">—</span></div>
+              <div class="result-disclaimer">Your break-even rate is the absolute minimum. Always aim for at least 20% above it. Market rates in most areas range from $95–$250/hr for excavators and dozers.</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:1.25rem">
+            <div class="card-header"><div class="card-title">Market Rate Reference</div></div>
+            <div class="card-body" style="padding:0">
+              <table class="ref-table">
+                <thead><tr><th>Service</th><th>Market Rate</th></tr></thead>
+                <tbody>
+                  <tr><td>Excavator (with operator)</td><td>$95–$175/hr</td></tr>
+                  <tr><td>Dozer (with operator)</td><td>$110–$200/hr</td></tr>
+                  <tr><td>Motor Grader</td><td>$120–$220/hr</td></tr>
+                  <tr><td>Skid Steer</td><td>$65–$110/hr</td></tr>
+                  <tr><td>Dump Truck</td><td>$75–$130/hr</td></tr>
+                  <tr><td>Land Clearing (per acre)</td><td>$400–$2,500/ac</td></tr>
+                  <tr><td>Pond Excavation (per CY)</td><td>$4–$12/cy</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 5. POND VOLUME ── -->
+    <div class="calc-section" id="calc-pond">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 5 of 7</div>
+        <div class="section-title">Pond <span>Volume</span></div>
+        <div class="section-sub">Calculate cubic yards to excavate for a pond based on shape and depth. One of the most common earthwork jobs on DirtBidder.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Pond Dimensions</div></div>
+          <div class="card-body">
+            <div class="field">
+              <span class="field-label">Pond Shape</span>
+              <select class="calc-input" id="pv_shape" onchange="updatePondShape()">
+                <option value="rect">Rectangular</option>
+                <option value="oval">Oval / Elliptical</option>
+                <option value="irregular">Irregular (use average dimensions)</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label" id="pv_dim1label">Length</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="pv_length" placeholder="e.g. 150" /><span class="input-unit">ft</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label" id="pv_dim2label">Width</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="pv_width" placeholder="e.g. 80" /><span class="input-unit">ft</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Average Depth</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="pv_depth" placeholder="e.g. 8" /><span class="input-unit">ft</span></div>
+              <div class="field-hint">Use average depth — ponds slope so edges are shallower</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Side Slope Ratio</span>
+              <select class="calc-input" id="pv_slope">
+                <option value="1.0">1:1 — Steep banks (rocky soil)</option>
+                <option value="1.5" selected>1.5:1 — Standard slope</option>
+                <option value="2.0">2:1 — Gentle slope (soft soil)</option>
+                <option value="3.0">3:1 — Very gentle (sandy)</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">Your Rate Per Cubic Yard</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="pv_rate" placeholder="e.g. 8" /><span class="input-unit">$/cy</span></div>
+              <div class="field-hint">Typical range: $4–$12/cy depending on soil and haul</div>
+            </div>
+            <button class="calc-btn" onclick="calcPond()">Calculate Pond Volume →</button>
+            <button class="reset-btn" onclick="resetCalc('pond')">Reset</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="results-card" id="pv_results" style="display:none">
+            <div class="results-header"><div class="results-title">📊 Results</div></div>
+            <div class="results-body">
+              <div class="result-row"><span class="result-label">Surface Area</span><span class="result-value" id="pv_surface">—</span></div>
+              <div class="result-row"><span class="result-label">Excavation Volume</span><span class="result-value highlight" id="pv_volume">—</span></div>
+              <div class="result-row"><span class="result-label">Pond Water Capacity</span><span class="result-value info" id="pv_gallons">—</span></div>
+              <div class="result-row"><span class="result-label">Estimated Dirt to Haul</span><span class="result-value" id="pv_haul">—</span></div>
+              <div class="result-row"><span class="result-label">Estimated Job Value</span><span class="result-value success" id="pv_value">—</span></div>
+              <div class="result-disclaimer">Add 15–20% for bank material at slopes. Confirm with client whether they want spoils on-site or hauled off — this significantly affects your price.</div>
+            </div>
+          </div>
+          <div class="formula-box" style="margin-top:1.25rem">
+            <strong>Pond Volume Formula:</strong><br>
+            Rectangular: V = L × W × D ÷ 27<br>
+            Oval: V = π × (L/2) × (W/2) × D ÷ 27<br>
+            Add ~20% for slope material above water line<br>
+            1 cubic yard = 201.97 gallons of water
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6. COMPACTION ── -->
+    <div class="calc-section" id="calc-compaction">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 6 of 7</div>
+        <div class="section-title">Compaction <span>Factor</span></div>
+        <div class="section-sub">How much does excavated dirt swell and compact? Use this to accurately price fill work and avoid leaving money on the table.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Soil & Compaction Details</div></div>
+          <div class="card-body">
+            <div class="field">
+              <span class="field-label">Bank Volume (in ground)</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="comp_bank" placeholder="e.g. 1000" /><span class="input-unit">cy</span></div>
+              <div class="field-hint">Volume of dirt before it's excavated</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Soil Type</span>
+              <select class="calc-input" id="comp_soil" onchange="updateCompactionFactors()">
+                <option value="sandy">Sandy / Gravel (swell 12%, shrink 8%)</option>
+                <option value="average" selected>Average Soil (swell 25%, shrink 10%)</option>
+                <option value="clay">Clay (swell 40%, shrink 15%)</option>
+                <option value="rock">Rock / Shale (swell 50%, shrink 35%)</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">Swell Factor</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="comp_swell" placeholder="25" /><span class="input-unit">%</span></div>
+              <div class="field-hint">How much bigger dirt gets when excavated</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Shrink Factor (after compaction)</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="comp_shrink" placeholder="10" /><span class="input-unit">%</span></div>
+              <div class="field-hint">How much it compacts below original bank volume</div>
+            </div>
+            <button class="calc-btn" onclick="calcCompaction()">Calculate Compaction →</button>
+            <button class="reset-btn" onclick="resetCalc('compaction')">Reset</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="results-card" id="comp_results" style="display:none">
+            <div class="results-header"><div class="results-title">📊 Results</div></div>
+            <div class="results-body">
+              <div class="result-row"><span class="result-label">Bank Volume (in ground)</span><span class="result-value" id="comp_bankresult">—</span></div>
+              <div class="result-row"><span class="result-label">Loose Volume (in truck)</span><span class="result-value highlight" id="comp_looseresult">—</span></div>
+              <div class="result-row"><span class="result-label">Compacted Volume (fill)</span><span class="result-value success" id="comp_compresult">—</span></div>
+              <div class="result-row"><span class="result-label">Truck Loads @ 14cy</span><span class="result-value info" id="comp_loads">—</span></div>
+              <div class="result-disclaimer">Bank measure = volume in the ground. Loose measure = volume in trucks. Compacted measure = final fill volume. Always order fill by bank measure.</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:1.25rem">
+            <div class="card-header"><div class="card-title">Soil Conversion Reference</div></div>
+            <div class="card-body" style="padding:0">
+              <table class="ref-table">
+                <thead><tr><th>Soil Type</th><th>Swell</th><th>Shrink</th></tr></thead>
+                <tbody>
+                  <tr><td>Sand / Gravel</td><td>10–15%</td><td>5–10%</td></tr>
+                  <tr><td>Common Earth</td><td>20–30%</td><td>8–12%</td></tr>
+                  <tr><td>Clay</td><td>35–45%</td><td>12–18%</td></tr>
+                  <tr><td>Limestone</td><td>45–55%</td><td>30–40%</td></tr>
+                  <tr><td>Granite</td><td>55–65%</td><td>40–50%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 7. TIME ESTIMATE ── -->
+    <div class="calc-section" id="calc-timeest">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 7 of 7</div>
+        <div class="section-title">Time <span>Estimator</span></div>
+        <div class="section-sub">How many days will a job take? Set a realistic timeline before you submit your bid.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Job Details</div></div>
+          <div class="card-body">
+            <div class="field">
+              <span class="field-label">Total Volume to Move</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="te_volume" placeholder="e.g. 800" /><span class="input-unit">cy</span></div>
+              <div class="field-hint">Use Cut & Fill or Pond calculator to get this</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Primary Machine</span>
+              <select class="calc-input" id="te_machine" onchange="updateMachineRate()">
+                <option value="50">Mini Excavator — 50 cy/hr</option>
+                <option value="80">Standard Excavator (CAT 320 size) — 80 cy/hr</option>
+                <option value="130" selected>Large Excavator (CAT 336 size) — 130 cy/hr</option>
+                <option value="60">Skid Steer — 60 cy/hr</option>
+                <option value="100">Dozer D6 — 100 cy/hr (pushing)</option>
+                <option value="160">Dozer D8+ — 160 cy/hr (pushing)</option>
+                <option value="90">Motor Grader — 90 cy/hr</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">Machine Production Rate</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="te_rate" placeholder="130" /><span class="input-unit">cy/hr</span></div>
+              <div class="field-hint">Adjust based on soil conditions and terrain</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Efficiency Factor</span>
+              <select class="calc-input" id="te_efficiency">
+                <option value="0.60">60% — Rocky, steep, or difficult terrain</option>
+                <option value="0.70">70% — Average conditions</option>
+                <option value="0.75" selected>75% — Good conditions</option>
+                <option value="0.85">85% — Ideal flat site</option>
+              </select>
+              <div class="field-hint">No machine runs at 100% — accounts for turns, repositioning, breaks</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Number of Machines</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="te_machines" placeholder="1" /><span class="input-unit">units</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Working Hours Per Day</span>
+              <div class="input-wrap"><input class="calc-input" type="number" id="te_hoursday" placeholder="10" /><span class="input-unit">hrs</span></div>
+            </div>
+            <button class="calc-btn" onclick="calcTimeEst()">Calculate Job Duration →</button>
+            <button class="reset-btn" onclick="resetCalc('timeest')">Reset</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="results-card" id="te_results" style="display:none">
+            <div class="results-header"><div class="results-title">📊 Results</div></div>
+            <div class="results-body">
+              <div class="result-row"><span class="result-label">Effective Production Rate</span><span class="result-value" id="te_effective">—</span></div>
+              <div class="result-row"><span class="result-label">Total Machine Hours Needed</span><span class="result-value" id="te_machineHours">—</span></div>
+              <div class="result-row"><span class="result-label">Estimated Days</span><span class="result-value highlight" id="te_days">—</span></div>
+              <div class="result-row"><span class="result-label">Add Buffer (15%)</span><span class="result-value success" id="te_buffer">—</span></div>
+              <div class="result-row"><span class="result-label">Recommended Bid Timeline</span><span class="result-value highlight" id="te_recommended">—</span></div>
+              <div class="result-disclaimer">Always add a 15–20% time buffer for weather delays, unexpected conditions, and equipment issues. Clients appreciate accurate timelines over optimistic ones.</div>
+            </div>
+          </div>
+
+          <div class="bid-helper" id="te_bidhelper">
+            <div class="bid-helper-title">✓ Ready to Bid</div>
+            <div class="bid-note" id="te_bidnote">Use the Job Cost calculator with this timeline to build your full bid price.</div>
+            <button class="use-bid-btn" onclick="showCalc('jobcost', document.querySelectorAll('.calc-tab')[2])">Go to Job Cost Calculator →</button>
+          </div>
+
+          <div class="card" style="margin-top:1.25rem">
+            <div class="card-header"><div class="card-title">Machine Production Reference</div></div>
+            <div class="card-body" style="padding:0">
+              <table class="ref-table">
+                <thead><tr><th>Machine</th><th>cy/hr (ideal)</th></tr></thead>
+                <tbody>
+                  <tr><td>Mini Excavator</td><td>40–70</td></tr>
+                  <tr><td>CAT 320 / JD 350G</td><td>70–100</td></tr>
+                  <tr><td>CAT 336 / large</td><td>110–160</td></tr>
+                  <tr><td>Dozer D5–D6</td><td>80–120</td></tr>
+                  <tr><td>Dozer D8–D9</td><td>140–200</td></tr>
+                  <tr><td>Skid Steer</td><td>40–80</td></tr>
+                  <tr><td>Motor Grader</td><td>70–110</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── TAB SWITCHER ──
+  function showCalc(name, btn) {
+    document.querySelectorAll('.calc-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.calc-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('calc-' + name).classList.add('active');
+    if (btn) btn.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function fmt(n, decimals=0) {
+    if (isNaN(n) || !isFinite(n)) return '—';
+    return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+
+  function fmtDollar(n) {
+    if (isNaN(n) || !isFinite(n)) return '—';
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  // ── 1. CUT & FILL ──
+  function calcCutFill() {
+    const L = parseFloat(document.getElementById('cf_length').value) || 0;
+    const W = parseFloat(document.getElementById('cf_width').value) || 0;
+    const cut = parseFloat(document.getElementById('cf_cut').value) || 0;
+    const fill = parseFloat(document.getElementById('cf_fill').value) || 0;
+    const swell = parseFloat(document.getElementById('cf_swell').value);
+    if (!L || !W) { alert('Please enter site length and width.'); return; }
+    const area = L * W;
+    const cutVol = (L * W * cut) / 27;
+    const fillVol = (L * W * fill) / 27;
+    const net = Math.max(0, cutVol - fillVol);
+    const loose = net * swell;
+    document.getElementById('cf_area').textContent = fmt(area) + ' sq ft (' + fmt(area/43560, 2) + ' acres)';
+    document.getElementById('cf_cutVol').textContent = fmt(cutVol, 1) + ' cy';
+    document.getElementById('cf_fillVol').textContent = fmt(fillVol, 1) + ' cy';
+    document.getElementById('cf_net').textContent = fmt(net, 1) + ' cy';
+    document.getElementById('cf_loose').textContent = fmt(loose, 1) + ' cy';
+    document.getElementById('cf_results').style.display = 'block';
+  }
+
+  // ── 2. HAUL OFF ──
+  function calcHaulOff() {
+    const vol = parseFloat(document.getElementById('ho_volume').value) || 0;
+    const truckSize = parseFloat(document.getElementById('ho_trucksize').value);
+    const costPerLoad = parseFloat(document.getElementById('ho_costperload').value) || 0;
+    const dumpFee = parseFloat(document.getElementById('ho_dumpfee').value) || 0;
+    if (!vol) { alert('Please enter the volume to haul off.'); return; }
+    const loads = Math.ceil(vol / truckSize);
+    const totalHaul = loads * costPerLoad;
+    const totalFees = loads * dumpFee;
+    const grand = totalHaul + totalFees;
+    const perCyd = grand / vol;
+    document.getElementById('ho_loads').textContent = fmt(loads) + ' loads';
+    document.getElementById('ho_totalcost').textContent = fmtDollar(totalHaul);
+    document.getElementById('ho_totalfees').textContent = fmtDollar(totalFees);
+    document.getElementById('ho_grandtotal').textContent = fmtDollar(grand);
+    document.getElementById('ho_percyd').textContent = fmtDollar(perCyd) + '/cy';
+    document.getElementById('ho_results').style.display = 'block';
+  }
+
+  // ── 3. JOB COST ──
+  function calcJobCost() {
+    const days = parseFloat(document.getElementById('jc_days').value) || 0;
+    const hpd = parseFloat(document.getElementById('jc_hoursperday').value) || 0;
+    const equipRate = parseFloat(document.getElementById('jc_equip').value) || 0;
+    const fuelRate = parseFloat(document.getElementById('jc_fuel').value) || 0;
+    const laborRate = parseFloat(document.getElementById('jc_labor').value) || 0;
+    const haul = parseFloat(document.getElementById('jc_haul').value) || 0;
+    const other = parseFloat(document.getElementById('jc_other').value) || 0;
+    const margin = parseFloat(document.getElementById('jc_margin').value);
+    if (!days || !hpd) { alert('Please enter job duration and hours per day.'); return; }
+    const totalHours = days * hpd;
+    const equipCost = totalHours * equipRate;
+    const fuelCost = totalHours * fuelRate;
+    const laborCost = totalHours * laborRate;
+    const totalCost = equipCost + fuelCost + laborCost + haul + other;
+    const profit = totalCost * margin;
+    const subtotal = totalCost + profit;
+    const dbFee = subtotal * 0.05;
+    const bidMin = subtotal + dbFee;
+    const bidMax = bidMin * 1.15;
+    document.getElementById('jc_totalhours').textContent = fmt(totalHours) + ' hrs';
+    document.getElementById('jc_equipcost').textContent = fmtDollar(equipCost);
+    document.getElementById('jc_fuelcost').textContent = fmtDollar(fuelCost);
+    document.getElementById('jc_laborcost').textContent = fmtDollar(laborCost);
+    document.getElementById('jc_extracost').textContent = fmtDollar(haul + other);
+    document.getElementById('jc_totalcost').textContent = fmtDollar(totalCost);
+    document.getElementById('jc_profit').textContent = fmtDollar(profit);
+    document.getElementById('jc_dbfee').textContent = fmtDollar(dbFee) + ' (deducted from payout)';
+    document.getElementById('jc_results').style.display = 'block';
+    document.getElementById('jc_bidrange').textContent = fmtDollar(bidMin) + ' – ' + fmtDollar(bidMax);
+    document.getElementById('jc_bidhelper').classList.add('visible');
+  }
+
+  // ── 4. HOURLY RATE ──
+  function calcHourlyRate() {
+    const days = parseFloat(document.getElementById('hr_days').value) || 0;
+    const hpd = parseFloat(document.getElementById('hr_hoursday').value) || 0;
+    const equip = parseFloat(document.getElementById('hr_equipcost').value) || 0;
+    const fuel = parseFloat(document.getElementById('hr_fuelcost').value) || 0;
+    const insurance = parseFloat(document.getElementById('hr_insurance').value) || 0;
+    const maint = parseFloat(document.getElementById('hr_maintenance').value) || 0;
+    const salary = parseFloat(document.getElementById('hr_salary').value) || 0;
+    const overhead = parseFloat(document.getElementById('hr_overhead').value) || 0;
+    if (!days || !hpd) { alert('Please enter billable days and hours.'); return; }
+    const totalHours = days * hpd;
+    const totalCosts = equip + fuel + insurance + maint + salary + overhead;
+    const breakEven = totalCosts / totalHours;
+    const with20 = breakEven * 1.20;
+    const with30 = breakEven * 1.30;
+    document.getElementById('hr_totalhours').textContent = fmt(totalHours) + ' hrs/yr';
+    document.getElementById('hr_totalcosts').textContent = fmtDollar(totalCosts) + '/yr';
+    document.getElementById('hr_breakeven').textContent = fmtDollar(breakEven) + '/hr';
+    document.getElementById('hr_with20').textContent = fmtDollar(with20) + '/hr';
+    document.getElementById('hr_with30').textContent = fmtDollar(with30) + '/hr';
+    document.getElementById('hr_results').style.display = 'block';
+  }
+
+  // ── 5. POND VOLUME ──
+  function updatePondShape() {
+    const shape = document.getElementById('pv_shape').value;
+    document.getElementById('pv_dim1label').textContent = shape === 'oval' ? 'Long Axis (length)' : 'Length';
+    document.getElementById('pv_dim2label').textContent = shape === 'oval' ? 'Short Axis (width)' : 'Width';
+  }
+
+  function calcPond() {
+    const shape = document.getElementById('pv_shape').value;
+    const L = parseFloat(document.getElementById('pv_length').value) || 0;
+    const W = parseFloat(document.getElementById('pv_width').value) || 0;
+    const D = parseFloat(document.getElementById('pv_depth').value) || 0;
+    const rate = parseFloat(document.getElementById('pv_rate').value) || 0;
+    if (!L || !W || !D) { alert('Please enter all pond dimensions.'); return; }
+    let surfaceArea, baseVol;
+    if (shape === 'oval') {
+      surfaceArea = Math.PI * (L/2) * (W/2);
+      baseVol = surfaceArea * D / 27;
+    } else {
+      surfaceArea = L * W;
+      baseVol = (L * W * D) / 27;
+    }
+    const totalVol = baseVol * 1.20; // 20% for slopes
+    const gallons = totalVol * 201.97;
+    const loads = Math.ceil(totalVol / 14);
+    const value = rate > 0 ? totalVol * rate : 0;
+    document.getElementById('pv_surface').textContent = fmt(surfaceArea) + ' sq ft';
+    document.getElementById('pv_volume').textContent = fmt(totalVol, 1) + ' cy (incl. slopes)';
+    document.getElementById('pv_gallons').textContent = fmt(gallons / 1000, 1) + 'K gallons';
+    document.getElementById('pv_haul').textContent = fmt(loads) + ' dump truck loads';
+    document.getElementById('pv_value').textContent = rate > 0 ? fmtDollar(value) : 'Enter your rate above';
+    document.getElementById('pv_results').style.display = 'block';
+  }
+
+  // ── 6. COMPACTION ──
+  function updateCompactionFactors() {
+    const soil = document.getElementById('comp_soil').value;
+    const factors = { sandy: [12, 8], average: [25, 10], clay: [40, 15], rock: [50, 35] };
+    const [swell, shrink] = factors[soil];
+    document.getElementById('comp_swell').value = swell;
+    document.getElementById('comp_shrink').value = shrink;
+  }
+
+  function calcCompaction() {
+    const bank = parseFloat(document.getElementById('comp_bank').value) || 0;
+    const swell = parseFloat(document.getElementById('comp_swell').value) / 100 || 0.25;
+    const shrink = parseFloat(document.getElementById('comp_shrink').value) / 100 || 0.10;
+    if (!bank) { alert('Please enter the bank volume.'); return; }
+    const loose = bank * (1 + swell);
+    const compacted = bank * (1 - shrink);
+    const loads = Math.ceil(loose / 14);
+    document.getElementById('comp_bankresult').textContent = fmt(bank, 1) + ' cy';
+    document.getElementById('comp_looseresult').textContent = fmt(loose, 1) + ' cy';
+    document.getElementById('comp_compresult').textContent = fmt(compacted, 1) + ' cy';
+    document.getElementById('comp_loads').textContent = fmt(loads) + ' loads';
+    document.getElementById('comp_results').style.display = 'block';
+  }
+
+  // ── 7. TIME ESTIMATE ──
+  function updateMachineRate() {
+    const rate = document.getElementById('te_machine').value;
+    document.getElementById('te_rate').value = rate;
+  }
+
+  function calcTimeEst() {
+    const vol = parseFloat(document.getElementById('te_volume').value) || 0;
+    const rate = parseFloat(document.getElementById('te_rate').value) || 0;
+    const efficiency = parseFloat(document.getElementById('te_efficiency').value);
+    const machines = parseFloat(document.getElementById('te_machines').value) || 1;
+    const hpd = parseFloat(document.getElementById('te_hoursday').value) || 10;
+    if (!vol || !rate) { alert('Please enter volume and machine production rate.'); return; }
+    const effectiveRate = rate * efficiency * machines;
+    const totalMachineHours = vol / (rate * efficiency);
+    const rawDays = totalMachineHours / hpd;
+    const bufferedDays = rawDays * 1.15;
+    const recommended = Math.ceil(bufferedDays);
+    document.getElementById('te_effective').textContent = fmt(effectiveRate, 0) + ' cy/hr';
+    document.getElementById('te_machineHours').textContent = fmt(totalMachineHours, 1) + ' hrs';
+    document.getElementById('te_days').textContent = fmt(rawDays, 1) + ' days';
+    document.getElementById('te_buffer').textContent = fmt(bufferedDays, 1) + ' days';
+    document.getElementById('te_recommended').textContent = recommended + ' days — use this in your bid';
+    document.getElementById('te_results').style.display = 'block';
+    document.getElementById('te_bidnote').textContent = 'Your job is estimated at ' + recommended + ' days. Use the Job Cost Calculator with ' + recommended + ' days to build your full bid price.';
+    document.getElementById('te_bidhelper').classList.add('visible');
+  }
+
+  // ── RESET ──
+  function resetCalc(name) {
+    const section = document.getElementById('calc-' + name);
+    section.querySelectorAll('.calc-input').forEach(input => {
+      if (input.tagName === 'SELECT') input.selectedIndex = input.tagName === 'SELECT' ? 0 : 0;
+      else input.value = '';
+    });
+    section.querySelectorAll('.results-card').forEach(r => r.style.display = 'none');
+    section.querySelectorAll('.bid-helper').forEach(b => b.classList.remove('visible'));
+  }
+
+  // Init compaction defaults
+  updateCompactionFactors();
+  updateMachineRate();
+</script>
+
+</body>
+</html>

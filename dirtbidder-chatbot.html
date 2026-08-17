@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Chatbot Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── BASE PAGE (for demo only) ── */
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: #1C1410;
+    color: #F2EDE6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem;
+  }
+
+  .demo-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #8C7B6B;
+    text-align: center;
+  }
+
+  .demo-note {
+    font-size: 0.82rem;
+    color: #8C7B6B;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.6;
+  }
+
+  /* ══════════════════════════════════════
+     CHATBOT WIDGET — Copy this entire
+     section into any DirtBidder page
+  ══════════════════════════════════════ */
+
+  /* FLOATING BUTTON */
+  .db-chat-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #E8892A;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(232,137,42,0.4);
+    z-index: 999;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .db-chat-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 28px rgba(232,137,42,0.55);
+  }
+
+  .db-chat-btn svg { width: 26px; height: 26px; fill: #1C1410; }
+
+  /* UNREAD BADGE */
+  .db-unread {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #E74C3C;
+    border: 2px solid #1C1410;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.65rem;
+    color: white;
+  }
+
+  /* CHAT WINDOW */
+  .db-chat-window {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 1.5rem;
+    width: 360px;
+    max-height: 560px;
+    background: #2A1F17;
+    border: 1px solid rgba(196,168,130,0.12);
+    border-radius: 12px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    z-index: 998;
+    overflow: hidden;
+    transform: scale(0.92) translateY(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .db-chat-window.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* CHAT HEADER */
+  .db-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: #1C1410;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    flex-shrink: 0;
+  }
+
+  .db-bot-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #E8892A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .db-online {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #27AE60;
+    border: 2px solid #1C1410;
+  }
+
+  .db-header-info { flex: 1; }
+
+  .db-bot-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #F2EDE6;
+  }
+
+  .db-bot-status {
+    font-size: 0.72rem;
+    color: #27AE60;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .db-bot-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #27AE60;
+    display: block;
+  }
+
+  .db-close {
+    background: none;
+    border: none;
+    color: #8C7B6B;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0.2rem;
+    line-height: 1;
+  }
+
+  .db-close:hover { color: #F2EDE6; }
+
+  /* MESSAGES */
+  .db-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    scroll-behavior: smooth;
+  }
+
+  /* MESSAGE BUBBLE */
+  .db-msg {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    max-width: 88%;
+  }
+
+  .db-msg.bot { align-self: flex-start; }
+  .db-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .db-msg-av {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #E8892A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    margin-bottom: 0.15rem;
+  }
+
+  .db-bubble {
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .db-msg.bot .db-bubble {
+    background: #3D2B1F;
+    color: #F2EDE6;
+    border-bottom-left-radius: 3px;
+    border: 1px solid rgba(196,168,130,0.1);
+  }
+
+  .db-msg.user .db-bubble {
+    background: #E8892A;
+    color: #1C1410;
+    border-bottom-right-radius: 3px;
+    font-weight: 500;
+  }
+
+  /* TYPING INDICATOR */
+  .db-typing {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    padding: 0 0 0.25rem;
+  }
+
+  .db-typing.visible { display: flex; }
+
+  .db-typing-dots {
+    background: #3D2B1F;
+    border: 1px solid rgba(196,168,130,0.1);
+    border-radius: 12px;
+    border-bottom-left-radius: 3px;
+    padding: 0.6rem 0.85rem;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .db-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #8C7B6B;
+    animation: dbBounce 1.2s infinite;
+  }
+
+  .db-dot:nth-child(2) { animation-delay: 0.2s; }
+  .db-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dbBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* QUICK REPLIES */
+  .db-quick-replies {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(196,168,130,0.06);
+    flex-shrink: 0;
+    background: #2A1F17;
+  }
+
+  .db-chip {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    border: 1.5px solid rgba(196,168,130,0.2);
+    background: transparent;
+    color: #C4A882;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .db-chip:hover {
+    border-color: #E8892A;
+    color: #E8892A;
+    background: rgba(232,137,42,0.08);
+  }
+
+  /* INPUT */
+  .db-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid rgba(196,168,130,0.08);
+    background: #1C1410;
+    flex-shrink: 0;
+  }
+
+  .db-input {
+    flex: 1;
+    background: #2A1F17;
+    border: 1.5px solid rgba(196,168,130,0.18);
+    color: #F2EDE6;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.88rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .db-input:focus { border-color: #E8892A; }
+  .db-input::placeholder { color: #8C7B6B; }
+
+  .db-send {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #E8892A;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+    color: #1C1410;
+  }
+
+  .db-send:hover { background: #F5A94E; }
+
+  /* LINK IN BUBBLE */
+  .db-bubble a {
+    color: #E8892A;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+
+  .db-msg.user .db-bubble a { color: #1C1410; }
+
+  /* MOBILE */
+  @media (max-width: 480px) {
+    .db-chat-window { width: calc(100vw - 2rem); right: 1rem; bottom: 5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-label">DirtBidder Chatbot — Widget Preview</div>
+<div class="demo-note">
+  This chatbot widget can be embedded on any DirtBidder page — the landing page, registration page, dashboard, or anywhere else. Click the orange button in the bottom right corner to open it.
+</div>
+
+<!-- ══════════════════════════════════
+     CHATBOT WIDGET — PASTE INTO ANY PAGE
+══════════════════════════════════ -->
+
+<!-- FLOATING BUTTON -->
+<button class="db-chat-btn" onclick="toggleChat()" id="dbChatBtn" title="Chat with DirtBidder Support">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+  </svg>
+  <div class="db-unread" id="dbUnread">1</div>
+</button>
+
+<!-- CHAT WINDOW -->
+<div class="db-chat-window" id="dbChatWindow">
+
+  <!-- HEADER -->
+  <div class="db-header">
+    <div class="db-bot-avatar">
+      🚜
+      <div class="db-online"></div>
+    </div>
+    <div class="db-header-info">
+      <div class="db-bot-name">DirtBidder Support</div>
+      <div class="db-bot-status">Online — typically replies instantly</div>
+    </div>
+    <button class="db-close" onclick="toggleChat()">✕</button>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="db-messages" id="dbMessages">
+
+    <div class="db-msg bot">
+      <div class="db-msg-av">🚜</div>
+      <div class="db-bubble">
+        Hey! 👋 I'm the DirtBidder assistant. I can help you with signing up, posting jobs, understanding how bidding works, payments, and anything else about the app.<br><br>What can I help you with?
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TYPING -->
+  <div class="db-typing" id="dbTyping">
+    <div style="width:24px"></div>
+    <div class="db-typing-dots">
+      <div class="db-dot"></div>
+      <div class="db-dot"></div>
+      <div class="db-dot"></div>
+    </div>
+  </div>
+
+  <!-- QUICK REPLIES -->
+  <div class="db-quick-replies" id="dbQuickReplies">
+    <button class="db-chip" onclick="quickReply('How do I sign up?')">How do I sign up?</button>
+    <button class="db-chip" onclick="quickReply('How does bidding work?')">How does bidding work?</button>
+    <button class="db-chip" onclick="quickReply('How do payments work?')">How do payments work?</button>
+    <button class="db-chip" onclick="quickReply('Is it free to post a job?')">Is it free to post?</button>
+    <button class="db-chip" onclick="quickReply('What is the platform fee?')">What is the fee?</button>
+    <button class="db-chip" onclick="quickReply('How do I become an operator?')">Become an operator</button>
+    <button class="db-chip" onclick="quickReply('What equipment types are on the platform?')">Equipment types</button>
+    <button class="db-chip" onclick="quickReply('How does escrow work?')">How does escrow work?</button>
+  </div>
+
+  <!-- INPUT -->
+  <div class="db-input-row">
+    <input class="db-input" type="text" id="dbInput" placeholder="Ask anything about DirtBidder..." onkeydown="handleDbKey(event)" />
+    <button class="db-send" onclick="sendDbMessage()">➤</button>
+  </div>
+
+</div>
+
+<script>
+  let chatOpen = false;
+
+  // ── KNOWLEDGE BASE ──
+  const kb = [
+    {
+      patterns: ['sign up','register','create account','join','get started','how do i start'],
+      answer: `Signing up is free and takes about 2 minutes! Here's how:\n\n1. Click <strong>Get Started</strong> on the homepage\n2. Choose your role — <strong>Client</strong> (need work done) or <strong>Operator</strong> (run equipment)\n3. Enter your name, email, and password\n4. Fill in your profile details\n5. You're in!\n\n<a href="dirtbidder-register.html">→ Create your free account</a>`
+    },
+    {
+      patterns: ['free to post','cost to post','post a job cost','posting fee','free job'],
+      answer: `Yes — posting a job is completely <strong>free</strong>! You pay nothing until you hire an operator and accept their bid.\n\nDirtBidder only charges a 5% platform fee when payment is released at job completion.`
+    },
+    {
+      patterns: ['platform fee','fee','how much','cost','charge','percent','commission'],
+      answer: `DirtBidder charges a <strong>10% total platform fee</strong>, split evenly:\n\n• <strong>5% from the Client</strong> — added to the total at checkout\n• <strong>5% from the Operator</strong> — deducted from their payout\n\nExample on a $5,000 job:\n• Client pays $5,250 total\n• Operator receives $4,750\n• DirtBidder earns $500\n\nNo monthly fees. No signup fees. You only pay when work gets done.`
+    },
+    {
+      patterns: ['bidding','how does bidding','bid','submit bid','sealed','see other bids'],
+      answer: `DirtBidder uses a <strong>sealed bid system</strong> — operators cannot see each other's bids.\n\nHere's how it works:\n\n1. You post a job for free\n2. Operators in your area submit private bids\n3. You see all bids with prices, equipment, timeline, and reviews\n4. You pick the operator that fits best\n5. Accept their bid to hire them\n\nOperators only see how many bids a job has received — never the dollar amounts.`
+    },
+    {
+      patterns: ['escrow','payment work','how do i pay','pay','money','funds','stripe'],
+      answer: `Payments are handled securely through <strong>Stripe escrow</strong>:\n\n🔒 <strong>Step 1:</strong> You pay when you hire an operator — funds go to Stripe escrow (not the operator yet)\n\n🚜 <strong>Step 2:</strong> Operator completes the job\n\n✅ <strong>Step 3:</strong> You confirm completion and release payment\n\n💸 <strong>Step 4:</strong> Operator gets paid within 2 business days\n\nYour money never moves until YOU say so. If there's a dispute, DirtBidder reviews it within 5 business days.`
+    },
+    {
+      patterns: ['operator','become operator','run equipment','equipment operator','contractor','how do i become'],
+      answer: `Great choice! As a DirtBidder Operator you can:\n\n✅ Browse local jobs matched to your equipment\n✅ Submit sealed bids on your own terms\n✅ Get paid within 2 business days via Stripe\n✅ Access Cat Financial and equipment rental resources\n✅ Build reviews and grow your reputation\n\nTo join:\n1. Sign up and choose <strong>Operator</strong> as your role\n2. List your equipment and service area\n3. Confirm your insurance and licenses\n4. Start browsing jobs!\n\n<a href="dirtbidder-register.html">→ Join as an Operator</a>`
+    },
+    {
+      patterns: ['equipment','machine','excavator','dozer','bulldozer','dump truck','skid steer','grader','compactor','what equipment'],
+      answer: `DirtBidder supports all major earthwork equipment:\n\n🏗️ Excavators (mini, standard, large)\n🚜 Bulldozers / Dozers\n🚛 Dump Trucks\n🔧 Skid Steers\n📐 Motor Graders\n⚙️ Compactors\n🏗️ Frontend Loaders\n🔨 Impact Hammers\n💧 Water Trucks\n🚧 Scrapers\n\nWhen posting a job, you can specify which equipment you think you'll need — operators will bring what's required.`
+    },
+    {
+      patterns: ['what jobs','type of work','kind of work','job types','what work','clearing','grading','excavation','pond','trenching'],
+      answer: `DirtBidder covers all types of earthwork:\n\n🌲 Land Clearing\n📐 Rough & Fine Grading\n🏗️ Excavation\n⚡ Trenching\n💧 Pond Digging\n🛣️ Road Building\n🏠 Foundation Prep\n🚛 Haul Off / Spoils Removal\n🔧 Site Prep\n💧 Drainage Work\n\nIf it moves dirt, it belongs on DirtBidder.`
+    },
+    {
+      patterns: ['dispute','problem','issue','bad job','not happy','incomplete','wrong'],
+      answer: `If there's a problem with a job, here's what to do:\n\n1. First, message the operator through the app and try to resolve it\n2. If unresolved within 48 hours, file a formal dispute\n3. DirtBidder reviews your case within <strong>5 business days</strong>\n4. Funds stay frozen in escrow during the dispute\n\nWe look at photos, messages, and the original job description to make a fair decision.\n\nImportant: Don't release payment until you're satisfied with the work!`
+    },
+    {
+      patterns: ['insurance','license','licensed','insured','certification','require'],
+      answer: `Operators on DirtBidder are required to:\n\n✅ Carry <strong>general liability insurance</strong>\n✅ Hold all required <strong>licenses and permits</strong> in their state\n✅ Confirm they are an <strong>independent contractor</strong>\n\nThey confirm all of this during registration. DirtBidder recommends clients ask to see proof of insurance before starting large jobs.`
+    },
+    {
+      patterns: ['how long','how fast','72 hours','when do i get paid','payout','payment time'],
+      answer: `Here's the timeline:\n\n📋 <strong>Getting bids:</strong> Most jobs receive bids within a few hours — up to 72 hours\n\n💸 <strong>Operator payout:</strong> Within 2 business days of payment release via Stripe\n\n⏱ <strong>Auto-release:</strong> If you don't confirm or dispute within 72 hours of the operator marking a job complete, payment releases automatically to the operator`
+    },
+    {
+      patterns: ['referral','cat financial','cat rental','united rentals','sunbelt','equipment rental','finance equipment'],
+      answer: `DirtBidder includes helpful links to equipment financing and rental resources for operators:\n\n🏗️ <strong>Cat Financial</strong> — Finance heavy equipment\n🚜 <strong>Cat Rental Store</strong> — Rent Cat equipment by the day\n⚙️ <strong>United Rentals</strong> — Large rental fleet nationwide\n🔧 <strong>Sunbelt Rentals</strong> — Heavy equipment rentals\n\nThese are available in your Operator Dashboard under Equipment Resources.`
+    },
+    {
+      patterns: ['calculator','estimate','bid price','how much should i charge','pricing'],
+      answer: `DirtBidder has a built-in <strong>Earthwork Calculator</strong> with 7 tools for operators:\n\n⛏ Cut & Fill Calculator\n🚛 Haul Off & Truck Loads\n💰 Job Cost Estimator\n⏱ Hourly Rate Builder\n💧 Pond Volume Calculator\n🔧 Compaction Factor\n📅 Time Estimator\n\nFind it in your Operator Dashboard under Tools → Calculators.\n\n<a href="dirtbidder-calculator.html">→ Open the Calculator</a>`
+    },
+    {
+      patterns: ['qr code','business card','qr','scan','print'],
+      answer: `DirtBidder generates a custom QR code for you!\n\n📱 Scan it → opens DirtBidder instantly on any phone\n\nYou can print it on:\n• Business cards\n• Job site signs\n• Truck decals\n• Flyers\n• Anywhere!\n\nFind it in your dashboard under Marketing → QR Code.\n\n<a href="dirtbidder-qr.html">→ Get Your QR Code</a>`
+    },
+    {
+      patterns: ['message','contact operator','talk to','reach','communicate'],
+      answer: `DirtBidder has built-in <strong>direct messaging</strong> between clients and operators.\n\nYou can message an operator:\n• Before accepting their bid (ask questions)\n• After hiring (coordinate start date, site access)\n• During the job (get progress updates, share photos)\n• After completion (confirm details)\n\nAll messages are saved to the job thread and can be used as evidence in disputes. Always use the app for job-related communication!`
+    },
+    {
+      patterns: ['review','rating','stars','reviews','reputation'],
+      answer: `After every completed job, both the client and operator can leave a review.\n\n⭐ Ratings are 1–5 stars\n📝 Reviews are public on operator profiles\n✅ Only verified job completions can leave reviews — no fake reviews\n\nFor operators, a strong rating is the best way to win more bids. For clients, it helps you choose the right operator.`
+    },
+    {
+      patterns: ['password','forgot password','reset','login','can\'t login','access'],
+      answer: `If you can't log in:\n\n1. Go to the <a href="dirtbidder-login.html">Login page</a>\n2. Click <strong>Forgot Password?</strong>\n3. Enter your email address\n4. Check your inbox for a reset link\n5. Set a new password and log in\n\nIf you're still having trouble, email <strong>support@dirtbidder.com</strong>`
+    },
+    {
+      patterns: ['contact','support','help','email','phone','reach out','speak to'],
+      answer: `Need to reach a real person? Here's how:\n\n📧 <strong>Email:</strong> support@dirtbidder.com\n💬 <strong>In-app messaging:</strong> Use the Help section in your account settings\n\nWe typically respond within a few hours during business hours. For urgent payment disputes, disputes are escalated automatically.`
+    },
+    {
+      patterns: ['safe','secure','trust','legitimate','scam','real'],
+      answer: `DirtBidder is built with security at every step:\n\n🔒 <strong>Escrow payments</strong> — your money is held by Stripe (licensed in all 50 states) until you release it\n\n🔒 <strong>Sealed bids</strong> — operators can't see each other's prices\n\n✅ <strong>Verified operators</strong> — insurance and license confirmation required\n\n⭐ <strong>Reviews</strong> — only real completed jobs can leave reviews\n\n📋 <strong>Terms of Service</strong> — binding arbitration protects both parties\n\nDirtBidder LLC is a registered US company.`
+    },
+    {
+      patterns: ['cancel','cancellation','refund','change mind'],
+      answer: `Here's the cancellation policy:\n\n✅ <strong>Before hiring:</strong> Cancel anytime — it's free to post and browse\n\n✅ <strong>After hiring, before work starts:</strong> Cancel and get a full refund — discuss with operator first\n\n⚠️ <strong>After work starts:</strong> Refunds depend on how much work was completed — DirtBidder reviews and determines a fair split\n\n✅ <strong>Job never started:</strong> Full refund including platform fee`
+    },
+    {
+      patterns: ['states','where','location','area','available','coverage','which states'],
+      answer: `DirtBidder is available <strong>nationwide across all 50 US states</strong>!\n\nWhen you sign up, you set your location or service area. The platform matches:\n• Clients with operators in their area\n• Operators with jobs within their travel radius\n\nWe're growing fast — the more operators and clients in your area, the faster you'll get bids and jobs.`
+    }
+  ];
+
+  const fallback = [
+    "I'm not sure about that specific question — could you rephrase it? Or try one of the quick reply buttons below for common topics.",
+    "That's a great question! I don't have a specific answer for that yet. For detailed help, email <strong>support@dirtbidder.com</strong> and we'll get back to you shortly.",
+    "I'm still learning! For that question, please reach out to our support team at <strong>support@dirtbidder.com</strong>. We typically respond within a few hours.",
+    "I couldn't find an exact answer to that. Try rephrasing your question or use the quick reply buttons below for common topics. You can also email <strong>support@dirtbidder.com</strong> for help."
+  ];
+
+  let fallbackIndex = 0;
+  let isOpen = false;
+  let isTyping = false;
+
+  function toggleChat() {
+    isOpen = !isOpen;
+    document.getElementById('dbChatWindow').classList.toggle('open', isOpen);
+    document.getElementById('dbUnread').style.display = 'none';
+    if (isOpen) {
+      setTimeout(() => document.getElementById('dbInput').focus(), 300);
+      scrollToBottom();
+      // Welcome message if first open
+      if (document.getElementById('dbMessages').children.length === 1) {
+        setTimeout(() => {
+          showTyping();
+          setTimeout(() => {
+            hideTyping();
+            addBotMessage("I'm here to answer any questions about DirtBidder. What would you like to know? 👇");
+          }, 1200);
+        }, 600);
+      }
+    }
+  }
+
+  function quickReply(text) {
+    addUserMessage(text);
+    processMessage(text);
+  }
+
+  function sendDbMessage() {
+    const input = document.getElementById('dbInput');
+    const text = input.value.trim();
+    if (!text || isTyping) return;
+    input.value = '';
+    addUserMessage(text);
+    processMessage(text);
+  }
+
+  function handleDbKey(e) {
+    if (e.key === 'Enter') sendDbMessage();
+  }
+
+  function addUserMessage(text) {
+    const msgs = document.getElementById('dbMessages');
+    const div = document.createElement('div');
+    div.className = 'db-msg user';
+    div.innerHTML = `<div class="db-msg-av" style="background:#3D2B1F;color:#E8892A;font-size:0.65rem">You</div><div class="db-bubble">${text}</div>`;
+    msgs.appendChild(div);
+    scrollToBottom();
+  }
+
+  function addBotMessage(html) {
+    const msgs = document.getElementById('dbMessages');
+    const div = document.createElement('div');
+    div.className = 'db-msg bot';
+    div.innerHTML = `<div class="db-msg-av">🚜</div><div class="db-bubble">${html.replace(/\n/g, '<br>')}</div>`;
+    msgs.appendChild(div);
+    scrollToBottom();
+  }
+
+  function showTyping() {
+    isTyping = true;
+    document.getElementById('dbTyping').classList.add('visible');
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    isTyping = false;
+    document.getElementById('dbTyping').classList.remove('visible');
+  }
+
+  function scrollToBottom() {
+    const msgs = document.getElementById('dbMessages');
+    setTimeout(() => msgs.scrollTop = msgs.scrollHeight, 50);
+  }
+
+  function processMessage(text) {
+    const lower = text.toLowerCase();
+    showTyping();
+
+    // Find matching answer
+    let answer = null;
+    for (const entry of kb) {
+      if (entry.patterns.some(p => lower.includes(p))) {
+        answer = entry.answer;
+        break;
+      }
+    }
+
+    // Typing delay based on answer length
+    const delay = answer ? Math.min(800 + answer.length * 3, 2200) : 1200;
+
+    setTimeout(() => {
+      hideTyping();
+      if (answer) {
+        addBotMessage(answer);
+      } else {
+        addBotMessage(fallback[fallbackIndex % fallback.length]);
+        fallbackIndex++;
+      }
+
+      // Show contextual follow-ups
+      updateQuickReplies(lower);
+    }, delay);
+  }
+
+  function updateQuickReplies(context) {
+    const qr = document.getElementById('dbQuickReplies');
+
+    // Context-aware follow-ups
+    if (context.includes('sign up') || context.includes('register') || context.includes('operator')) {
+      qr.innerHTML = `
+        <button class="db-chip" onclick="quickReply('What is the platform fee?')">What is the fee?</button>
+        <button class="db-chip" onclick="quickReply('How does bidding work?')">How does bidding work?</button>
+        <button class="db-chip" onclick="quickReply('How does escrow work?')">How does escrow work?</button>
+        <button class="db-chip" onclick="quickReply('Is it free to post a job?')">Free to post?</button>`;
+    } else if (context.includes('pay') || context.includes('escrow') || context.includes('fee')) {
+      qr.innerHTML = `
+        <button class="db-chip" onclick="quickReply('How do I dispute a job?')">How do I dispute?</button>
+        <button class="db-chip" onclick="quickReply('How fast do operators get paid?')">Operator payout time?</button>
+        <button class="db-chip" onclick="quickReply('Can I get a refund?')">Can I get a refund?</button>
+        <button class="db-chip" onclick="quickReply('Is DirtBidder safe?')">Is it safe?</button>`;
+    } else if (context.includes('bid') || context.includes('job')) {
+      qr.innerHTML = `
+        <button class="db-chip" onclick="quickReply('What types of jobs can I post?')">Job types?</button>
+        <button class="db-chip" onclick="quickReply('How does escrow work?')">How does escrow work?</button>
+        <button class="db-chip" onclick="quickReply('Can I message an operator before hiring?')">Message before hiring?</button>
+        <button class="db-chip" onclick="quickReply('How do I leave a review?')">How do reviews work?</button>`;
+    } else {
+      // Default chips
+      qr.innerHTML = `
+        <button class="db-chip" onclick="quickReply('How do I sign up?')">How to sign up</button>
+        <button class="db-chip" onclick="quickReply('What is the platform fee?')">Platform fee</button>
+        <button class="db-chip" onclick="quickReply('How does escrow work?')">Escrow</button>
+        <button class="db-chip" onclick="quickReply('Contact support')">Contact support</button>`;
+    }
+  }
+
+  // Auto-open with welcome after 4 seconds on page load
+  setTimeout(() => {
+    if (!isOpen) {
+      document.getElementById('dbUnread').style.display = 'flex';
+    }
+  }, 4000);
+</script>
+
+</body>
+</html>

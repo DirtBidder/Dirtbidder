@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Email Templates</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --amber-lt:#F5A94E; --dust:#C4A882; --stone:#8C7B6B; --chalk:#F2EDE6; --error:#E74C3C; --success:#27AE60; --sidebar:240px; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;background:var(--soil);color:var(--chalk);min-height:100vh;display:flex;}
+  .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--dig);border-right:1px solid rgba(196,168,130,0.08);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+  .sidebar-logo{padding:1.4rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.5rem;color:var(--chalk);text-decoration:none;display:block;}
+  .sidebar-logo span{color:var(--amber);}
+  .sidebar-user{padding:1.25rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);display:flex;align-items:center;gap:0.75rem;}
+  .avatar{width:36px;height:36px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.9rem;color:var(--soil);flex-shrink:0;}
+  .user-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;text-transform:uppercase;color:var(--chalk);}
+  .user-role{font-size:0.72rem;color:var(--amber);text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:600;}
+  .nav-section{padding:1rem 0;flex:1;overflow-y:auto;}
+  .nav-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--stone);padding:0.5rem 1.5rem 0.3rem;}
+  .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1.5rem;font-size:0.88rem;color:var(--stone);cursor:pointer;transition:all 0.15s;border-left:3px solid transparent;}
+  .nav-item:hover{color:var(--chalk);background:rgba(196,168,130,0.05);}
+  .nav-item.active{color:var(--amber);border-left-color:var(--amber);background:rgba(232,137,42,0.07);}
+  .nav-icon{font-size:1rem;width:20px;text-align:center;}
+  .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid rgba(196,168,130,0.08);}
+  .signout-btn{font-size:0.82rem;color:var(--stone);cursor:pointer;display:flex;align-items:center;gap:0.5rem;transition:color 0.2s;background:none;border:none;padding:0;font-family:'Barlow',sans-serif;}
+  .signout-btn:hover{color:var(--error);}
+  .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:var(--dig);border-bottom:1px solid rgba(196,168,130,0.08);position:sticky;top:0;z-index:40;}
+  .topbar-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.3rem;text-transform:uppercase;color:var(--chalk);}
+  .email-tabs{display:flex;gap:0;overflow-x:auto;background:var(--dig);border-bottom:1px solid rgba(196,168,130,0.08);padding:0 2rem;}
+  .email-tab{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.85rem 1.1rem;border:none;background:transparent;color:var(--stone);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.15s;white-space:nowrap;}
+  .email-tab:hover{color:var(--chalk);}
+  .email-tab.active{color:var(--amber);border-bottom-color:var(--amber);}
+  .content{padding:2rem;flex:1;}
+  .email-section{display:none;}
+  .email-section.active{display:block;}
+  .section-header{margin-bottom:1.5rem;}
+  .section-eyebrow{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin-bottom:0.4rem;}
+  .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.8rem;text-transform:uppercase;color:var(--chalk);}
+  .section-title span{color:var(--amber);}
+  .section-sub{font-size:0.85rem;color:var(--stone);margin-top:0.3rem;}
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+  .card{background:var(--dig);border:1px solid rgba(196,168,130,0.08);border-radius:4px;overflow:hidden;margin-bottom:1rem;}
+  .card-header{padding:0.85rem 1.25rem;border-bottom:1px solid rgba(196,168,130,0.08);display:flex;align-items:center;justify-content:space-between;}
+  .card-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--chalk);}
+  .trigger-badge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.55rem;border-radius:2px;background:rgba(232,137,42,0.12);color:var(--amber);}
+  .card-body{padding:1.25rem;}
+  .meta-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+  .meta-chip{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.55rem;border-radius:2px;}
+  .chip-client{background:rgba(52,152,219,0.12);color:#3498DB;}
+  .chip-operator{background:rgba(39,174,96,0.12);color:#27AE60;}
+  .chip-both{background:rgba(196,168,130,0.12);color:var(--dust);}
+  /* EMAIL PREVIEW */
+  .email-preview{background:#f8f7f5;border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;}
+  .ep-header{background:#1C1410;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .ep-logo{font-family:Georgia,serif;font-weight:900;font-size:1.3rem;color:white;letter-spacing:0.02em;}
+  .ep-logo span{color:#E8892A;}
+  .ep-tagline{font-size:0.65rem;color:#8C7B6B;letter-spacing:0.1em;text-transform:uppercase;}
+  .ep-stripe{height:4px;background:repeating-linear-gradient(90deg,#E8892A 0,#E8892A 20px,#1C1410 20px,#1C1410 30px);}
+  .ep-body{padding:28px 24px;background:#ffffff;}
+  .ep-greeting{font-size:0.95rem;color:#2A1F17;margin-bottom:12px;line-height:1.5;}
+  .ep-main{font-size:0.9rem;color:#4a4a4a;line-height:1.7;margin-bottom:16px;}
+  .ep-highlight{background:#FFF8F0;border-left:4px solid #E8892A;padding:12px 16px;border-radius:0 4px 4px 0;margin:16px 0;}
+  .ep-highlight-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#E8892A;margin-bottom:4px;}
+  .ep-highlight-value{font-size:1.1rem;font-weight:700;color:#1C1410;}
+  .ep-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0;}
+  .ep-detail{background:#f8f7f5;padding:10px 12px;border-radius:4px;}
+  .ep-detail-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#8C7B6B;margin-bottom:2px;}
+  .ep-detail-value{font-size:0.9rem;color:#1C1410;font-weight:600;}
+  .ep-cta{display:inline-block;background:#E8892A;color:#1C1410;font-weight:700;font-size:0.88rem;padding:12px 24px;border-radius:4px;text-decoration:none;letter-spacing:0.05em;text-transform:uppercase;margin:8px 0 16px;}
+  .ep-divider{border:none;border-top:1px solid #e8e4de;margin:16px 0;}
+  .ep-footer{padding:16px 24px;background:#f8f7f5;border-top:1px solid #e8e4de;}
+  .ep-footer-text{font-size:0.72rem;color:#8C7B6B;line-height:1.6;}
+  .ep-footer-links{display:flex;gap:12px;margin-top:8px;}
+  .ep-footer-links a{font-size:0.72rem;color:#8C7B6B;text-decoration:none;}
+  .ep-escrow{background:#F0FFF4;border:1px solid #A8D5B5;border-radius:4px;padding:12px 16px;margin:12px 0;font-size:0.82rem;color:#1a4731;}
+  .ep-warning{background:#FFF5F5;border:1px solid #FFBABA;border-radius:4px;padding:12px 16px;margin:12px 0;font-size:0.82rem;color:#7B1E1E;}
+  /* BUTTONS */
+  .btn-copy{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;background:transparent;color:var(--stone);border:1.5px solid rgba(196,168,130,0.2);padding:0.35rem 0.85rem;border-radius:3px;cursor:pointer;transition:all 0.2s;}
+  .btn-copy:hover{border-color:var(--amber);color:var(--amber);}
+  @media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;}.layout{grid-template-columns:1fr;}.content{padding:1.25rem;}.topbar{padding:1rem;}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <div class="sidebar-user"><div class="avatar">DS</div><div><div class="user-name">Daniel Smith</div><div class="user-role">Owner — DirtBidder LLC</div></div></div>
+  <nav class="nav-section">
+    <div class="nav-label">Owner Tools</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-tax-report.html'"><span class="nav-icon">📄</span> Tax Report</div>
+    <div class="nav-item active"><span class="nav-icon">✉️</span> Email Templates</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-qr.html'"><span class="nav-icon">📱</span> QR Code</div>
+  </nav>
+  <div class="sidebar-footer"><button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Email Notification Templates</div>
+    <div style="font-size:0.8rem;color:var(--stone)">9 templates · Auto-sent by the platform</div>
+  </div>
+
+  <div class="email-tabs">
+    <button class="email-tab active" onclick="showEmail('bid',this)">📬 New Bid</button>
+    <button class="email-tab" onclick="showEmail('hired',this)">🤝 Job Hired</button>
+    <button class="email-tab" onclick="showEmail('escrow',this)">🔒 Escrow Confirmed</button>
+    <button class="email-tab" onclick="showEmail('complete',this)">✅ Job Complete</button>
+    <button class="email-tab" onclick="showEmail('payment',this)">💸 Payment Released</button>
+    <button class="email-tab" onclick="showEmail('dispute',this)">⚠ Dispute Filed</button>
+    <button class="email-tab" onclick="showEmail('welcome',this)">👋 Welcome</button>
+    <button class="email-tab" onclick="showEmail('reset',this)">🔑 Password Reset</button>
+    <button class="email-tab" onclick="showEmail('review',this)">⭐ Leave a Review</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ── 1. NEW BID ── -->
+    <div class="email-section active" id="email-bid">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 1 of 9</div>
+        <div class="section-title">New Bid <span>Received</span></div>
+        <div class="section-sub">Sent to the Client when an operator submits a bid on their job</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-client">To: Client</span><span class="meta-chip chip-both">Trigger: Bid Submitted</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> You have a new bid on "[Job Title]" — DirtBidder</div>
+                <div><strong style="color:var(--chalk)">Variables:</strong> {{client_name}}, {{job_title}}, {{operator_name}}, {{bid_amount}}, {{bid_days}}, {{operator_rating}}, {{total_bids}}, {{job_url}}</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Get the client back on the platform to review and accept bids</div>
+                <div><strong style="color:var(--chalk)">Urgency trigger:</strong> If this is the first bid, say so. Creates excitement.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div><div class="ep-tagline">Find the dirt. Find the deal.</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Hi Daniel,</div>
+              <div class="ep-main">You have a new bid on your job! An operator has reviewed your listing and submitted a competitive bid.</div>
+              <div class="ep-highlight">
+                <div class="ep-highlight-label">New Bid On</div>
+                <div class="ep-highlight-value">Land Clearing — 12 Acres</div>
+              </div>
+              <div class="ep-detail-grid">
+                <div class="ep-detail"><div class="ep-detail-label">Operator</div><div class="ep-detail-value">Smith Excavating LLC</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Bid Amount</div><div class="ep-detail-value" style="color:#E8892A">$4,200</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Est. Timeline</div><div class="ep-detail-value">4 days</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Operator Rating</div><div class="ep-detail-value">★ 4.9 (47 reviews)</div></div>
+              </div>
+              <div class="ep-main" style="font-size:0.82rem;color:#666">You now have <strong>5 total bids</strong> on this job. Review all bids and hire the operator that's the best fit.</div>
+              <a class="ep-cta" href="#">Review All Bids →</a>
+              <hr class="ep-divider">
+              <div class="ep-main" style="font-size:0.78rem;color:#888">Remember: Bid amounts are sealed — operators cannot see each other's prices. You're seeing true market rates.</div>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · www.dirtbidder.com<br>You're receiving this because you have an active job posting.<br><div class="ep-footer-links"><a href="#">Unsubscribe</a><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2. JOB HIRED ── -->
+    <div class="email-section" id="email-hired">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 2 of 9</div>
+        <div class="section-title">Job <span>Hired</span></div>
+        <div class="section-sub">Sent to the Operator when a client accepts their bid</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-operator">To: Operator</span><span class="meta-chip chip-both">Trigger: Bid Accepted</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> 🎉 You got hired! "[Job Title]" — DirtBidder</div>
+                <div><strong style="color:var(--chalk)">Variables:</strong> {{operator_name}}, {{job_title}}, {{client_name}}, {{job_location}}, {{bid_amount}}, {{operator_payout}}, {{start_date}}, {{job_url}}</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Confirm hire, show escrow status, prompt them to message the client</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">You got hired, Jake! 🎉</div>
+              <div class="ep-main">Your bid was accepted. Payment is now held in Stripe escrow — you'll receive it within 2 business days of the client confirming job completion.</div>
+              <div class="ep-highlight">
+                <div class="ep-highlight-label">Job Confirmed</div>
+                <div class="ep-highlight-value">Land Clearing — 12 Acres</div>
+              </div>
+              <div class="ep-detail-grid">
+                <div class="ep-detail"><div class="ep-detail-label">Client</div><div class="ep-detail-value">Daniel S.</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Location</div><div class="ep-detail-value">Nashville, TN</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Your Bid</div><div class="ep-detail-value">$4,200</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Your Payout</div><div class="ep-detail-value" style="color:#27AE60">$3,990</div></div>
+              </div>
+              <div class="ep-escrow">🔒 <strong>$4,200 is now held in Stripe escrow.</strong> This money is reserved for you and releases when the client confirms the job is complete.</div>
+              <a class="ep-cta" href="#">Message the Client →</a>
+              <div class="ep-main" style="font-size:0.78rem;color:#888">Pro tip: Message the client within the hour to introduce yourself and confirm the start date. Clients love fast communication.</div>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · www.dirtbidder.com<div class="ep-footer-links"><a href="#">Unsubscribe</a><a href="#">Privacy Policy</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3. ESCROW CONFIRMED ── -->
+    <div class="email-section" id="email-escrow">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 3 of 9</div>
+        <div class="section-title">Escrow <span>Confirmed</span></div>
+        <div class="section-sub">Sent to the Client confirming their payment is safely held</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-client">To: Client</span><span class="meta-chip chip-both">Trigger: Payment Collected</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> ✅ Payment secured — your job starts soon · DirtBidder</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Reassure client their money is safe, explain the release process</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Hi Daniel,</div>
+              <div class="ep-main">Your payment is confirmed and safely held in escrow. The operator has been notified and will reach out to coordinate the start date.</div>
+              <div class="ep-escrow">🔒 <strong>$4,410 is held in Stripe escrow.</strong> This money does not go to the operator until you confirm the job is complete to your satisfaction.</div>
+              <div class="ep-detail-grid">
+                <div class="ep-detail"><div class="ep-detail-label">Job</div><div class="ep-detail-value">Land Clearing — 12 Acres</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Operator</div><div class="ep-detail-value">Smith Excavating LLC</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Total Charged</div><div class="ep-detail-value">$4,410</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Escrow Status</div><div class="ep-detail-value" style="color:#27AE60">🔒 Secured</div></div>
+              </div>
+              <div class="ep-main" style="font-size:0.82rem;color:#555"><strong>What happens next:</strong><br>1. The operator contacts you to confirm the start date<br>2. Work is completed<br>3. You release payment when satisfied<br>4. If there's an issue, you have 72 hours to dispute</div>
+              <a class="ep-cta" href="#">View Job Status →</a>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · www.dirtbidder.com<div class="ep-footer-links"><a href="#">Unsubscribe</a><a href="#">Privacy Policy</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. JOB COMPLETE ── -->
+    <div class="email-section" id="email-complete">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 4 of 9</div>
+        <div class="section-title">Job Marked <span>Complete</span></div>
+        <div class="section-sub">Sent to Client when operator marks the job done — prompts them to release payment or dispute</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-client">To: Client</span><span class="meta-chip chip-both">Trigger: Operator Marks Complete</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> ⏱ Action required — your job is marked complete · DirtBidder</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Get client to release payment or file dispute within 72 hours</div>
+                <div><strong style="color:var(--chalk)">Urgency:</strong> 72-hour countdown creates action</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Hi Daniel — action required!</div>
+              <div class="ep-main"><strong>Smith Excavating LLC</strong> has marked your land clearing job as complete. Please inspect the work and take action within <strong>72 hours.</strong></div>
+              <div class="ep-warning">⏱ <strong>72-hour window:</strong> If you don't release payment or file a dispute by <strong>Tuesday Aug 13 at 2:14 PM</strong>, payment will automatically release to the operator.</div>
+              <div class="ep-detail-grid">
+                <div class="ep-detail"><div class="ep-detail-label">Job</div><div class="ep-detail-value">Land Clearing — 12 Acres</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Operator</div><div class="ep-detail-value">Smith Excavating LLC</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Amount in Escrow</div><div class="ep-detail-value" style="color:#E8892A">$4,200</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Deadline</div><div class="ep-detail-value" style="color:#E74C3C">Aug 13, 2:14 PM</div></div>
+              </div>
+              <a class="ep-cta" href="#" style="background:#27AE60;margin-right:8px">✓ Release Payment</a>
+              <a class="ep-cta" href="#" style="background:#E74C3C">⚠ File Dispute</a>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · www.dirtbidder.com<div class="ep-footer-links"><a href="#">Unsubscribe</a><a href="#">Privacy Policy</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 5. PAYMENT RELEASED ── -->
+    <div class="email-section" id="email-payment">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 5 of 9</div>
+        <div class="section-title">Payment <span>Released</span></div>
+        <div class="section-sub">Sent to Operator confirming payment is on the way</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-operator">To: Operator</span><span class="meta-chip chip-both">Trigger: Client Releases Payment</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> 💸 Payment on the way — $X arriving in 2 business days · DirtBidder</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Confirm payout, encourage leaving a review, promote next job</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Money's on the way, Jake! 💸</div>
+              <div class="ep-main">The client has confirmed the job is complete and released your payment. It will arrive in your linked bank account within 2 business days via Stripe.</div>
+              <div class="ep-highlight">
+                <div class="ep-highlight-label">Payout Amount</div>
+                <div class="ep-highlight-value" style="color:#27AE60">$3,990.00</div>
+              </div>
+              <div class="ep-detail-grid">
+                <div class="ep-detail"><div class="ep-detail-label">Job</div><div class="ep-detail-value">Land Clearing — 12 Acres</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Client</div><div class="ep-detail-value">Daniel S.</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Agreed Bid</div><div class="ep-detail-value">$4,200</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Platform Fee (5%)</div><div class="ep-detail-value">− $210</div></div>
+              </div>
+              <div class="ep-escrow">⭐ <strong>Leave a review for Daniel!</strong> Reviews help you win more jobs. It only takes 30 seconds.</div>
+              <a class="ep-cta" href="#">Leave a Review →</a>
+              <hr class="ep-divider">
+              <div class="ep-main" style="font-size:0.82rem;color:#555">Ready for the next job? <strong>12 new jobs</strong> have been posted in your area this week.</div>
+              <a class="ep-cta" href="#" style="background:#3D2B1F;color:#E8892A;border:1.5px solid #E8892A">Browse New Jobs →</a>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · www.dirtbidder.com<div class="ep-footer-links"><a href="#">Unsubscribe</a><a href="#">Privacy Policy</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6. DISPUTE ── -->
+    <div class="email-section" id="email-dispute">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 6 of 9</div>
+        <div class="section-title">Dispute <span>Filed</span></div>
+        <div class="section-sub">Sent to both parties when a dispute is filed — freezes escrow and sets expectations</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-both">To: Both Parties</span><span class="meta-chip chip-both">Trigger: Dispute Filed</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> ⚠ Dispute filed — escrow frozen · DirtBidder</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Inform both parties, freeze expectations, set 5-day timeline</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Hi Daniel,</div>
+              <div class="ep-main">A dispute has been filed on the <strong>Land Clearing — 12 Acres</strong> job. The escrow funds are now frozen while DirtBidder reviews the case.</div>
+              <div class="ep-warning">⚠ <strong>Escrow is frozen.</strong> No funds will be released until DirtBidder makes a determination. Do not attempt to arrange payment outside the platform.</div>
+              <div class="ep-detail-grid">
+                <div class="ep-detail"><div class="ep-detail-label">Dispute Filed By</div><div class="ep-detail-value">Daniel S. (Client)</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Amount Frozen</div><div class="ep-detail-value" style="color:#E74C3C">$4,200</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Review Timeline</div><div class="ep-detail-value">5 business days</div></div>
+                <div class="ep-detail"><div class="ep-detail-label">Case Number</div><div class="ep-detail-value">#DB-2026-0847</div></div>
+              </div>
+              <div class="ep-main" style="font-size:0.82rem;color:#555"><strong>What to do now:</strong><br>1. Log in to DirtBidder<br>2. Go to your dispute case<br>3. Upload any photos, videos, or evidence<br>4. DirtBidder will contact both parties within 5 business days</div>
+              <a class="ep-cta" href="#" style="background:#E74C3C">View Dispute Case →</a>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · support@dirtbidder.com<div class="ep-footer-links"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 7. WELCOME ── -->
+    <div class="email-section" id="email-welcome">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 7 of 9</div>
+        <div class="section-title">Welcome <span>Email</span></div>
+        <div class="section-sub">Sent immediately after someone creates a new account</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-both">To: New User</span><span class="meta-chip chip-both">Trigger: Account Created</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> Welcome to DirtBidder — let's get to work 🚜</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Warm welcome, explain next steps, drive first action</div>
+                <div><strong style="color:var(--chalk)">Two versions:</strong> Client version and Operator version (different CTAs)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div><div class="ep-tagline">Find the dirt. Find the deal.</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Welcome to DirtBidder, Daniel! 🚜</div>
+              <div class="ep-main">You're in. DirtBidder connects you with vetted excavation and earthwork operators in your area — fast, fair, and protected by escrow.</div>
+              <div class="ep-highlight"><div class="ep-highlight-label">Your Account Is Ready</div><div class="ep-highlight-value">Client Account · Nashville, TN</div></div>
+              <div class="ep-main" style="font-size:0.85rem;color:#444"><strong>Here's how to get started:</strong><br><br>1️⃣ <strong>Post your job</strong> — describe the work, add photos, set your budget<br>2️⃣ <strong>Receive bids</strong> — operators in your area respond within hours<br>3️⃣ <strong>Hire the best fit</strong> — review ratings, equipment, and price<br>4️⃣ <strong>Pay when done</strong> — escrow holds your money until you're satisfied</div>
+              <a class="ep-cta" href="#">Post Your First Job — Free →</a>
+              <hr class="ep-divider">
+              <div class="ep-main" style="font-size:0.78rem;color:#888">Questions? Our support chatbot is available 24/7 on the website, or email support@dirtbidder.com</div>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · www.dirtbidder.com<div class="ep-footer-links"><a href="#">Unsubscribe</a><a href="#">Privacy Policy</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 8. PASSWORD RESET ── -->
+    <div class="email-section" id="email-reset">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 8 of 9</div>
+        <div class="section-title">Password <span>Reset</span></div>
+        <div class="section-sub">Sent when a user requests a password reset</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-both">To: Any User</span><span class="meta-chip chip-both">Trigger: Reset Requested</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> Reset your DirtBidder password</div>
+                <div><strong style="color:var(--chalk)">Security note:</strong> Link expires in 1 hour. One-time use only.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Hi Daniel,</div>
+              <div class="ep-main">We received a request to reset your DirtBidder password. Click the button below to set a new one.</div>
+              <a class="ep-cta" href="#">Reset My Password →</a>
+              <div class="ep-warning">⏱ This link expires in <strong>1 hour</strong> and can only be used once.</div>
+              <div class="ep-main" style="font-size:0.82rem;color:#666">If you didn't request a password reset, you can safely ignore this email. Your password will not change.</div>
+              <hr class="ep-divider">
+              <div class="ep-main" style="font-size:0.75rem;color:#888">If the button doesn't work, copy this link into your browser:<br><span style="color:#E8892A;word-break:break-all">https://www.dirtbidder.com/reset?token=abc123xyz789</span></div>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · For security questions: support@dirtbidder.com<div class="ep-footer-links"><a href="#">Privacy Policy</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 9. REVIEW ── -->
+    <div class="email-section" id="email-review">
+      <div class="section-header">
+        <div class="section-eyebrow">Template 9 of 9</div>
+        <div class="section-title">Leave a <span>Review</span></div>
+        <div class="section-sub">Sent to Client 24 hours after payment is released — prompts them to review the operator</div>
+      </div>
+      <div class="layout">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Template Details</div><span class="trigger-badge">Auto-Sent</span></div>
+            <div class="card-body">
+              <div class="meta-row"><span class="meta-chip chip-client">To: Client</span><span class="meta-chip chip-both">Trigger: 24hrs After Payment Release</span></div>
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6;display:flex;flex-direction:column;gap:0.5rem">
+                <div><strong style="color:var(--chalk)">Subject:</strong> How did Smith Excavating LLC do? Leave your review · DirtBidder</div>
+                <div><strong style="color:var(--chalk)">Goal:</strong> Drive review completion — reviews build the marketplace</div>
+                <div><strong style="color:var(--chalk)">Timing:</strong> 24 hours after payment — job is fresh in their mind</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="email-preview">
+            <div class="ep-header"><div><div class="ep-logo"><span>Dirt</span>Bidder</div></div></div>
+            <div class="ep-stripe"></div>
+            <div class="ep-body">
+              <div class="ep-greeting">Hi Daniel, how did the job go?</div>
+              <div class="ep-main">Your land clearing job with <strong>Smith Excavating LLC</strong> is complete. Your review helps other clients choose the right operator — and helps great operators get more work.</div>
+              <div class="ep-highlight"><div class="ep-highlight-label">Rate Your Experience With</div><div class="ep-highlight-value">Smith Excavating LLC</div></div>
+              <div style="display:flex;gap:6px;justify-content:center;margin:16px 0;font-size:2rem">
+                <span style="cursor:pointer">★</span><span style="cursor:pointer">★</span><span style="cursor:pointer">★</span><span style="cursor:pointer">★</span><span style="cursor:pointer;color:#ddd">★</span>
+              </div>
+              <a class="ep-cta" href="#">Write My Review →</a>
+              <hr class="ep-divider">
+              <div class="ep-main" style="font-size:0.82rem;color:#666">Need earthwork done again? Post your next job free on DirtBidder.</div>
+              <a class="ep-cta" href="#" style="background:#3D2B1F;color:#E8892A;border:1.5px solid #E8892A">Post Another Job →</a>
+            </div>
+            <div class="ep-footer"><div class="ep-footer-text">DirtBidder LLC · www.dirtbidder.com<div class="ep-footer-links"><a href="#">Unsubscribe</a><a href="#">Privacy Policy</a></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showEmail(name, btn) {
+    document.querySelectorAll('.email-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.email-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('email-' + name).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>

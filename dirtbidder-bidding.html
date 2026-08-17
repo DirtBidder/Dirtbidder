@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Bidding System</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+    --info:     #3498DB;
+    --sidebar:  240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--soil);
+    color: var(--chalk);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar);
+    flex-shrink: 0;
+    background: var(--dig);
+    border-right: 1px solid rgba(196,168,130,0.08);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 50;
+  }
+
+  .sidebar-logo {
+    padding: 1.4rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.5rem;
+    color: var(--chalk); text-decoration: none; display: block;
+  }
+
+  .sidebar-logo span { color: var(--amber); }
+
+  .sidebar-user {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--amber);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.9rem;
+    color: var(--soil); flex-shrink: 0;
+  }
+
+  .user-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.9rem;
+    text-transform: uppercase; color: var(--chalk);
+  }
+
+  .user-role {
+    font-size: 0.72rem; color: var(--amber);
+    text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+  }
+
+  .nav-section { padding: 1rem 0; flex: 1; }
+
+  .nav-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.65rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--stone); padding: 0.5rem 1.5rem 0.3rem;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.7rem 1.5rem; font-size: 0.88rem;
+    color: var(--stone); cursor: pointer;
+    transition: all 0.15s; border-left: 3px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { color: var(--chalk); background: rgba(196,168,130,0.05); }
+  .nav-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(232,137,42,0.07); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--amber); color: var(--soil);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.7rem;
+    padding: 0.1rem 0.45rem; border-radius: 10px;
+  }
+
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .signout-btn {
+    font-size: 0.82rem; color: var(--stone); cursor: pointer;
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: color 0.2s; background: none; border: none;
+    padding: 0; font-family: 'Barlow', sans-serif;
+  }
+
+  .signout-btn:hover { color: var(--error); }
+
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+    background: var(--dig);
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    position: sticky; top: 0; z-index: 40;
+  }
+
+  .topbar-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 1.3rem;
+    text-transform: uppercase; color: var(--chalk);
+  }
+
+  .view-toggle {
+    display: flex; gap: 0;
+    background: var(--clay); border-radius: 3px;
+    padding: 3px; border: 1px solid rgba(196,168,130,0.1);
+  }
+
+  .view-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.78rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.4rem 1rem; border-radius: 2px;
+    border: none; background: transparent;
+    color: var(--stone); cursor: pointer; transition: all 0.15s;
+  }
+
+  .view-btn.active { background: var(--amber); color: var(--soil); }
+
+  /* ── CONTENT ── */
+  .content { padding: 2rem; flex: 1; }
+
+  /* JOB DETAIL HEADER */
+  .job-header {
+    background: var(--dig);
+    border: 1px solid rgba(196,168,130,0.08);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 2rem;
+  }
+
+  .job-header-left { flex: 1; }
+
+  .job-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.72rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--amber); margin-bottom: 0.4rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .job-header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.8rem;
+    text-transform: uppercase; color: var(--chalk);
+    margin-bottom: 0.75rem; line-height: 1;
+  }
+
+  .job-meta-row {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+  }
+
+  .job-meta-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.82rem; color: var(--stone);
+  }
+
+  .job-meta-item strong { color: var(--dust); }
+
+  .job-header-right {
+    text-align: right; flex-shrink: 0;
+  }
+
+  .budget-display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.6rem;
+    color: var(--amber); line-height: 1;
+  }
+
+  .budget-label {
+    font-size: 0.72rem; color: var(--stone);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+
+  .status-badge {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.3rem 0.8rem; border-radius: 2px;
+    background: rgba(232,137,42,0.15); color: var(--amber);
+  }
+
+  /* LAYOUT */
+  .bid-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* SECTION CARD */
+  .card {
+    background: var(--dig);
+    border: 1px solid rgba(196,168,130,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .card:last-child { margin-bottom: 0; }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.9rem;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--chalk);
+  }
+
+  .card-subtitle {
+    font-size: 0.75rem; color: var(--stone); margin-top: 0.1rem;
+  }
+
+  /* SORT BAR */
+  .sort-bar {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.06);
+    flex-wrap: wrap;
+  }
+
+  .sort-label {
+    font-size: 0.75rem; color: var(--stone);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    margin-right: 0.25rem;
+  }
+
+  .sort-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.72rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.3rem 0.75rem; border-radius: 2px;
+    border: 1.5px solid rgba(196,168,130,0.15);
+    background: transparent; color: var(--stone);
+    cursor: pointer; transition: all 0.15s;
+  }
+
+  .sort-btn:hover, .sort-btn.active {
+    border-color: var(--amber); color: var(--amber);
+    background: rgba(232,137,42,0.08);
+  }
+
+  /* BID CARD */
+  .bid-card {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.06);
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .bid-card:last-child { border-bottom: none; }
+  .bid-card:hover { background: rgba(196,168,130,0.03); }
+
+  .bid-card.accepted {
+    background: rgba(39,174,96,0.04);
+    border-left: 3px solid var(--success);
+  }
+
+  .bid-card.top-pick {
+    border-left: 3px solid var(--amber);
+  }
+
+  .top-pick-label {
+    position: absolute; top: 0; right: 1.5rem;
+    background: var(--amber); color: var(--soil);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0 0 3px 3px;
+  }
+
+  .bid-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; margin-bottom: 0.75rem;
+    gap: 1rem;
+  }
+
+  .bid-operator-row {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+
+  .op-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--clay); border: 2px solid rgba(196,168,130,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.85rem; color: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .op-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--chalk);
+  }
+
+  .op-stats {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-top: 0.2rem; flex-wrap: wrap;
+  }
+
+  .op-rating {
+    font-size: 0.8rem; color: var(--amber);
+    display: flex; align-items: center; gap: 0.25rem;
+  }
+
+  .op-rating span { color: var(--stone); font-size: 0.72rem; }
+
+  .op-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.15rem 0.45rem; border-radius: 2px;
+    background: rgba(196,168,130,0.1); color: var(--dust);
+  }
+
+  .bid-price-block { text-align: right; flex-shrink: 0; }
+
+  .bid-price {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.5rem;
+    color: var(--chalk); line-height: 1;
+  }
+
+  .bid-days {
+    font-size: 0.75rem; color: var(--stone); margin-top: 0.2rem;
+  }
+
+  .bid-vs-budget {
+    font-size: 0.72rem; margin-top: 0.15rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; letter-spacing: 0.06em;
+  }
+
+  .vs-low { color: var(--success); }
+  .vs-mid { color: var(--amber); }
+  .vs-high { color: var(--error); }
+
+  /* BID DETAILS */
+  .bid-details {
+    background: var(--clay);
+    border-radius: 3px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.85rem;
+    font-size: 0.83rem;
+    color: var(--dust);
+    line-height: 1.6;
+  }
+
+  .bid-equipment-row {
+    display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem;
+  }
+
+  .equip-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.2rem 0.55rem; border-radius: 2px;
+    background: rgba(232,137,42,0.1); color: var(--amber);
+  }
+
+  /* BID ACTIONS */
+  .bid-actions {
+    display: flex; align-items: center; gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-accept {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.82rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: var(--success); color: white;
+    border: none; padding: 0.55rem 1.25rem;
+    border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
+  }
+
+  .btn-accept:hover { opacity: 0.88; }
+  .btn-accept:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-message {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.78rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: transparent; color: var(--info);
+    border: 1.5px solid rgba(52,152,219,0.3);
+    padding: 0.5rem 1rem; border-radius: 3px;
+    cursor: pointer; transition: all 0.2s;
+  }
+
+  .btn-message:hover { background: rgba(52,152,219,0.1); }
+
+  .btn-profile {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.78rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: transparent; color: var(--stone);
+    border: 1.5px solid rgba(196,168,130,0.2);
+    padding: 0.5rem 1rem; border-radius: 3px;
+    cursor: pointer; transition: all 0.2s;
+  }
+
+  .btn-profile:hover { border-color: var(--dust); color: var(--dust); }
+
+  .btn-decline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.78rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: transparent; color: var(--stone);
+    border: none; padding: 0.5rem 0.5rem;
+    cursor: pointer; transition: color 0.2s;
+    margin-left: auto;
+  }
+
+  .btn-decline:hover { color: var(--error); }
+
+  /* COMPARE TABLE */
+  .compare-table { width: 100%; border-collapse: collapse; }
+
+  .compare-table th {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.7rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--stone); padding: 0.6rem 1rem;
+    text-align: left; border-bottom: 1px solid rgba(196,168,130,0.08);
+    background: var(--clay);
+  }
+
+  .compare-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(196,168,130,0.06);
+    font-size: 0.85rem; color: var(--dust);
+    vertical-align: middle;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: rgba(196,168,130,0.03); }
+
+  .td-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.88rem;
+    text-transform: uppercase; color: var(--chalk);
+  }
+
+  .td-price {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1rem; color: var(--amber);
+  }
+
+  .td-rating { color: var(--amber); font-size: 0.82rem; }
+
+  .td-best {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 2px;
+  }
+
+  .best-price { background: rgba(39,174,96,0.12); color: var(--success); }
+  .best-rating { background: rgba(232,137,42,0.12); color: var(--amber); }
+  .best-speed { background: rgba(52,152,219,0.12); color: var(--info); }
+
+  /* RIGHT PANEL */
+  .job-detail-card {
+    background: var(--dig);
+    border: 1px solid rgba(196,168,130,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+
+  .detail-section { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.06); }
+  .detail-section:last-child { border-bottom: none; }
+
+  .detail-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.68rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--stone); margin-bottom: 0.3rem;
+  }
+
+  .detail-value { font-size: 0.88rem; color: var(--chalk); line-height: 1.5; }
+
+  .detail-desc { font-size: 0.82rem; color: var(--dust); line-height: 1.6; }
+
+  /* ACCEPTED STATE */
+  .accepted-banner {
+    display: none;
+    background: rgba(39,174,96,0.1);
+    border: 1.5px solid rgba(39,174,96,0.3);
+    border-radius: 3px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .accepted-banner.visible { display: block; }
+
+  .accepted-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.1rem;
+    text-transform: uppercase; color: var(--success);
+    margin-bottom: 0.3rem;
+  }
+
+  .accepted-sub { font-size: 0.82rem; color: var(--dust); }
+
+  /* OPERATOR PROFILE MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(28,20,16,0.88);
+    z-index: 100; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--dig);
+    border: 1px solid rgba(196,168,130,0.15);
+    border-radius: 4px;
+    width: 100%; max-width: 520px;
+    overflow: hidden; max-height: 90vh; overflow-y: auto;
+  }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.1);
+    position: sticky; top: 0; background: var(--dig);
+  }
+
+  .modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 1.1rem;
+    text-transform: uppercase; color: var(--chalk);
+  }
+
+  .modal-close {
+    background: none; border: none; color: var(--stone);
+    font-size: 1.2rem; cursor: pointer; transition: color 0.2s;
+  }
+
+  .modal-close:hover { color: var(--chalk); }
+
+  .modal-body { padding: 1.5rem; }
+
+  .profile-header {
+    display: flex; gap: 1rem; align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--clay); border: 2px solid var(--amber);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.2rem; color: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .profile-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.3rem;
+    text-transform: uppercase; color: var(--chalk);
+  }
+
+  .profile-stars { color: var(--amber); font-size: 0.9rem; margin: 0.2rem 0; }
+
+  .profile-meta { font-size: 0.8rem; color: var(--stone); }
+
+  .profile-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .profile-section:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .profile-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.72rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--stone); margin-bottom: 0.75rem;
+  }
+
+  .profile-stat-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+  }
+
+  .profile-stat {
+    background: var(--clay); border-radius: 3px;
+    padding: 0.75rem; text-align: center;
+  }
+
+  .profile-stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.3rem; color: var(--amber);
+  }
+
+  .profile-stat-label { font-size: 0.7rem; color: var(--stone); margin-top: 0.15rem; }
+
+  .equip-list {
+    display: flex; gap: 0.4rem; flex-wrap: wrap;
+  }
+
+  .review-item {
+    background: var(--clay); border-radius: 3px;
+    padding: 0.85rem 1rem; margin-bottom: 0.6rem;
+  }
+
+  .review-item:last-child { margin-bottom: 0; }
+
+  .review-stars { color: var(--amber); font-size: 0.8rem; margin-bottom: 0.3rem; }
+
+  .review-text { font-size: 0.82rem; color: var(--dust); line-height: 1.5; }
+
+  .review-author { font-size: 0.72rem; color: var(--stone); margin-top: 0.3rem; }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .bid-layout { grid-template-columns: 1fr; }
+    .job-header { flex-direction: column; }
+    .content { padding: 1.25rem; }
+    .topbar { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <div class="sidebar-user">
+    <div class="avatar">DS</div>
+    <div>
+      <div class="user-name">Daniel Smith</div>
+      <div class="user-role">Client Account</div>
+    </div>
+  </div>
+  <nav class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📊</span> Overview</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📋</span> My Jobs</div>
+    <div class="nav-item active"><span class="nav-icon">💰</span> Bids Received <span class="nav-badge">5</span></div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">🏦</span> Payments</div>
+    <div class="nav-label" style="margin-top:0.5rem">Account</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-post-job.html'"><span class="nav-icon">➕</span> Post a Job</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Bids Received</div>
+    <div class="view-toggle">
+      <button class="view-btn active" onclick="switchView('cards', this)">Cards</button>
+      <button class="view-btn" onclick="switchView('compare', this)">Compare</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- JOB HEADER -->
+    <div class="job-header">
+      <div class="job-header-left">
+        <div class="job-eyebrow">📋 Land Clearing · Nashville, TN · Posted 2 days ago</div>
+        <div class="job-header-title">Land Clearing — 12 Acres</div>
+        <div class="job-meta-row">
+          <div class="job-meta-item">📍 <strong>Nashville, TN</strong></div>
+          <div class="job-meta-item">📐 <strong>10–20 acres</strong></div>
+          <div class="job-meta-item">⛰️ <strong>Wooded — Heavy</strong></div>
+          <div class="job-meta-item">🚛 <strong>Haul off required</strong></div>
+          <div class="job-meta-item">⏱ <strong>ASAP</strong></div>
+        </div>
+      </div>
+      <div class="job-header-right">
+        <div class="budget-label">Your Budget</div>
+        <div class="budget-display">$3,000–$6,000</div>
+        <div style="margin-top:0.75rem">
+          <span class="status-badge">5 Bids Received</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCEPTED BANNER -->
+    <div class="accepted-banner" id="acceptedBanner">
+      <div class="accepted-title">✓ Bid Accepted — Job Hired!</div>
+      <div class="accepted-sub">Payment has been collected and held in Stripe escrow. The operator has been notified and will contact you shortly to confirm the start date.</div>
+    </div>
+
+    <!-- CARDS VIEW -->
+    <div id="cardsView">
+      <div class="bid-layout">
+
+        <!-- LEFT — BID LIST -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">5 Bids — Accepting Through Friday</div>
+                <div class="card-subtitle">Sorted by best match · Bid amounts are sealed from other operators — only you can see these prices</div>
+              </div>
+            </div>
+
+            <div style="padding:0.75rem 1.5rem;background:rgba(39,174,96,0.05);border-bottom:1px solid rgba(39,174,96,0.1);font-size:0.78rem;color:var(--dust);display:flex;align-items:center;gap:0.6rem">
+              <span style="color:var(--success)">🔒</span>
+              <span><strong style="color:var(--chalk)">Sealed Bid System:</strong> Operators cannot see each other's bids or prices. Each operator submitted their best price independently — you're seeing the true market rate for your job.</span>
+            </div>
+            <div class="sort-bar">
+              <span class="sort-label">Sort:</span>
+              <button class="sort-btn active" onclick="setSort(this)">Best Match</button>
+              <button class="sort-btn" onclick="setSort(this)">Lowest Price</button>
+              <button class="sort-btn" onclick="setSort(this)">Highest Rated</button>
+              <button class="sort-btn" onclick="setSort(this)">Fastest</button>
+            </div>
+
+            <!-- BID 1 — TOP PICK -->
+            <div class="bid-card top-pick" id="bid1">
+              <div class="top-pick-label">⭐ Top Pick</div>
+              <div class="bid-top">
+                <div class="bid-operator-row">
+                  <div class="op-avatar">SE</div>
+                  <div>
+                    <div class="op-name">Smith Excavating LLC</div>
+                    <div class="op-stats">
+                      <div class="op-rating">★★★★★ <span>4.9 (47 reviews)</span></div>
+                      <span class="op-tag">✓ Verified</span>
+                      <span class="op-tag">38 jobs done</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bid-price-block">
+                  <div class="bid-price">$4,200</div>
+                  <div class="bid-days">Est. 4 days</div>
+                  <div class="bid-vs-budget vs-mid">Within budget</div>
+                </div>
+              </div>
+              <div class="bid-equipment-row">
+                <span class="equip-tag">CAT 320 Excavator</span>
+                <span class="equip-tag">D6 Dozer</span>
+                <span class="equip-tag">14-yd Dump Truck</span>
+              </div>
+              <div class="bid-details">
+                "We specialize in land clearing jobs in the Nashville area and have completed 12 similar acreage clears this year. We'll bring the CAT 320 for the heavy brush and our D6 dozer to push and pile, then haul all material off site. We can start Monday if hired today."
+              </div>
+              <div class="bid-actions">
+                <button class="btn-accept" onclick="acceptBid(this, 'Smith Excavating LLC', '$4,200')">✓ Accept This Bid</button>
+                <button class="btn-message" onclick="openMessage('Smith Excavating LLC')">💬 Message</button>
+                <button class="btn-profile" onclick="openProfile('SE', 'Smith Excavating LLC', '4.9', '47')">View Profile</button>
+                <button class="btn-decline" onclick="declineBid(this)">Decline</button>
+              </div>
+            </div>
+
+            <!-- BID 2 -->
+            <div class="bid-card" id="bid2">
+              <div class="bid-top">
+                <div class="bid-operator-row">
+                  <div class="op-avatar">RR</div>
+                  <div>
+                    <div class="op-name">Ridge Runner Excavating</div>
+                    <div class="op-stats">
+                      <div class="op-rating">★★★★★ <span>5.0 (61 reviews)</span></div>
+                      <span class="op-tag">✓ Verified</span>
+                      <span class="op-tag">61 jobs done</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bid-price-block">
+                  <div class="bid-price">$4,800</div>
+                  <div class="bid-days">Est. 3 days</div>
+                  <div class="bid-vs-budget vs-mid">Within budget</div>
+                </div>
+              </div>
+              <div class="bid-equipment-row">
+                <span class="equip-tag">2x CAT 336 Excavator</span>
+                <span class="equip-tag">D8 Dozer</span>
+                <span class="equip-tag">2x Dump Trucks</span>
+              </div>
+              <div class="bid-details">
+                "Two-machine crew means faster completion. We run two large excavators simultaneously and can finish this job in 3 days vs competitors' 4-5. Premium equipment, perfect 5-star record. Happy to provide references from similar clearing jobs."
+              </div>
+              <div class="bid-actions">
+                <button class="btn-accept" onclick="acceptBid(this, 'Ridge Runner Excavating', '$4,800')">✓ Accept This Bid</button>
+                <button class="btn-message" onclick="openMessage('Ridge Runner Excavating')">💬 Message</button>
+                <button class="btn-profile" onclick="openProfile('RR', 'Ridge Runner Excavating', '5.0', '61')">View Profile</button>
+                <button class="btn-decline" onclick="declineBid(this)">Decline</button>
+              </div>
+            </div>
+
+            <!-- BID 3 — LOWEST PRICE -->
+            <div class="bid-card" id="bid3">
+              <div class="bid-top">
+                <div class="bid-operator-row">
+                  <div class="op-avatar">TD</div>
+                  <div>
+                    <div class="op-name">TN Dirt Works</div>
+                    <div class="op-stats">
+                      <div class="op-rating">★★★★☆ <span>4.6 (22 reviews)</span></div>
+                      <span class="op-tag">22 jobs done</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bid-price-block">
+                  <div class="bid-price">$3,800</div>
+                  <div class="bid-days">Est. 5 days</div>
+                  <div class="bid-vs-budget vs-low">Lowest bid</div>
+                </div>
+              </div>
+              <div class="bid-equipment-row">
+                <span class="equip-tag">Komatsu PC200</span>
+                <span class="equip-tag">D5 Dozer</span>
+                <span class="equip-tag">Dump Truck</span>
+              </div>
+              <div class="bid-details">
+                "Family-owned operation, been clearing land in middle Tennessee for 8 years. We're honest, hardworking, and our reviews speak for themselves. We'll get it done right."
+              </div>
+              <div class="bid-actions">
+                <button class="btn-accept" onclick="acceptBid(this, 'TN Dirt Works', '$3,800')">✓ Accept This Bid</button>
+                <button class="btn-message" onclick="openMessage('TN Dirt Works')">💬 Message</button>
+                <button class="btn-profile" onclick="openProfile('TD', 'TN Dirt Works', '4.6', '22')">View Profile</button>
+                <button class="btn-decline" onclick="declineBid(this)">Decline</button>
+              </div>
+            </div>
+
+            <!-- BID 4 -->
+            <div class="bid-card" id="bid4">
+              <div class="bid-top">
+                <div class="bid-operator-row">
+                  <div class="op-avatar">MW</div>
+                  <div>
+                    <div class="op-name">Middle TN Excavating</div>
+                    <div class="op-stats">
+                      <div class="op-rating">★★★★☆ <span>4.7 (18 reviews)</span></div>
+                      <span class="op-tag">18 jobs done</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bid-price-block">
+                  <div class="bid-price">$4,500</div>
+                  <div class="bid-days">Est. 4 days</div>
+                  <div class="bid-vs-budget vs-mid">Within budget</div>
+                </div>
+              </div>
+              <div class="bid-equipment-row">
+                <span class="equip-tag">John Deere 350G</span>
+                <span class="equip-tag">D6 Dozer</span>
+                <span class="equip-tag">Water Truck</span>
+              </div>
+              <div class="bid-details">
+                "We include a water truck to control dust during clearing — especially important near residences. Full cleanup included, gate left as found. Happy to walk the property before starting."
+              </div>
+              <div class="bid-actions">
+                <button class="btn-accept" onclick="acceptBid(this, 'Middle TN Excavating', '$4,500')">✓ Accept This Bid</button>
+                <button class="btn-message" onclick="openMessage('Middle TN Excavating')">💬 Message</button>
+                <button class="btn-profile" onclick="openProfile('MW', 'Middle TN Excavating', '4.7', '18')">View Profile</button>
+                <button class="btn-decline" onclick="declineBid(this)">Decline</button>
+              </div>
+            </div>
+
+            <!-- BID 5 — HIGHEST -->
+            <div class="bid-card" id="bid5">
+              <div class="bid-top">
+                <div class="bid-operator-row">
+                  <div class="op-avatar">BC</div>
+                  <div>
+                    <div class="op-name">Big Creek Site Work</div>
+                    <div class="op-stats">
+                      <div class="op-rating">★★★★★ <span>4.8 (31 reviews)</span></div>
+                      <span class="op-tag">✓ Verified</span>
+                      <span class="op-tag">31 jobs done</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bid-price-block">
+                  <div class="bid-price">$5,500</div>
+                  <div class="bid-days">Est. 3 days</div>
+                  <div class="bid-vs-budget vs-mid">Within budget</div>
+                </div>
+              </div>
+              <div class="bid-equipment-row">
+                <span class="equip-tag">CAT 349 Excavator</span>
+                <span class="equip-tag">D8 Dozer</span>
+                <span class="equip-tag">Stump Grinder</span>
+                <span class="equip-tag">2x Dump Trucks</span>
+              </div>
+              <div class="bid-details">
+                "Large-machine crew with full stump grinding included — no extra charge. We leave the site completely clear with stumps ground to 12 inches below grade, ready for development. Premium finish, fast timeline."
+              </div>
+              <div class="bid-actions">
+                <button class="btn-accept" onclick="acceptBid(this, 'Big Creek Site Work', '$5,500')">✓ Accept This Bid</button>
+                <button class="btn-message" onclick="openMessage('Big Creek Site Work')">💬 Message</button>
+                <button class="btn-profile" onclick="openProfile('BC', 'Big Creek Site Work', '4.8', '31')">View Profile</button>
+                <button class="btn-decline" onclick="declineBid(this)">Decline</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT — JOB DETAILS -->
+        <div>
+          <div class="job-detail-card">
+            <div class="detail-section">
+              <div class="detail-label">Your Job Description</div>
+              <div class="detail-desc">Need approximately 12 acres of wooded land cleared for a new residential development. Land has moderate to heavy tree cover — mostly pine and hardwood 6–18 inches diameter. Rocky areas in northwest corner. Access via gravel road off County Road 45. Need all stumps ground and material hauled off site.</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Location</div>
+              <div class="detail-value">Nashville, TN 37201</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Size & Terrain</div>
+              <div class="detail-value">10–20 acres · Wooded heavy brush · Rocky patches</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Timeline</div>
+              <div class="detail-value">ASAP · Must be done within 6 weeks</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Budget</div>
+              <div class="detail-value" style="color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem">$3,000 – $6,000</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Spoils</div>
+              <div class="detail-value">Haul off all material — operator arranges</div>
+            </div>
+          </div>
+
+          <!-- BID SUMMARY -->
+          <div class="job-detail-card">
+            <div class="detail-section" style="background:var(--clay)">
+              <div class="detail-label">Bid Summary</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Price Range</div>
+              <div class="detail-value">$3,800 – $5,500</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Avg. Bid Price</div>
+              <div class="detail-value" style="color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-weight:900">$4,560</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Fastest Completion</div>
+              <div class="detail-value">3 days (2 operators)</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Avg. Completion</div>
+              <div class="detail-value">3.8 days</div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-label">Avg. Operator Rating</div>
+              <div class="detail-value" style="color:var(--amber)">★ 4.8 / 5.0</div>
+            </div>
+          </div>
+
+          <div class="job-detail-card" style="background:rgba(232,137,42,0.05);border-color:rgba(232,137,42,0.2)">
+            <div class="detail-section" style="border-bottom:none">
+              <div style="font-size:0.82rem;color:var(--dust);line-height:1.6">
+                <strong style="color:var(--amber);display:block;margin-bottom:0.4rem;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em">💡 DirtBidder Tip</strong>
+                You don't have to take the lowest bid. Look at reviews, equipment, and their notes. A slightly higher bid from a 5-star operator is usually worth it for land clearing jobs.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COMPARE VIEW -->
+    <div id="compareView" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Side-by-Side Comparison</div>
+            <div class="card-subtitle">All 5 bids on Land Clearing — 12 Acres</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Operator</th>
+                <th>Bid Price</th>
+                <th>Days</th>
+                <th>Rating</th>
+                <th>Jobs Done</th>
+                <th>Verified</th>
+                <th>Best For</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="td-name">Smith Excavating LLC</div><div style="font-size:0.72rem;color:var(--stone)">CAT 320 · D6 · Dump Truck</div></td>
+                <td><div class="td-price">$4,200</div></td>
+                <td>4 days</td>
+                <td><div class="td-rating">★ 4.9</div><div style="font-size:0.7rem;color:var(--stone)">(47 reviews)</div></td>
+                <td>38</td>
+                <td style="color:var(--success)">✓ Yes</td>
+                <td><span class="td-best best-rating">Best Value</span></td>
+                <td><button class="btn-accept" style="font-size:0.72rem;padding:0.4rem 0.8rem" onclick="acceptBid(this,'Smith Excavating LLC','$4,200')">Accept</button></td>
+              </tr>
+              <tr>
+                <td><div class="td-name">Ridge Runner Excavating</div><div style="font-size:0.72rem;color:var(--stone)">2x CAT 336 · D8 · 2x Dump</div></td>
+                <td><div class="td-price">$4,800</div></td>
+                <td>3 days</td>
+                <td><div class="td-rating">★ 5.0</div><div style="font-size:0.7rem;color:var(--stone)">(61 reviews)</div></td>
+                <td>61</td>
+                <td style="color:var(--success)">✓ Yes</td>
+                <td><span class="td-best best-speed">Fastest + Best Rated</span></td>
+                <td><button class="btn-accept" style="font-size:0.72rem;padding:0.4rem 0.8rem" onclick="acceptBid(this,'Ridge Runner Excavating','$4,800')">Accept</button></td>
+              </tr>
+              <tr>
+                <td><div class="td-name">TN Dirt Works</div><div style="font-size:0.72rem;color:var(--stone)">Komatsu PC200 · D5 · Dump</div></td>
+                <td><div class="td-price">$3,800</div></td>
+                <td>5 days</td>
+                <td><div class="td-rating">★ 4.6</div><div style="font-size:0.7rem;color:var(--stone)">(22 reviews)</div></td>
+                <td>22</td>
+                <td style="color:var(--stone)">—</td>
+                <td><span class="td-best best-price">Lowest Price</span></td>
+                <td><button class="btn-accept" style="font-size:0.72rem;padding:0.4rem 0.8rem" onclick="acceptBid(this,'TN Dirt Works','$3,800')">Accept</button></td>
+              </tr>
+              <tr>
+                <td><div class="td-name">Middle TN Excavating</div><div style="font-size:0.72rem;color:var(--stone)">JD 350G · D6 · Water Truck</div></td>
+                <td><div class="td-price">$4,500</div></td>
+                <td>4 days</td>
+                <td><div class="td-rating">★ 4.7</div><div style="font-size:0.7rem;color:var(--stone)">(18 reviews)</div></td>
+                <td>18</td>
+                <td style="color:var(--stone)">—</td>
+                <td><span class="td-best" style="background:rgba(196,168,130,0.1);color:var(--dust)">Dust Control Included</span></td>
+                <td><button class="btn-accept" style="font-size:0.72rem;padding:0.4rem 0.8rem" onclick="acceptBid(this,'Middle TN Excavating','$4,500')">Accept</button></td>
+              </tr>
+              <tr>
+                <td><div class="td-name">Big Creek Site Work</div><div style="font-size:0.72rem;color:var(--stone)">CAT 349 · D8 · Grinder · 2x Dump</div></td>
+                <td><div class="td-price">$5,500</div></td>
+                <td>3 days</td>
+                <td><div class="td-rating">★ 4.8</div><div style="font-size:0.7rem;color:var(--stone)">(31 reviews)</div></td>
+                <td>31</td>
+                <td style="color:var(--success)">✓ Yes</td>
+                <td><span class="td-best" style="background:rgba(52,152,219,0.12);color:var(--info)">Stump Grinding Included</span></td>
+                <td><button class="btn-accept" style="font-size:0.72rem;padding:0.4rem 0.8rem" onclick="acceptBid(this,'Big Creek Site Work','$5,500')">Accept</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- OPERATOR PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalOpName">Smith Excavating LLC</div>
+      <button class="modal-close" onclick="closeProfile()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-header">
+        <div class="profile-avatar" id="modalAvatar">SE</div>
+        <div>
+          <div class="profile-name" id="modalName">Smith Excavating LLC</div>
+          <div class="profile-stars" id="modalStars">★★★★★</div>
+          <div class="profile-meta" id="modalMeta">4.9 avg · 47 reviews · Nashville, TN · 50mi radius</div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Stats</div>
+        <div class="profile-stat-row">
+          <div class="profile-stat"><div class="profile-stat-num">47</div><div class="profile-stat-label">Reviews</div></div>
+          <div class="profile-stat"><div class="profile-stat-num">4.9</div><div class="profile-stat-label">Avg Rating</div></div>
+          <div class="profile-stat"><div class="profile-stat-num">38</div><div class="profile-stat-label">Jobs Done</div></div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">About</div>
+        <div style="font-size:0.85rem;color:var(--dust);line-height:1.6">Family-owned excavating company based in Nashville with 12 years of experience in land clearing, grading, and site prep across middle Tennessee. Licensed, insured, and DirtBidder verified.</div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Equipment</div>
+        <div class="equip-list">
+          <span class="equip-tag">CAT 320 Excavator (2019)</span>
+          <span class="equip-tag">CAT D6 Dozer (2021)</span>
+          <span class="equip-tag">Ford F-750 Dump Truck (2020)</span>
+          <span class="equip-tag">Skid Steer</span>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Recent Reviews</div>
+        <div class="review-item">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-text">"Jake and his crew showed up on time, worked clean, and finished our 8-acre clearing in 3 days. Communication was excellent. Already hired them again."</div>
+          <div class="review-author">— T. Reynolds · Land Clearing · 3 weeks ago</div>
+        </div>
+        <div class="review-item">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-text">"Very professional. They identified a drainage issue we didn't know about and fixed it as part of the job. Highly recommend."</div>
+          <div class="review-author">— L. Parker · Site Prep · 6 weeks ago</div>
+        </div>
+        <div class="review-item">
+          <div class="review-stars">★★★★☆</div>
+          <div class="review-text">"Great work overall. Started a day later than planned but finished on time. Good communication throughout."</div>
+          <div class="review-author">— B. Harris · Rough Grading · 2 months ago</div>
+        </div>
+      </div>
+
+      <button class="btn-accept" onclick="acceptBid(null,'Smith Excavating LLC','$4,200');closeProfile()" style="width:100%">✓ Accept Their Bid — $4,200</button>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE MODAL -->
+<div class="modal-overlay" id="messageModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title" id="msgOpName">Message Operator</div>
+      <button class="modal-close" onclick="closeMessage()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.82rem;color:var(--stone);margin-bottom:1rem">Ask questions about the job before accepting their bid. All messages are saved to the job thread.</div>
+      <div style="background:var(--clay);border-radius:3px;padding:0.85rem 1rem;margin-bottom:1rem">
+        <div style="font-size:0.72rem;color:var(--stone);margin-bottom:0.3rem">QUICK QUESTIONS</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+          <button class="sort-btn" onclick="fillMsg('Can you start this week?')">Can you start this week?</button>
+          <button class="sort-btn" onclick="fillMsg('Are you licensed and insured?')">Licensed & insured?</button>
+          <button class="sort-btn" onclick="fillMsg('Can you walk the property first?')">Walk property first?</button>
+          <button class="sort-btn" onclick="fillMsg('Do you handle the haul off?')">Handle haul off?</button>
+        </div>
+      </div>
+      <textarea id="msgText" style="width:100%;background:var(--clay);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);font-family:'Barlow',sans-serif;font-size:0.9rem;padding:0.75rem 1rem;border-radius:3px;outline:none;resize:vertical;min-height:100px;margin-bottom:1rem" placeholder="Type your message..."></textarea>
+      <button class="btn-accept" style="width:100%" onclick="sendMessage()">Send Message →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let acceptedCount = 0;
+
+  function switchView(view, btn) {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('cardsView').style.display = view === 'cards' ? 'block' : 'none';
+    document.getElementById('compareView').style.display = view === 'compare' ? 'block' : 'none';
+  }
+
+  function setSort(btn) {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function acceptBid(btn, opName, price) {
+    if (!confirm(`Accept ${opName}'s bid of ${price}?\n\nPayment will be collected and held in Stripe escrow until the job is complete. The operator will be notified immediately.`)) return;
+
+    // Disable all accept buttons
+    document.querySelectorAll('.btn-accept').forEach(b => {
+      b.disabled = true;
+      b.textContent = '—';
+      b.style.background = 'rgba(196,168,130,0.1)';
+      b.style.color = 'var(--stone)';
+    });
+
+    // Highlight accepted bid
+    const bidCards = document.querySelectorAll('.bid-card');
+    bidCards.forEach(card => {
+      card.style.opacity = '0.45';
+    });
+
+    // Find and highlight the accepted one
+    if (btn) {
+      const card = btn.closest('.bid-card');
+      if (card) {
+        card.style.opacity = '1';
+        card.classList.add('accepted');
+        btn.textContent = '✓ Accepted';
+        btn.style.background = 'var(--success)';
+        btn.style.color = 'white';
+        btn.disabled = true;
+      }
+    }
+
+    // Show banner
+    document.getElementById('acceptedBanner').classList.add('visible');
+    document.getElementById('acceptedBanner').innerHTML = `
+      <div class="accepted-title">✓ Bid Accepted — ${opName} Hired!</div>
+      <div class="accepted-sub">${price} collected and held in Stripe escrow. ${opName} has been notified and will contact you shortly. Funds release when you confirm the job is complete.</div>
+    `;
+
+    window.scrollTo(0, 0);
+    alert(`✓ ${opName} has been hired!\n\nPayment of ${price} is now held in Stripe escrow.\n\nThey'll reach out to confirm the start date. You release payment only after the job is done to your satisfaction.`);
+  }
+
+  function declineBid(btn) {
+    const card = btn.closest('.bid-card');
+    card.style.opacity = '0.4';
+    card.style.pointerEvents = 'none';
+    btn.textContent = 'Declined';
+  }
+
+  function openProfile(initials, name, rating, reviews) {
+    document.getElementById('modalAvatar').textContent = initials;
+    document.getElementById('modalOpName').textContent = name;
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('modalMeta').textContent = rating + ' avg · ' + reviews + ' reviews · Nashville, TN';
+    document.getElementById('profileModal').classList.add('active');
+  }
+
+  function closeProfile() {
+    document.getElementById('profileModal').classList.remove('active');
+  }
+
+  function openMessage(opName) {
+    document.getElementById('msgOpName').textContent = 'Message — ' + opName;
+    document.getElementById('msgText').value = '';
+    document.getElementById('messageModal').classList.add('active');
+  }
+
+  function closeMessage() {
+    document.getElementById('messageModal').classList.remove('active');
+  }
+
+  function fillMsg(text) {
+    document.getElementById('msgText').value = text;
+    document.getElementById('msgText').focus();
+  }
+
+  function sendMessage() {
+    const text = document.getElementById('msgText').value.trim();
+    if (!text) return;
+    closeMessage();
+    alert('✓ Message sent! The operator will be notified and can reply through the DirtBidder messaging system.');
+  }
+
+  // Close modals on overlay click
+  document.getElementById('profileModal').addEventListener('click', function(e) { if (e.target === this) closeProfile(); });
+  document.getElementById('messageModal').addEventListener('click', function(e) { if (e.target === this) closeMessage(); });
+</script>
+
+</body>
+</html>

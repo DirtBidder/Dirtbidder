@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — QR Code Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+    --sidebar:  240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--chalk); min-height: 100vh; display: flex; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar); flex-shrink: 0; background: var(--dig); border-right: 1px solid rgba(196,168,130,0.08); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+  .sidebar-logo { padding: 1.4rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; display: block; }
+  .sidebar-logo span { color: var(--amber); }
+  .sidebar-user { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); display: flex; align-items: center; gap: 0.75rem; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--amber); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--soil); flex-shrink: 0; }
+  .user-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: var(--chalk); }
+  .user-role { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+  .nav-section { padding: 1rem 0; flex: 1; overflow-y: auto; }
+  .nav-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--stone); padding: 0.5rem 1.5rem 0.3rem; }
+  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; font-size: 0.88rem; color: var(--stone); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav-item:hover { color: var(--chalk); background: rgba(196,168,130,0.05); }
+  .nav-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(232,137,42,0.07); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(196,168,130,0.08); }
+  .signout-btn { font-size: 0.82rem; color: var(--stone); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s; background: none; border: none; padding: 0; font-family: 'Barlow', sans-serif; }
+  .signout-btn:hover { color: var(--error); }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: var(--dig); border-bottom: 1px solid rgba(196,168,130,0.08); position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.3rem; text-transform: uppercase; color: var(--chalk); }
+
+  /* CONTENT */
+  .content { padding: 2rem; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+  .page-header { margin-bottom: 2rem; }
+  .page-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem; }
+  .page-eyebrow::before { content: ''; display: block; width: 24px; height: 2px; background: var(--amber); }
+  .page-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2rem; text-transform: uppercase; color: var(--chalk); }
+  .page-title span { color: var(--amber); }
+  .page-sub { font-size: 0.88rem; color: var(--stone); margin-top: 0.3rem; }
+
+  /* MAIN GRID */
+  .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+
+  /* CARD */
+  .card { background: var(--dig); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; }
+  .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--chalk); }
+  .card-body { padding: 1.5rem; }
+
+  /* QR DISPLAY */
+  .qr-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .qr-frame {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    position: relative;
+    display: inline-block;
+  }
+
+  /* Corner brackets on QR */
+  .qr-frame::before, .qr-frame::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--amber);
+    border-style: solid;
+  }
+
+  .qr-frame::before { top: -3px; left: -3px; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
+  .qr-frame::after { bottom: -3px; right: -3px; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
+
+  #qrcode { display: block; }
+  #qrcode canvas, #qrcode img { display: block; }
+
+  .qr-url {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.85rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--amber); text-align: center;
+  }
+
+  .qr-scan-hint {
+    font-size: 0.75rem; color: var(--stone);
+    text-align: center; line-height: 1.5;
+  }
+
+  /* SETTINGS */
+  .setting-group { margin-bottom: 1.25rem; }
+
+  .setting-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.72rem;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--dust); display: block; margin-bottom: 0.5rem;
+  }
+
+  .setting-input {
+    width: 100%;
+    background: var(--clay);
+    border: 1.5px solid rgba(196,168,130,0.18);
+    color: var(--chalk);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 1rem;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .setting-input:focus { border-color: var(--amber); }
+  .setting-input::placeholder { color: var(--stone); }
+
+  /* SIZE BUTTONS */
+  .size-btns { display: flex; gap: 0.5rem; }
+
+  .size-btn {
+    flex: 1;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.78rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.6rem;
+    border: 1.5px solid rgba(196,168,130,0.18);
+    border-radius: 3px;
+    background: var(--clay);
+    color: var(--stone);
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+
+  .size-btn:hover { border-color: rgba(232,137,42,0.4); color: var(--dust); }
+  .size-btn.active { border-color: var(--amber); color: var(--amber); background: rgba(232,137,42,0.08); }
+
+  /* COLOR SWATCHES */
+  .color-swatches { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .color-swatch {
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; border: 3px solid transparent;
+    transition: border-color 0.15s, transform 0.15s;
+    flex-shrink: 0;
+  }
+
+  .color-swatch:hover { transform: scale(1.1); }
+  .color-swatch.active { border-color: var(--chalk); }
+
+  /* DOWNLOAD BUTTONS */
+  .download-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  .btn-download {
+    flex: 1;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.85rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--amber); color: var(--soil);
+    border: none; padding: 0.75rem 1rem;
+    border-radius: 3px; cursor: pointer;
+    transition: background 0.2s; text-align: center;
+    min-width: 120px;
+  }
+
+  .btn-download:hover { background: var(--amber-lt); }
+
+  .btn-secondary {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.85rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: transparent; color: var(--stone);
+    border: 1.5px solid rgba(196,168,130,0.2);
+    padding: 0.75rem 1rem; border-radius: 3px;
+    cursor: pointer; transition: all 0.2s;
+    min-width: 120px;
+  }
+
+  .btn-secondary:hover { border-color: var(--dust); color: var(--dust); }
+
+  /* BUSINESS CARD PREVIEW */
+  .card-preview-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  /* CARD TOGGLE */
+  .card-side-btns { display: flex; gap: 0.4rem; }
+  .card-side-btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.35rem 0.85rem; border-radius: 2px; border: 1.5px solid rgba(196,168,130,0.18); background: transparent; color: var(--stone); cursor: pointer; transition: all 0.15s; }
+  .card-side-btn.active { border-color: var(--amber); color: var(--amber); background: rgba(232,137,42,0.08); }
+
+  /* BUSINESS CARD */
+  .business-card {
+    width: 340px;
+    height: 190px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  /* FRONT */
+  .card-front {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1C1410 0%, #2A1F17 60%, #3D2B1F 100%);
+    display: flex;
+    align-items: stretch;
+    position: relative;
+  }
+
+  /* Hazard stripe top */
+  .card-front::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: repeating-linear-gradient(90deg, #E8892A 0, #E8892A 18px, #1C1410 18px, #1C1410 26px);
+  }
+
+  .card-left {
+    flex: 1;
+    padding: 1.1rem 1.1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .card-logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 1.5rem;
+    letter-spacing: 0.04em; color: white;
+    line-height: 1;
+  }
+
+  .card-logo-text span { color: #E8892A; }
+
+  .card-tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600; font-size: 0.6rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: #8C7B6B; margin-top: 0.2rem;
+  }
+
+  .card-owner-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 0.85rem;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: #F2EDE6;
+  }
+
+  .card-owner-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600; font-size: 0.62rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: #E8892A; margin-top: 0.1rem;
+  }
+
+  .card-contact {
+    display: flex; flex-direction: column; gap: 0.2rem;
+  }
+
+  .card-contact-item {
+    font-size: 0.6rem; color: #8C7B6B;
+    font-family: 'Barlow', sans-serif;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+
+  .card-right {
+    width: 100px;
+    background: rgba(0,0,0,0.2);
+    border-left: 1px solid rgba(232,137,42,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.75rem 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .card-qr-wrap {
+    background: white;
+    padding: 5px;
+    border-radius: 4px;
+    width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  .card-qr-wrap canvas, .card-qr-wrap img { width: 100% !important; height: 100% !important; }
+
+  .card-scan-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.5rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #8C7B6B; text-align: center; line-height: 1.3;
+  }
+
+  /* BACK */
+  .card-back {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #2A1F17 0%, #1C1410 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+  }
+
+  .card-back::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+    background: repeating-linear-gradient(90deg, #E8892A 0, #E8892A 18px, #1C1410 18px, #1C1410 26px);
+  }
+
+  .card-back-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 2rem;
+    letter-spacing: 0.04em; color: white;
+  }
+
+  .card-back-logo span { color: #E8892A; }
+
+  .card-back-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600; font-size: 0.65rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8C7B6B;
+  }
+
+  .card-back-url {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.78rem;
+    letter-spacing: 0.08em; color: #E8892A;
+    margin-top: 0.5rem;
+  }
+
+  /* USE CASES */
+  .use-cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(196,168,130,0.08); }
+  .use-case { background: var(--dig); padding: 1.25rem 1rem; text-align: center; }
+  .use-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+  .use-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--chalk); margin-bottom: 0.25rem; }
+  .use-desc { font-size: 0.75rem; color: var(--stone); line-height: 1.4; }
+
+  /* STATS */
+  .qr-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(196,168,130,0.08); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 2rem; }
+  .qr-stat { background: var(--dig); padding: 1.25rem; text-align: center; }
+  .qr-stat-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2rem; color: var(--amber); }
+  .qr-stat-label { font-size: 0.75rem; color: var(--stone); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+
+  /* INSTRUCTIONS */
+  .instructions { display: flex; flex-direction: column; gap: 0; }
+  .instruction-step { display: flex; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.06); align-items: flex-start; }
+  .instruction-step:last-child { border-bottom: none; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: rgba(232,137,42,0.15); border: 1.5px solid rgba(232,137,42,0.3); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.8rem; color: var(--amber); flex-shrink: 0; }
+  .step-text { font-size: 0.85rem; color: var(--dust); line-height: 1.55; }
+  .step-text strong { color: var(--chalk); }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .main-grid { grid-template-columns: 1fr; }
+    .content { padding: 1.25rem; }
+    .topbar { padding: 1rem; }
+    .use-cases { grid-template-columns: 1fr; }
+    .business-card { width: 100%; max-width: 340px; }
+    .qr-stats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <div class="sidebar-user">
+    <div class="avatar">DS</div>
+    <div>
+      <div class="user-name">Daniel Smith</div>
+      <div class="user-role">Owner — DirtBidder</div>
+    </div>
+  </div>
+  <nav class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📋</span> My Jobs</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-payments.html'"><span class="nav-icon">🏦</span> Payments</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'"><span class="nav-icon">💬</span> Messages</div>
+    <div class="nav-label" style="margin-top:0.5rem">Marketing</div>
+    <div class="nav-item active"><span class="nav-icon">📱</span> QR Code</div>
+    <div class="nav-label" style="margin-top:0.5rem">Account</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-post-job.html'"><span class="nav-icon">➕</span> Post a Job</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">QR Code Generator</div>
+    <div style="font-size:0.8rem;color:var(--stone)">For business cards & marketing</div>
+  </div>
+
+  <div class="content">
+
+    <div class="page-header">
+      <div class="page-eyebrow">Marketing Tool</div>
+      <div class="page-title">Your DirtBidder <span>QR Code</span></div>
+      <div class="page-sub">Scan to open DirtBidder instantly. Print on business cards, flyers, job site signs, and truck decals.</div>
+    </div>
+
+    <!-- SCAN STATS -->
+    <div class="qr-stats">
+      <div class="qr-stat">
+        <div class="qr-stat-num">0</div>
+        <div class="qr-stat-label">Total Scans</div>
+      </div>
+      <div class="qr-stat">
+        <div class="qr-stat-num">—</div>
+        <div class="qr-stat-label">Last Scanned</div>
+      </div>
+      <div class="qr-stat">
+        <div class="qr-stat-num">0</div>
+        <div class="qr-stat-label">New Signups via QR</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+
+      <!-- LEFT: QR GENERATOR -->
+      <div>
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="card-header"><div class="card-title">QR Code Settings</div></div>
+          <div class="card-body">
+
+            <div class="setting-group">
+              <span class="setting-label">Link URL</span>
+              <input class="setting-input" type="text" id="qrUrl" value="https://www.dirtbidder.com" oninput="regenerateQR()" />
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label">Size</span>
+              <div class="size-btns">
+                <div class="size-btn" onclick="setSize(128, this)">Small<br><span style="font-size:0.6rem;opacity:0.7">128px</span></div>
+                <div class="size-btn active" onclick="setSize(200, this)">Medium<br><span style="font-size:0.6rem;opacity:0.7">200px</span></div>
+                <div class="size-btn" onclick="setSize(280, this)">Large<br><span style="font-size:0.6rem;opacity:0.7">280px</span></div>
+                <div class="size-btn" onclick="setSize(360, this)">Print<br><span style="font-size:0.6rem;opacity:0.7">360px</span></div>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label">QR Color</span>
+              <div class="color-swatches">
+                <div class="color-swatch active" style="background:#1C1410" onclick="setColor('#1C1410', this)" title="DirtBidder Dark"></div>
+                <div class="color-swatch" style="background:#E8892A" onclick="setColor('#E8892A', this)" title="DirtBidder Amber"></div>
+                <div class="color-swatch" style="background:#2A1F17" onclick="setColor('#2A1F17', this)" title="Dig Brown"></div>
+                <div class="color-swatch" style="background:#000000" onclick="setColor('#000000', this)" title="Black"></div>
+                <div class="color-swatch" style="background:#1a472a" onclick="setColor('#1a472a', this)" title="Forest Green"></div>
+                <div class="color-swatch" style="background:#1a1a2e" onclick="setColor('#1a1a2e', this)" title="Navy"></div>
+                <div class="color-swatch" style="background:#8B0000" onclick="setColor('#8B0000', this)" title="Dark Red"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- QR DISPLAY -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Your QR Code</div></div>
+          <div class="card-body">
+            <div class="qr-display">
+              <div class="qr-frame">
+                <div id="qrcode"></div>
+              </div>
+              <div class="qr-url" id="qrUrlDisplay">www.dirtbidder.com</div>
+              <div class="qr-scan-hint">Scan with any smartphone camera<br>No app needed — opens instantly in browser</div>
+              <div class="download-btns">
+                <button class="btn-download" onclick="downloadQR()">⬇ Download PNG</button>
+                <button class="btn-secondary" onclick="copyQR()">📋 Copy Image</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: BUSINESS CARD PREVIEW -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Business Card Preview</div>
+            <div class="card-side-btns">
+              <button class="card-side-btn active" onclick="showCardSide('front', this)">Front</button>
+              <button class="card-side-btn" onclick="showCardSide('back', this)">Back</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-preview-wrap">
+
+              <!-- FRONT -->
+              <div class="business-card" id="cardFront">
+                <div class="card-front">
+                  <div class="card-left">
+                    <div>
+                      <div class="card-logo-text"><span>Dirt</span>Bidder</div>
+                      <div class="card-tagline">Find the dirt. Find the deal.</div>
+                    </div>
+                    <div>
+                      <div class="card-owner-name" id="cardName">Daniel Smith</div>
+                      <div class="card-owner-title" id="cardTitle">Founder & Owner</div>
+                    </div>
+                    <div class="card-contact">
+                      <div class="card-contact-item" id="cardPhone">📞 (555) 000-0000</div>
+                      <div class="card-contact-item" id="cardEmail">✉ daniel@dirtbidder.com</div>
+                      <div class="card-contact-item">🌐 www.dirtbidder.com</div>
+                    </div>
+                  </div>
+                  <div class="card-right">
+                    <div class="card-qr-wrap" id="cardQrWrap">
+                      <div id="cardQrCode"></div>
+                    </div>
+                    <div class="card-scan-text">Scan to<br>get started</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BACK -->
+              <div class="business-card" id="cardBack" style="display:none">
+                <div class="card-back">
+                  <div class="card-back-logo"><span>Dirt</span>Bidder</div>
+                  <div class="card-back-tag">Heavy Equipment Marketplace</div>
+                  <div style="display:flex;flex-direction:column;gap:0.3rem;margin-top:0.25rem">
+                    <div style="font-size:0.62rem;color:#C4A882;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:0.08em;text-transform:uppercase">Post a job · Get bids · Hire operators</div>
+                    <div style="font-size:0.62rem;color:#C4A882;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:0.08em;text-transform:uppercase">Excavation · Grading · Clearing · Site Prep</div>
+                  </div>
+                  <div class="card-back-url">www.dirtbidder.com</div>
+                </div>
+              </div>
+
+              <!-- CARD EDITOR -->
+              <div style="width:100%;background:var(--clay);border-radius:3px;padding:1rem;display:flex;flex-direction:column;gap:0.6rem">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--stone);margin-bottom:0.2rem">Customize Card</div>
+                <input class="setting-input" type="text" placeholder="Your Name" oninput="updateCard('name', this.value)" style="font-size:0.82rem;padding:0.5rem 0.75rem" />
+                <input class="setting-input" type="text" placeholder="Your Title (e.g. Founder & Owner)" oninput="updateCard('title', this.value)" style="font-size:0.82rem;padding:0.5rem 0.75rem" />
+                <input class="setting-input" type="text" placeholder="Phone Number" oninput="updateCard('phone', this.value)" style="font-size:0.82rem;padding:0.5rem 0.75rem" />
+                <input class="setting-input" type="text" placeholder="Email Address" oninput="updateCard('email', this.value)" style="font-size:0.82rem;padding:0.5rem 0.75rem" />
+              </div>
+
+              <div class="download-btns" style="width:100%">
+                <button class="btn-download" onclick="downloadCard()">⬇ Download Card</button>
+                <button class="btn-secondary" onclick="printCard()">🖨 Print Card</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- WHERE TO USE IT -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header"><div class="card-title">Where to Use Your QR Code</div></div>
+      <div class="use-cases">
+        <div class="use-case">
+          <div class="use-icon">💼</div>
+          <div class="use-title">Business Cards</div>
+          <div class="use-desc">Hand out at job sites, trade shows, and networking events. Clients scan and post a job immediately.</div>
+        </div>
+        <div class="use-case">
+          <div class="use-icon">📋</div>
+          <div class="use-title">Job Site Signs</div>
+          <div class="use-desc">Post a sign at active job sites. Neighbors who need earthwork can scan and get on the platform.</div>
+        </div>
+        <div class="use-case">
+          <div class="use-icon">🚛</div>
+          <div class="use-title">Truck & Equipment</div>
+          <div class="use-desc">Decal on your dump truck or trailer. Anyone who sees your equipment working can scan and hire.</div>
+        </div>
+        <div class="use-case">
+          <div class="use-icon">📄</div>
+          <div class="use-title">Flyers & Mailers</div>
+          <div class="use-desc">Include in any print marketing. Drop flyers at lumber yards, feed stores, and county offices.</div>
+        </div>
+        <div class="use-case">
+          <div class="use-icon">🏪</div>
+          <div class="use-title">Local Bulletin Boards</div>
+          <div class="use-desc">Co-ops, hardware stores, and farm supply stores. Where your target clients already shop.</div>
+        </div>
+        <div class="use-case">
+          <div class="use-icon">🤝</div>
+          <div class="use-title">Partner Referrals</div>
+          <div class="use-desc">Give to local contractors, surveyors, and realtors. They refer clients who need site prep done.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO PRINT -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">How to Get Cards Printed</div></div>
+      <div class="instructions">
+        <div class="instruction-step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Download your QR code</strong> using the PNG button above. It's print-ready at any size.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Download the business card</strong> design and take it to a print shop or upload to an online printer.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Recommended printers:</strong> VistaPrint.com, GotPrint.com, or Canva Print — all accept PNG/PDF files. 500 cards typically cost $20–$40.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>For truck decals or signs:</strong> Take the downloaded PNG to any local sign shop. Ask for a weatherproof vinyl decal — they'll size it to fit.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">5</div>
+          <div class="step-text"><strong>Test it first</strong> — scan your QR code with your phone before printing to confirm it goes to the right URL.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let qrInstance = null;
+  let cardQrInstance = null;
+  let currentSize = 200;
+  let currentColor = '#1C1410';
+  let currentUrl = 'https://www.dirtbidder.com';
+
+  function initQR() {
+    document.getElementById('qrcode').innerHTML = '';
+    qrInstance = new QRCode(document.getElementById('qrcode'), {
+      text: currentUrl,
+      width: currentSize,
+      height: currentSize,
+      colorDark: currentColor,
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Mini QR for card
+    document.getElementById('cardQrCode').innerHTML = '';
+    cardQrInstance = new QRCode(document.getElementById('cardQrCode'), {
+      text: currentUrl,
+      width: 54,
+      height: 54,
+      colorDark: '#1C1410',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  function regenerateQR() {
+    currentUrl = document.getElementById('qrUrl').value || 'https://www.dirtbidder.com';
+    const display = document.getElementById('qrUrlDisplay');
+    display.textContent = currentUrl.replace('https://', '').replace('http://', '');
+    document.getElementById('qrcode').innerHTML = '';
+    document.getElementById('cardQrCode').innerHTML = '';
+    setTimeout(initQR, 100);
+  }
+
+  function setSize(size, btn) {
+    currentSize = size;
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    regenerateQR();
+  }
+
+  function setColor(color, swatch) {
+    currentColor = color;
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    swatch.classList.add('active');
+    regenerateQR();
+  }
+
+  function showCardSide(side, btn) {
+    document.querySelectorAll('.card-side-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('cardFront').style.display = side === 'front' ? 'block' : 'none';
+    document.getElementById('cardBack').style.display = side === 'back' ? 'block' : 'none';
+  }
+
+  function updateCard(field, value) {
+    const map = {
+      name: 'cardName',
+      title: 'cardTitle',
+      phone: 'cardPhone',
+      email: 'cardEmail'
+    };
+    const el = document.getElementById(map[field]);
+    if (!el) return;
+
+    if (field === 'phone') el.textContent = value ? '📞 ' + value : '📞 (555) 000-0000';
+    else if (field === 'email') el.textContent = value ? '✉ ' + value : '✉ daniel@dirtbidder.com';
+    else el.textContent = value || (field === 'name' ? 'Daniel Smith' : 'Founder & Owner');
+  }
+
+  function downloadQR() {
+    setTimeout(() => {
+      const canvas = document.querySelector('#qrcode canvas');
+      if (canvas) {
+        const link = document.createElement('a');
+        link.download = 'dirtbidder-qr-code.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } else {
+        const img = document.querySelector('#qrcode img');
+        if (img) {
+          const link = document.createElement('a');
+          link.download = 'dirtbidder-qr-code.png';
+          link.href = img.src;
+          link.click();
+        }
+      }
+    }, 100);
+  }
+
+  function copyQR() {
+    alert('📋 QR code image copied!\n\nYou can now paste it into any design tool, email, or document.\n\n(Full clipboard API available when app goes live)');
+  }
+
+  function downloadCard() {
+    alert('⬇ Business card downloading...\n\nThe card design (front & back) will download as a print-ready PNG.\n\nTake it to VistaPrint.com or any local print shop.\n\n(Full card export available when app goes live with your domain)');
+  }
+
+  function printCard() {
+    alert('🖨 Print dialog will open with your business card formatted for standard 3.5" × 2" business card size.\n\n(Available when app goes live)');
+  }
+
+  // Init on load
+  window.addEventListener('load', () => {
+    setTimeout(initQR, 200);
+  });
+</script>
+
+</body>
+</html>

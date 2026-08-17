@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Client Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+    --info:     #3498DB;
+    --sidebar:  240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--soil);
+    color: var(--chalk);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar);
+    flex-shrink: 0;
+    background: var(--dig);
+    border-right: 1px solid rgba(196,168,130,0.08);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 50;
+  }
+
+  .sidebar-logo {
+    padding: 1.4rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    color: var(--chalk);
+    text-decoration: none;
+    display: block;
+  }
+
+  .sidebar-logo span { color: var(--amber); }
+
+  .sidebar-user {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--soil);
+    flex-shrink: 0;
+  }
+
+  .user-info { overflow: hidden; }
+
+  .user-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--chalk);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-role {
+    font-size: 0.72rem;
+    color: var(--amber);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+  }
+
+  /* NAV LINKS */
+  .nav-section {
+    padding: 1rem 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .nav-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--stone);
+    padding: 0.5rem 1.5rem 0.3rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.88rem;
+    color: var(--stone);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { color: var(--chalk); background: rgba(196,168,130,0.05); }
+
+  .nav-item.active {
+    color: var(--amber);
+    border-left-color: var(--amber);
+    background: rgba(232,137,42,0.07);
+  }
+
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--amber);
+    color: var(--soil);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .signout-btn {
+    font-size: 0.82rem;
+    color: var(--stone);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  .signout-btn:hover { color: var(--error); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: var(--dig);
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .topbar-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--chalk);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .notif-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--clay);
+    border: 1px solid rgba(196,168,130,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .notif-btn:hover { background: var(--clay); border-color: var(--amber); }
+
+  .notif-dot {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    border: 2px solid var(--dig);
+  }
+
+  .post-job-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--amber);
+    color: var(--soil);
+    border: none;
+    padding: 0.6rem 1.25rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .post-job-btn:hover { background: var(--amber-lt); }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 2rem;
+    flex: 1;
+  }
+
+  /* GREETING */
+  .greeting {
+    margin-bottom: 2rem;
+  }
+
+  .greeting-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    color: var(--chalk);
+    line-height: 1;
+  }
+
+  .greeting-text span { color: var(--amber); }
+
+  .greeting-sub {
+    font-size: 0.88rem;
+    color: var(--stone);
+    margin-top: 0.3rem;
+  }
+
+  /* STAT CARDS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(196,168,130,0.08);
+    border: 1px solid rgba(196,168,130,0.08);
+    margin-bottom: 2rem;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .stat-card {
+    background: var(--dig);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--chalk);
+    line-height: 1;
+  }
+
+  .stat-value span { color: var(--amber); font-size: 1.2rem; }
+
+  .stat-change {
+    font-size: 0.75rem;
+    color: var(--success);
+    margin-top: 0.3rem;
+  }
+
+  .stat-change.neutral { color: var(--stone); }
+
+  /* TWO COLUMN LAYOUT */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  /* SECTION CARD */
+  .card {
+    background: var(--dig);
+    border: 1px solid rgba(196,168,130,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.08);
+  }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--chalk);
+  }
+
+  .card-link {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .card-link:hover { color: var(--amber-lt); }
+
+  /* JOB ROWS */
+  .job-row {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.06);
+    gap: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .job-row:last-child { border-bottom: none; }
+  .job-row:hover { background: rgba(196,168,130,0.04); }
+
+  .job-status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-open     { background: var(--info); }
+  .dot-bidding  { background: var(--amber); }
+  .dot-hired    { background: #9B59B6; }
+  .dot-progress { background: var(--success); }
+  .dot-complete { background: var(--stone); }
+
+  .job-info { flex: 1; min-width: 0; }
+
+  .job-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--chalk);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .job-meta {
+    font-size: 0.75rem;
+    color: var(--stone);
+    margin-top: 0.2rem;
+  }
+
+  .job-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .badge-open     { background: rgba(52,152,219,0.15); color: var(--info); }
+  .badge-bidding  { background: rgba(232,137,42,0.15); color: var(--amber); }
+  .badge-hired    { background: rgba(155,89,182,0.15); color: #9B59B6; }
+  .badge-progress { background: rgba(39,174,96,0.15);  color: var(--success); }
+  .badge-complete { background: rgba(140,123,107,0.15); color: var(--stone); }
+
+  .job-bids {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--amber);
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 60px;
+  }
+
+  /* BID CARDS */
+  .bid-card {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.06);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+
+  .bid-card:last-child { border-bottom: none; }
+  .bid-card:hover { background: rgba(196,168,130,0.04); }
+
+  .bid-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .bid-operator {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--chalk);
+  }
+
+  .bid-price {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--amber);
+  }
+
+  .bid-job {
+    font-size: 0.75rem;
+    color: var(--stone);
+    margin-bottom: 0.5rem;
+  }
+
+  .bid-stars { color: var(--amber); font-size: 0.75rem; }
+
+  .bid-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .btn-accept {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-accept:hover { opacity: 0.85; }
+
+  .btn-decline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--stone);
+    border: 1px solid rgba(196,168,130,0.2);
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-decline:hover { border-color: var(--error); color: var(--error); }
+
+  .btn-view {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--amber);
+    border: 1px solid rgba(232,137,42,0.25);
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-view:hover { background: rgba(232,137,42,0.1); }
+
+  /* ACTIVITY FEED */
+  .activity-item {
+    display: flex;
+    gap: 0.85rem;
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.06);
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+
+  .activity-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .icon-bid     { background: rgba(232,137,42,0.15); }
+  .icon-hired   { background: rgba(155,89,182,0.15); }
+  .icon-payment { background: rgba(39,174,96,0.15);  }
+  .icon-message { background: rgba(52,152,219,0.15); }
+
+  .activity-text {
+    flex: 1;
+    font-size: 0.83rem;
+    color: var(--dust);
+    line-height: 1.5;
+  }
+
+  .activity-text strong { color: var(--chalk); font-weight: 600; }
+  .activity-text .hi { color: var(--amber); font-weight: 600; }
+
+  .activity-time {
+    font-size: 0.72rem;
+    color: var(--stone);
+    white-space: nowrap;
+    margin-top: 0.15rem;
+  }
+
+  /* PAYMENT CARD */
+  .payment-row {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(196,168,130,0.06);
+    gap: 1rem;
+  }
+
+  .payment-row:last-child { border-bottom: none; }
+
+  .payment-info { flex: 1; }
+
+  .payment-job {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--chalk);
+  }
+
+  .payment-op {
+    font-size: 0.75rem;
+    color: var(--stone);
+    margin-top: 0.15rem;
+  }
+
+  .payment-amount {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--chalk);
+    text-align: right;
+  }
+
+  .payment-status {
+    font-size: 0.7rem;
+    text-align: right;
+    margin-top: 0.15rem;
+  }
+
+  .status-held    { color: var(--amber); }
+  .status-release { color: var(--success); }
+  .status-pending { color: var(--stone); }
+
+  .release-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(39,174,96,0.15);
+    color: var(--success);
+    border: 1px solid rgba(39,174,96,0.25);
+    padding: 0.35rem 0.75rem;
+    border-radius: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .release-btn:hover { background: rgba(39,174,96,0.25); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--stone);
+  }
+
+  .empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+
+  .empty-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--stone);
+    margin-bottom: 0.4rem;
+  }
+
+  .empty-sub { font-size: 0.8rem; color: var(--clay); }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .topbar { padding: 1rem; }
+    .content { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+
+  <div class="sidebar-user">
+    <div class="avatar">DS</div>
+    <div class="user-info">
+      <div class="user-name">Daniel Smith</div>
+      <div class="user-role">Client Account</div>
+    </div>
+  </div>
+
+  <nav class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" onclick="showSection('overview')">
+      <span class="nav-icon">📊</span> Overview
+    </div>
+    <div class="nav-item" onclick="showSection('jobs')">
+      <span class="nav-icon">📋</span> My Jobs
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item" onclick="showSection('bids')">
+      <span class="nav-icon">💰</span> Bids Received
+      <span class="nav-badge">5</span>
+    </div>
+    <div class="nav-item" onclick="showSection('payments')">
+      <span class="nav-icon">🏦</span> Payments
+    </div>
+
+    <div class="nav-label" style="margin-top:0.5rem">Communication</div>
+    <div class="nav-item" onclick="showSection('messages')">
+      <span class="nav-icon">💬</span> Messages
+      <span class="nav-badge">2</span>
+    </div>
+    <div class="nav-item" onclick="showSection('notifications')">
+      <span class="nav-icon">🔔</span> Notifications
+    </div>
+
+    <div class="nav-label" style="margin-top:0.5rem">Account</div>
+    <div class="nav-item" onclick="showSection('settings')">
+      <span class="nav-icon">⚙️</span> Settings
+    </div>
+    <div class="nav-item" onclick="showSection('reviews')">
+      <span class="nav-icon">⭐</span> My Reviews
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">
+      🚪 Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard Overview</div>
+    <div class="topbar-right">
+      <div class="notif-btn" onclick="showSection('notifications')">
+        🔔 <div class="notif-dot"></div>
+      </div>
+      <button class="post-job-btn" onclick="showSection('postjob')">+ Post a Job</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── OVERVIEW SECTION ── -->
+    <div id="section-overview">
+
+      <div class="greeting">
+        <div class="greeting-text">Good Morning, <span>Daniel.</span></div>
+        <div class="greeting-sub">You have 5 new bids across your active jobs. Here's your summary.</div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Active Jobs</div>
+          <div class="stat-value">3</div>
+          <div class="stat-change neutral">1 in progress</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Bids Received</div>
+          <div class="stat-value">5</div>
+          <div class="stat-change">↑ 3 new today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Held in Escrow</div>
+          <div class="stat-value">$<span>8,500</span></div>
+          <div class="stat-change neutral">1 job hired</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Jobs Completed</div>
+          <div class="stat-value">2</div>
+          <div class="stat-change neutral">All time</div>
+        </div>
+      </div>
+
+      <!-- TWO COL -->
+      <div class="two-col">
+
+        <!-- ACTIVE JOBS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Active Jobs</div>
+            <span class="card-link" onclick="showSection('jobs')">View All →</span>
+          </div>
+          <div class="job-row" onclick="showSection('bids')">
+            <div class="job-status-dot dot-bidding"></div>
+            <div class="job-info">
+              <div class="job-title">Land Clearing — 12 Acres</div>
+              <div class="job-meta">Nashville, TN · Posted 2 days ago</div>
+            </div>
+            <div class="job-bids">5 bids</div>
+            <div class="job-badge badge-bidding">Bidding</div>
+          </div>
+          <div class="job-row">
+            <div class="job-status-dot dot-progress"></div>
+            <div class="job-info">
+              <div class="job-title">Pond Excavation — 2 Acres</div>
+              <div class="job-meta">Franklin, TN · Started 5 days ago</div>
+            </div>
+            <div class="job-bids">—</div>
+            <div class="job-badge badge-progress">In Progress</div>
+          </div>
+          <div class="job-row">
+            <div class="job-status-dot dot-open"></div>
+            <div class="job-info">
+              <div class="job-title">Rough Grading — 5 Acres</div>
+              <div class="job-meta">Brentwood, TN · Posted 1 hour ago</div>
+            </div>
+            <div class="job-bids">0 bids</div>
+            <div class="job-badge badge-open">Open</div>
+          </div>
+        </div>
+
+        <!-- RECENT BIDS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Bids</div>
+            <span class="card-link" onclick="showSection('bids')">View All →</span>
+          </div>
+
+          <div class="bid-card">
+            <div class="bid-top">
+              <div class="bid-operator">🚜 Smith Excavating LLC</div>
+              <div class="bid-price">$4,200</div>
+            </div>
+            <div class="bid-job">Land Clearing — 12 Acres · 4 days est.</div>
+            <div class="bid-stars">★★★★★ <span style="color:var(--stone);font-size:0.72rem">4.9 (38 reviews)</span></div>
+            <div class="bid-actions">
+              <button class="btn-accept" onclick="acceptBid(this)">✓ Accept</button>
+              <button class="btn-decline">Decline</button>
+              <button class="btn-view">View Profile</button>
+            </div>
+          </div>
+
+          <div class="bid-card">
+            <div class="bid-top">
+              <div class="bid-operator">🏗️ TN Dirt Works</div>
+              <div class="bid-price">$3,800</div>
+            </div>
+            <div class="bid-job">Land Clearing — 12 Acres · 5 days est.</div>
+            <div class="bid-stars">★★★★☆ <span style="color:var(--stone);font-size:0.72rem">4.6 (22 reviews)</span></div>
+            <div class="bid-actions">
+              <button class="btn-accept" onclick="acceptBid(this)">✓ Accept</button>
+              <button class="btn-decline">Decline</button>
+              <button class="btn-view">View Profile</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div class="two-col">
+
+        <!-- PAYMENTS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Payments & Escrow</div>
+            <span class="card-link" onclick="showSection('payments')">View All →</span>
+          </div>
+          <div class="payment-row">
+            <div class="payment-info">
+              <div class="payment-job">Pond Excavation</div>
+              <div class="payment-op">Operator: Mike's Dirt Co.</div>
+            </div>
+            <div>
+              <div class="payment-amount">$8,500</div>
+              <div class="payment-status status-held">🔒 Held in Escrow</div>
+            </div>
+            <button class="release-btn" onclick="releasePayment(this)">Release Funds</button>
+          </div>
+          <div class="payment-row">
+            <div class="payment-info">
+              <div class="payment-job">Site Prep — Completed</div>
+              <div class="payment-op">Operator: Ridge Runner Excavating</div>
+            </div>
+            <div>
+              <div class="payment-amount">$3,200</div>
+              <div class="payment-status status-release">✓ Released</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY FEED -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Activity</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon icon-bid">💰</div>
+            <div>
+              <div class="activity-text"><strong>Smith Excavating LLC</strong> submitted a bid of <span class="hi">$4,200</span> on your land clearing job</div>
+              <div class="activity-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon icon-message">💬</div>
+            <div>
+              <div class="activity-text"><strong>Mike's Dirt Co.</strong> sent you a message about the pond job</div>
+              <div class="activity-time">Yesterday, 4:32 PM</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon icon-bid">💰</div>
+            <div>
+              <div class="activity-text"><strong>TN Dirt Works</strong> submitted a bid of <span class="hi">$3,800</span> on your land clearing job</div>
+              <div class="activity-time">Yesterday, 11:10 AM</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon icon-hired">🤝</div>
+            <div>
+              <div class="activity-text">You hired <strong>Mike's Dirt Co.</strong> for the pond excavation job</div>
+              <div class="activity-time">5 days ago</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── OTHER SECTIONS (placeholders) ── -->
+    <div id="section-jobs" style="display:none">
+      <div class="greeting"><div class="greeting-text">My <span>Jobs</span></div><div class="greeting-sub">All jobs you've posted on DirtBidder</div></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">All Jobs</div><button class="post-job-btn" onclick="showSection('postjob')">+ Post New Job</button></div>
+        <div class="job-row"><div class="job-status-dot dot-bidding"></div><div class="job-info"><div class="job-title">Land Clearing — 12 Acres</div><div class="job-meta">Nashville, TN · Budget: $3,000–$6,000 · Posted 2 days ago</div></div><div class="job-bids">5 bids</div><div class="job-badge badge-bidding">Bidding</div></div>
+        <div class="job-row"><div class="job-status-dot dot-progress"></div><div class="job-info"><div class="job-title">Pond Excavation — 2 Acres</div><div class="job-meta">Franklin, TN · Budget: $7,000–$10,000 · Started 5 days ago</div></div><div class="job-bids">—</div><div class="job-badge badge-progress">In Progress</div></div>
+        <div class="job-row"><div class="job-status-dot dot-open"></div><div class="job-info"><div class="job-title">Rough Grading — 5 Acres</div><div class="job-meta">Brentwood, TN · Budget: $2,000–$4,000 · Posted 1 hour ago</div></div><div class="job-bids">0 bids</div><div class="job-badge badge-open">Open</div></div>
+        <div class="job-row"><div class="job-status-dot dot-complete"></div><div class="job-info"><div class="job-title">Site Prep — Foundation</div><div class="job-meta">Nashville, TN · Completed 3 weeks ago</div></div><div class="job-bids">—</div><div class="job-badge badge-complete">Complete</div></div>
+      </div>
+    </div>
+
+    <div id="section-bids" style="display:none">
+      <div class="greeting"><div class="greeting-text">Bids <span>Received</span></div><div class="greeting-sub">Review and accept bids from operators in your area</div></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Land Clearing — 12 Acres · 5 Bids</div></div>
+        <div class="bid-card"><div class="bid-top"><div class="bid-operator">🚜 Smith Excavating LLC</div><div class="bid-price">$4,200</div></div><div class="bid-job">4 days estimated · CAT 320 Excavator + D6 Dozer</div><div class="bid-stars">★★★★★ 4.9 (38 reviews)</div><div class="bid-actions"><button class="btn-accept" onclick="acceptBid(this)">✓ Accept Bid</button><button class="btn-decline">Decline</button><button class="btn-view">View Profile</button></div></div>
+        <div class="bid-card"><div class="bid-top"><div class="bid-operator">🏗️ TN Dirt Works</div><div class="bid-price">$3,800</div></div><div class="bid-job">5 days estimated · Komatsu PC200 + D5 Dozer</div><div class="bid-stars">★★★★☆ 4.6 (22 reviews)</div><div class="bid-actions"><button class="btn-accept" onclick="acceptBid(this)">✓ Accept Bid</button><button class="btn-decline">Decline</button><button class="btn-view">View Profile</button></div></div>
+        <div class="bid-card"><div class="bid-top"><div class="bid-operator">⚙️ Ridge Runner Excavating</div><div class="bid-price">$4,800</div></div><div class="bid-job">3 days estimated · Two CAT 336 Excavators</div><div class="bid-stars">★★★★★ 5.0 (61 reviews)</div><div class="bid-actions"><button class="btn-accept" onclick="acceptBid(this)">✓ Accept Bid</button><button class="btn-decline">Decline</button><button class="btn-view">View Profile</button></div></div>
+      </div>
+    </div>
+
+    <div id="section-payments" style="display:none">
+      <div class="greeting"><div class="greeting-text">Payments &amp; <span>Escrow</span></div><div class="greeting-sub">All payments are securely held by Stripe until you release them</div></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Active Escrow</div></div>
+        <div class="payment-row"><div class="payment-info"><div class="payment-job">Pond Excavation — 2 Acres</div><div class="payment-op">Operator: Mike's Dirt Co. · In Progress</div></div><div><div class="payment-amount">$8,500</div><div class="payment-status status-held">🔒 Held in Escrow</div></div><button class="release-btn" onclick="releasePayment(this)">Release Funds</button></div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <div class="card-header"><div class="card-title">Payment History</div></div>
+        <div class="payment-row"><div class="payment-info"><div class="payment-job">Site Prep — Foundation</div><div class="payment-op">Operator: Ridge Runner Excavating</div></div><div><div class="payment-amount">$3,200</div><div class="payment-status status-release">✓ Released — 3 weeks ago</div></div></div>
+      </div>
+    </div>
+
+    <div id="section-messages" style="display:none">
+      <div class="greeting"><div class="greeting-text">My <span>Messages</span></div><div class="greeting-sub">Direct messages with your operators</div></div>
+      <div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages Coming Soon</div><div class="empty-sub">In-app messaging with operators is being built next</div></div></div>
+    </div>
+
+    <div id="section-notifications" style="display:none">
+      <div class="greeting"><div class="greeting-text">My <span>Notifications</span></div></div>
+      <div class="card">
+        <div class="activity-item"><div class="activity-icon icon-bid">💰</div><div><div class="activity-text"><strong>Smith Excavating LLC</strong> submitted a bid of <span class="hi">$4,200</span></div><div class="activity-time">2 hours ago</div></div></div>
+        <div class="activity-item"><div class="activity-icon icon-message">💬</div><div><div class="activity-text"><strong>Mike's Dirt Co.</strong> sent you a message</div><div class="activity-time">Yesterday 4:32 PM</div></div></div>
+        <div class="activity-item"><div class="activity-icon icon-bid">💰</div><div><div class="activity-text"><strong>TN Dirt Works</strong> submitted a bid of <span class="hi">$3,800</span></div><div class="activity-time">Yesterday 11:10 AM</div></div></div>
+      </div>
+    </div>
+
+    <div id="section-settings" style="display:none">
+      <div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div>
+      <div class="card"><div class="empty-state"><div class="empty-icon">⚙️</div><div class="empty-text">Settings Coming Soon</div><div class="empty-sub">Profile editing, notifications, and billing settings</div></div></div>
+    </div>
+
+    <div id="section-reviews" style="display:none">
+      <div class="greeting"><div class="greeting-text">My <span>Reviews</span></div></div>
+      <div class="card"><div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No Reviews Yet</div><div class="empty-sub">After completing a job, leave a review for your operator</div></div></div>
+    </div>
+
+    <div id="section-postjob" style="display:none">
+      <div class="greeting"><div class="greeting-text">Post a <span>New Job</span></div><div class="greeting-sub">Tell operators what work you need done</div></div>
+      <div class="card"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Job Posting Form — Building Next</div><div class="empty-sub">This is the next page being built in the DirtBidder app</div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showSection(name) {
+    // Hide all sections
+    document.querySelectorAll('[id^="section-"]').forEach(s => s.style.display = 'none');
+    document.getElementById('section-' + name).style.display = 'block';
+
+    // Update nav active state
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+    // Update topbar title
+    const titles = {
+      overview: 'Dashboard Overview', jobs: 'My Jobs', bids: 'Bids Received',
+      payments: 'Payments & Escrow', messages: 'Messages', notifications: 'Notifications',
+      settings: 'Settings', reviews: 'My Reviews', postjob: 'Post a New Job'
+    };
+    document.getElementById('topbarTitle').textContent = titles[name] || 'Dashboard';
+  }
+
+  function acceptBid(btn) {
+    if (confirm('Accept this bid? Payment will be collected and held in escrow by Stripe until the job is complete.')) {
+      const card = btn.closest('.bid-card') || btn.closest('.bid-card');
+      btn.textContent = '✓ Accepted';
+      btn.style.background = 'rgba(39,174,96,0.3)';
+      btn.disabled = true;
+      const siblings = btn.parentElement.querySelectorAll('button');
+      siblings.forEach(b => { if (b !== btn) b.style.display = 'none'; });
+      alert('Bid accepted! The operator has been notified and payment will be collected. Funds are held securely in escrow until you confirm the job is complete.');
+    }
+  }
+
+  function releasePayment(btn) {
+    if (confirm('Release $8,500 to the operator? Only do this when the job is complete to your satisfaction. This cannot be undone.')) {
+      btn.textContent = '✓ Released';
+      btn.style.background = 'rgba(39,174,96,0.2)';
+      btn.style.color = 'var(--success)';
+      btn.disabled = true;
+      const row = btn.closest('.payment-row');
+      const statusEl = row.querySelector('.payment-status');
+      if (statusEl) { statusEl.textContent = '✓ Released'; statusEl.className = 'payment-status status-release'; }
+      alert('Payment released! The operator will receive funds within 2 business days via Stripe.');
+    }
+  }
+</script>
+
+</body>
+</html>

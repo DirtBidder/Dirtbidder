@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Job Status Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --dust:#C4A882; --stone:#8C7B6B; --chalk:#F2EDE6; --success:#27AE60; --sidebar:240px; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;background:var(--soil);color:var(--chalk);min-height:100vh;display:flex;}
+  .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--dig);border-right:1px solid rgba(196,168,130,0.08);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+  .sidebar-logo{padding:1.4rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.5rem;color:var(--chalk);text-decoration:none;display:block;}
+  .sidebar-logo span{color:var(--amber);}
+  .nav-section{padding:1rem 0;flex:1;overflow-y:auto;}
+  .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1.5rem;font-size:0.88rem;color:var(--stone);cursor:pointer;border-left:3px solid transparent;}
+  .nav-item.active{color:var(--amber);border-left-color:var(--amber);background:rgba(232,137,42,0.07);}
+  .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:var(--dig);border-bottom:1px solid rgba(196,168,130,0.08);}
+  .topbar-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.3rem;text-transform:uppercase;}
+  .content{padding:2rem;flex:1;}
+  .job-card{background:var(--dig);border:1px solid rgba(196,168,130,0.08);border-radius:6px;padding:1.75rem;margin-bottom:2rem;}
+  .job-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4rem;text-transform:uppercase;margin-bottom:0.3rem;}
+  .job-sub{font-size:0.85rem;color:var(--stone);margin-bottom:1.75rem;}
+  .tracker{display:flex;align-items:flex-start;justify-content:space-between;position:relative;margin:2rem 0;}
+  .tracker::before{content:'';position:absolute;top:18px;left:5%;right:5%;height:3px;background:rgba(196,168,130,0.15);z-index:0;}
+  .tracker-fill{position:absolute;top:18px;left:5%;height:3px;background:var(--amber);z-index:1;}
+  .step{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;flex:1;text-align:center;}
+  .step-dot{width:38px;height:38px;border-radius:50%;background:var(--clay);border:3px solid var(--stone);display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:0.6rem;}
+  .step.done .step-dot{background:var(--amber);border-color:var(--amber);color:var(--soil);}
+  .step.current .step-dot{background:var(--soil);border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 4px rgba(232,137,42,0.2);}
+  .step-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--chalk);}
+  .step-date{font-size:0.7rem;color:var(--stone);margin-top:0.2rem;}
+  .step.current .step-label{color:var(--amber);}
+  .status-banner{background:rgba(232,137,42,0.1);border:1px solid rgba(232,137,42,0.3);border-radius:4px;padding:1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;margin-top:1.5rem;}
+  .status-banner-text{font-size:0.9rem;color:var(--chalk);}
+  .status-banner-text strong{color:var(--amber);}
+  .detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.5rem;}
+  .detail{background:var(--clay);border-radius:4px;padding:0.85rem 1rem;}
+  .detail-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--stone);margin-bottom:0.2rem;}
+  .detail-value{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--chalk);}
+  @media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.detail-grid{grid-template-columns:1fr 1fr}.tracker{flex-wrap:wrap}.step{flex-basis:33%}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <nav class="nav-section">
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'">Dashboard</div>
+    <div class="nav-item active">Job Status</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'">Messages</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-payments.html'">Payments</div>
+  </nav>
+</aside>
+
+<div class="main">
+  <div class="topbar"><div class="topbar-title">Job Status Tracker</div></div>
+  <div class="content">
+
+    <div class="job-card">
+      <div class="job-title">Land Clearing — 12 Acres</div>
+      <div class="job-sub">Job number DB-4471 · Hired: Smith Excavating LLC · Nashville, Tennessee</div>
+
+      <div class="tracker">
+        <div class="tracker-fill" style="width:55%"></div>
+        <div class="step done"><div class="step-dot">&#10003;</div><div class="step-label">Posted</div><div class="step-date">Aug 5</div></div>
+        <div class="step done"><div class="step-dot">&#10003;</div><div class="step-label">Bidding</div><div class="step-date">Aug 5-8</div></div>
+        <div class="step done"><div class="step-dot">&#10003;</div><div class="step-label">Hired</div><div class="step-date">Aug 8</div></div>
+        <div class="step current"><div class="step-dot">&#128678;</div><div class="step-label">In Progress</div><div class="step-date">Started Aug 10</div></div>
+        <div class="step"><div class="step-dot">&#8987;</div><div class="step-label">Complete</div><div class="step-date">Pending</div></div>
+        <div class="step"><div class="step-dot">&#128176;</div><div class="step-label">Paid Out</div><div class="step-date">Pending</div></div>
+      </div>
+
+      <div class="status-banner">
+        <span style="font-size:1.4rem">&#128678;</span>
+        <div class="status-banner-text"><strong>Work is underway.</strong> Smith Excavating LLC started on site August 10th. Estimated completion in 3-4 days.</div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail"><div class="detail-label">Escrow Status</div><div class="detail-value" style="color:#27AE60">Secured</div></div>
+        <div class="detail"><div class="detail-label">Amount Held</div><div class="detail-value">$4,200</div></div>
+        <div class="detail"><div class="detail-label">Operator</div><div class="detail-value">Smith Excavating</div></div>
+        <div class="detail"><div class="detail-label">Est. Completion</div><div class="detail-value">Aug 14</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

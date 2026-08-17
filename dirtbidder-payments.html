@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Payments & Escrow</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+    --info:     #3498DB;
+    --sidebar:  240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--chalk); min-height: 100vh; display: flex; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar); flex-shrink: 0; background: var(--dig); border-right: 1px solid rgba(196,168,130,0.08); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+  .sidebar-logo { padding: 1.4rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; display: block; }
+  .sidebar-logo span { color: var(--amber); }
+  .sidebar-user { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); display: flex; align-items: center; gap: 0.75rem; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--amber); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--soil); flex-shrink: 0; }
+  .user-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: var(--chalk); }
+  .user-role { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+  .nav-section { padding: 1rem 0; flex: 1; overflow-y: auto; }
+  .nav-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--stone); padding: 0.5rem 1.5rem 0.3rem; }
+  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; font-size: 0.88rem; color: var(--stone); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; }
+  .nav-item:hover { color: var(--chalk); background: rgba(196,168,130,0.05); }
+  .nav-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(232,137,42,0.07); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.7rem; padding: 0.1rem 0.45rem; border-radius: 10px; }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(196,168,130,0.08); }
+  .signout-btn { font-size: 0.82rem; color: var(--stone); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s; background: none; border: none; padding: 0; font-family: 'Barlow', sans-serif; }
+  .signout-btn:hover { color: var(--error); }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: var(--dig); border-bottom: 1px solid rgba(196,168,130,0.08); position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.3rem; text-transform: uppercase; color: var(--chalk); }
+
+  /* VIEW TABS */
+  .view-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(196,168,130,0.08); padding: 0 2rem; background: var(--dig); }
+  .view-tab { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.85rem 1.25rem; border: none; background: transparent; color: var(--stone); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; }
+  .view-tab:hover { color: var(--chalk); }
+  .view-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+  /* CONTENT */
+  .content { padding: 2rem; flex: 1; }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(196,168,130,0.08); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 2rem; }
+  .stat-card { background: var(--dig); padding: 1.25rem 1.5rem; }
+  .stat-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--stone); margin-bottom: 0.5rem; }
+  .stat-value { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.8rem; color: var(--chalk); line-height: 1; }
+  .stat-value span { color: var(--amber); }
+  .stat-change { font-size: 0.75rem; color: var(--success); margin-top: 0.3rem; }
+  .stat-change.neutral { color: var(--stone); }
+
+  /* CARD */
+  .card { background: var(--dig); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); }
+  .card-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--chalk); }
+  .card-sub { font-size: 0.75rem; color: var(--stone); margin-top: 0.15rem; }
+
+  /* ESCROW FLOW DIAGRAM */
+  .flow-diagram { padding: 2rem 1.5rem; display: flex; align-items: center; gap: 0; overflow-x: auto; }
+  .flow-step { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 100px; }
+  .flow-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 0.6rem; border: 2px solid; flex-shrink: 0; }
+  .flow-icon.done { background: rgba(39,174,96,0.1); border-color: var(--success); }
+  .flow-icon.active { background: rgba(232,137,42,0.1); border-color: var(--amber); animation: pulse 2s infinite; }
+  .flow-icon.pending { background: rgba(196,168,130,0.08); border-color: rgba(196,168,130,0.2); }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(232,137,42,0.3); } 50% { box-shadow: 0 0 0 8px rgba(232,137,42,0); } }
+  .flow-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dust); text-align: center; margin-bottom: 0.25rem; }
+  .flow-sub { font-size: 0.68rem; color: var(--stone); text-align: center; max-width: 90px; line-height: 1.3; }
+  .flow-arrow { font-size: 1.2rem; color: var(--stone); flex-shrink: 0; padding: 0 0.25rem; margin-bottom: 1.8rem; }
+  .flow-done { color: var(--success); }
+  .flow-active { color: var(--amber); }
+
+  /* ESCROW CARD */
+  .escrow-card { border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 1rem; transition: box-shadow 0.2s; }
+  .escrow-card:hover { box-shadow: 0 0 0 1px rgba(232,137,42,0.15); }
+  .escrow-card.status-held { border-left: 4px solid var(--amber); }
+  .escrow-card.status-progress { border-left: 4px solid var(--success); }
+  .escrow-card.status-dispute { border-left: 4px solid var(--error); }
+  .escrow-card.status-released { border-left: 4px solid var(--stone); opacity: 0.7; }
+
+  .escrow-top { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.25rem 1.5rem 0.75rem; gap: 1rem; background: var(--dig); }
+  .escrow-job { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; color: var(--chalk); margin-bottom: 0.25rem; }
+  .escrow-meta { font-size: 0.78rem; color: var(--stone); }
+  .escrow-amount { text-align: right; flex-shrink: 0; }
+  .escrow-total { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); line-height: 1; }
+  .escrow-fee { font-size: 0.72rem; color: var(--stone); margin-top: 0.15rem; }
+
+  .escrow-status-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; background: var(--clay); gap: 1rem; }
+  .escrow-badge { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 0.75rem; border-radius: 2px; }
+  .badge-held { background: rgba(232,137,42,0.15); color: var(--amber); }
+  .badge-progress { background: rgba(39,174,96,0.15); color: var(--success); }
+  .badge-dispute { background: rgba(231,76,60,0.15); color: var(--error); }
+  .badge-released { background: rgba(140,123,107,0.15); color: var(--stone); }
+
+  .escrow-progress { flex: 1; max-width: 200px; }
+  .progress-bar-wrap { background: rgba(196,168,130,0.1); border-radius: 2px; height: 5px; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+  .fill-amber { background: var(--amber); }
+  .fill-green { background: var(--success); }
+  .progress-label { font-size: 0.68rem; color: var(--stone); margin-top: 0.25rem; }
+
+  .escrow-actions { padding: 0.75rem 1.5rem; background: var(--dig); display: flex; gap: 0.6rem; align-items: center; border-top: 1px solid rgba(196,168,130,0.06); }
+
+  /* BUTTONS */
+  .btn-release { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; background: var(--success); color: white; border: none; padding: 0.55rem 1.25rem; border-radius: 3px; cursor: pointer; transition: opacity 0.2s; }
+  .btn-release:hover { opacity: 0.88; }
+  .btn-release:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-dispute { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; background: transparent; color: var(--error); border: 1.5px solid rgba(231,76,60,0.3); padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .btn-dispute:hover { background: rgba(231,76,60,0.1); }
+  .btn-message { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; background: transparent; color: var(--info); border: 1.5px solid rgba(52,152,219,0.3); padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .btn-message:hover { background: rgba(52,152,219,0.1); }
+  .btn-secondary { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; background: transparent; color: var(--stone); border: 1.5px solid rgba(196,168,130,0.2); padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary:hover { border-color: var(--dust); color: var(--dust); }
+
+  /* BREAKDOWN */
+  .breakdown { padding: 1rem 1.5rem; background: rgba(196,168,130,0.03); border-top: 1px solid rgba(196,168,130,0.06); display: none; }
+  .breakdown.open { display: block; }
+  .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; font-size: 0.82rem; color: var(--dust); }
+  .breakdown-row.total { border-top: 1px solid rgba(196,168,130,0.1); margin-top: 0.4rem; padding-top: 0.75rem; font-weight: 600; color: var(--chalk); }
+  .breakdown-row.fee { color: var(--stone); font-size: 0.78rem; }
+  .breakdown-row.escrow-hold { color: var(--amber); font-weight: 600; }
+  .breakdown-toggle { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone); background: none; border: none; cursor: pointer; transition: color 0.2s; }
+  .breakdown-toggle:hover { color: var(--amber); }
+
+  /* HISTORY TABLE */
+  .history-table { width: 100%; border-collapse: collapse; }
+  .history-table th { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone); padding: 0.6rem 1.5rem; text-align: left; border-bottom: 1px solid rgba(196,168,130,0.08); background: var(--clay); }
+  .history-table td { padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.05); font-size: 0.85rem; color: var(--dust); vertical-align: middle; }
+  .history-table tr:last-child td { border-bottom: none; }
+  .history-table tr:hover td { background: rgba(196,168,130,0.03); }
+  .td-job { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.88rem; text-transform: uppercase; color: var(--chalk); }
+  .td-amount { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1rem; color: var(--chalk); }
+  .td-fee { font-size: 0.75rem; color: var(--stone); }
+  .paid-badge { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.55rem; border-radius: 2px; background: rgba(39,174,96,0.12); color: var(--success); }
+
+  /* STRIPE SECTION */
+  .stripe-card { background: var(--dig); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+  .stripe-header { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); }
+  .stripe-logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.1rem; color: #635BFF; background: rgba(99,91,255,0.1); border: 1px solid rgba(99,91,255,0.2); padding: 0.3rem 0.75rem; border-radius: 3px; }
+  .stripe-status { font-size: 0.8rem; color: var(--success); display: flex; align-items: center; gap: 0.4rem; }
+  .stripe-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--success); display: block; }
+
+  /* DISPUTE MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,20,16,0.88); z-index: 100; align-items: center; justify-content: center; padding: 2rem; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--dig); border: 1px solid rgba(196,168,130,0.15); border-radius: 4px; width: 100%; max-width: 500px; overflow: hidden; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.1); }
+  .modal-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; color: var(--chalk); }
+  .modal-close { background: none; border: none; color: var(--stone); font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
+  .modal-close:hover { color: var(--chalk); }
+  .modal-body { padding: 1.5rem; }
+  .modal-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dust); display: block; margin-bottom: 0.4rem; }
+  .modal-input { width: 100%; background: var(--clay); border: 1.5px solid rgba(196,168,130,0.18); color: var(--chalk); font-family: 'Barlow', sans-serif; font-size: 0.92rem; padding: 0.75rem 1rem; border-radius: 3px; outline: none; transition: border-color 0.2s; margin-bottom: 1rem; }
+  .modal-input:focus { border-color: var(--amber); }
+  textarea.modal-input { resize: vertical; min-height: 90px; }
+  select.modal-input { cursor: pointer; }
+  .modal-footer { display: flex; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid rgba(196,168,130,0.1); }
+  .btn-submit { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--error); color: white; border: none; padding: 0.8rem; border-radius: 3px; cursor: pointer; transition: opacity 0.2s; }
+  .btn-submit:hover { opacity: 0.88; }
+  .btn-cancel { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; background: transparent; color: var(--stone); border: 1.5px solid rgba(196,168,130,0.2); padding: 0.8rem 1.25rem; border-radius: 3px; cursor: pointer; }
+
+  /* SECTION VIEWS */
+  .section-view { display: none; }
+  .section-view.active { display: block; }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .content { padding: 1.25rem; }
+    .topbar { padding: 1rem; }
+    .view-tabs { padding: 0 1rem; overflow-x: auto; }
+    .flow-diagram { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <div class="sidebar-user">
+    <div class="avatar">DS</div>
+    <div>
+      <div class="user-name">Daniel Smith</div>
+      <div class="user-role">Client Account</div>
+    </div>
+  </div>
+  <nav class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📊</span> Overview</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📋</span> My Jobs</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-bidding.html'"><span class="nav-icon">💰</span> Bids Received <span class="nav-badge">5</span></div>
+    <div class="nav-item active"><span class="nav-icon">🏦</span> Payments & Escrow</div>
+    <div class="nav-label" style="margin-top:0.5rem">Account</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-post-job.html'"><span class="nav-icon">➕</span> Post a Job</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Payments & Escrow</div>
+    <div style="font-size:0.8rem;color:var(--stone);display:flex;align-items:center;gap:0.5rem">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block"></span>
+      Secured by Stripe
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="view-tabs">
+    <button class="view-tab active" onclick="showTab('escrow', this)">Active Escrow</button>
+    <button class="view-tab" onclick="showTab('history', this)">Payment History</button>
+    <button class="view-tab" onclick="showTab('howit', this)">How It Works</button>
+    <button class="view-tab" onclick="showTab('stripe', this)">Stripe Account</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ── ACTIVE ESCROW ── -->
+    <div class="section-view active" id="tab-escrow">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Held in Escrow</div>
+          <div class="stat-value">$<span>8,500</span></div>
+          <div class="stat-change neutral">1 active job</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Released This Month</div>
+          <div class="stat-value">$<span>3,200</span></div>
+          <div class="stat-change">1 job completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Paid Out</div>
+          <div class="stat-value">$<span>11,700</span></div>
+          <div class="stat-change neutral">All time · 3 jobs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Platform Fees Paid</div>
+          <div class="stat-value">$<span>585</span></div>
+          <div class="stat-change neutral">5% of total</div>
+        </div>
+      </div>
+
+      <!-- ACTIVE ESCROW HOLD -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🔒 Active Escrow — 1 Job</div>
+            <div class="card-sub">Funds held by Stripe until you release them</div>
+          </div>
+        </div>
+
+        <!-- ESCROW CARD 1 — IN PROGRESS -->
+        <div style="padding:1.25rem 1.5rem">
+          <div class="escrow-card status-progress" id="escrowCard1">
+            <div class="escrow-top">
+              <div>
+                <div class="escrow-job">Pond Excavation — 2 Acres</div>
+                <div class="escrow-meta">Operator: Mike's Dirt Co. · Franklin, TN · Hired 5 days ago</div>
+              </div>
+              <div class="escrow-amount">
+                <div class="escrow-total">$8,500</div>
+                <div class="escrow-fee">Operator receives $8,075 · DirtBidder fee $425</div>
+              </div>
+            </div>
+
+            <!-- PROGRESS BAR -->
+            <div class="escrow-status-bar">
+              <div class="escrow-badge badge-progress">🚜 In Progress</div>
+              <div class="escrow-progress">
+                <div class="progress-bar-wrap">
+                  <div class="progress-fill fill-green" style="width:60%"></div>
+                </div>
+                <div class="progress-label">Day 3 of 5 estimated</div>
+              </div>
+              <button class="breakdown-toggle" onclick="toggleBreakdown('breakdown1', this)">Show Breakdown ▾</button>
+            </div>
+
+            <!-- BREAKDOWN -->
+            <div class="breakdown" id="breakdown1">
+              <div class="breakdown-row"><span>Job Value (agreed bid)</span><span>$8,500.00</span></div>
+              <div class="breakdown-row fee"><span>Client platform fee (5%)</span><span style="color:var(--stone)">Already included</span></div>
+              <div class="breakdown-row fee"><span>Operator platform fee (5%)</span><span>−$425.00</span></div>
+              <div class="breakdown-row escrow-hold"><span>🔒 Currently held in Stripe escrow</span><span>$8,500.00</span></div>
+              <div class="breakdown-row total"><span>Operator receives on release</span><span style="color:var(--success)">$8,075.00</span></div>
+              <div class="breakdown-row total"><span>DirtBidder platform revenue</span><span style="color:var(--amber)">$850.00 (10%)</span></div>
+            </div>
+
+            <div class="escrow-actions">
+              <button class="btn-release" onclick="releasePayment('escrowCard1', 'Mike\'s Dirt Co.', '$8,075')">✓ Release Payment</button>
+              <button class="btn-message">💬 Message Operator</button>
+              <button class="btn-dispute" onclick="openDispute('Pond Excavation — 2 Acres', 'Mike\'s Dirt Co.')">⚠ File Dispute</button>
+              <span style="margin-left:auto;font-size:0.75rem;color:var(--stone)">Auto-releases in 67 hrs if no action</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PENDING HIRE CARD -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">⏳ Awaiting Payment — 1 Job</div>
+            <div class="card-sub">Bid accepted — payment collection pending</div>
+          </div>
+        </div>
+        <div style="padding:1.25rem 1.5rem">
+          <div class="escrow-card status-held">
+            <div class="escrow-top">
+              <div>
+                <div class="escrow-job">Land Clearing — 12 Acres</div>
+                <div class="escrow-meta">Operator: Smith Excavating LLC · Bid accepted 1 hour ago</div>
+              </div>
+              <div class="escrow-amount">
+                <div class="escrow-total">$4,200</div>
+                <div class="escrow-fee">+ 5% client fee = $4,410 total charge</div>
+              </div>
+            </div>
+            <div class="escrow-status-bar">
+              <div class="escrow-badge badge-held">💳 Payment Pending</div>
+              <div style="font-size:0.78rem;color:var(--stone)">Complete payment to lock in your operator and start the job</div>
+            </div>
+            <div class="escrow-actions">
+              <button class="btn-release" style="background:var(--amber)" onclick="completePayment()">💳 Complete Payment — $4,410</button>
+              <button class="btn-secondary">Cancel Hire</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── PAYMENT HISTORY ── -->
+    <div class="section-view" id="tab-history">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Spent</div>
+          <div class="stat-value">$<span>11,700</span></div>
+          <div class="stat-change neutral">3 completed jobs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Job Cost</div>
+          <div class="stat-value">$<span>3,900</span></div>
+          <div class="stat-change neutral">Per completed job</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Fees Paid</div>
+          <div class="stat-value">$<span>585</span></div>
+          <div class="stat-change neutral">5% platform fee</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Disputes Filed</div>
+          <div class="stat-value">0</div>
+          <div class="stat-change">All jobs completed ✓</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Completed Payments</div>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.85rem" onclick="downloadCSV()">⬇ Download CSV</button>
+        </div>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Job</th>
+              <th>Operator</th>
+              <th>Date Released</th>
+              <th>Job Amount</th>
+              <th>Platform Fee</th>
+              <th>Total Charged</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="td-job">Site Prep — Foundation</div><div style="font-size:0.72rem;color:var(--stone)">Murfreesboro, TN · 4 days</div></td>
+              <td>Ridge Runner Excavating</td>
+              <td>Jul 18, 2026</td>
+              <td><div class="td-amount">$3,200</div></td>
+              <td><div class="td-fee">$160 (5%)</div></td>
+              <td><div class="td-amount">$3,360</div></td>
+              <td><span class="paid-badge">✓ Released</span></td>
+            </tr>
+            <tr>
+              <td><div class="td-job">Rough Grading — 3 Acres</div><div style="font-size:0.72rem;color:var(--stone)">Nashville, TN · 3 days</div></td>
+              <td>TN Dirt Works</td>
+              <td>Jun 5, 2026</td>
+              <td><div class="td-amount">$2,800</div></td>
+              <td><div class="td-fee">$140 (5%)</div></td>
+              <td><div class="td-amount">$2,940</div></td>
+              <td><span class="paid-badge">✓ Released</span></td>
+            </tr>
+            <tr>
+              <td><div class="td-job">Topsoil Strip — 1 Acre</div><div style="font-size:0.72rem;color:var(--stone)">Brentwood, TN · 1 day</div></td>
+              <td>Smith Excavating LLC</td>
+              <td>Apr 22, 2026</td>
+              <td><div class="td-amount">$5,700</div></td>
+              <td><div class="td-fee">$285 (5%)</div></td>
+              <td><div class="td-amount">$5,985</div></td>
+              <td><span class="paid-badge">✓ Released</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── HOW IT WORKS ── -->
+    <div class="section-view" id="tab-howit">
+      <div class="card">
+        <div class="card-header"><div class="card-title">How DirtBidder Escrow Works</div></div>
+
+        <!-- FLOW DIAGRAM -->
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-icon done">📋</div>
+            <div class="flow-label">Post Job</div>
+            <div class="flow-sub">Free — no payment needed</div>
+          </div>
+          <div class="flow-arrow flow-done">→</div>
+          <div class="flow-step">
+            <div class="flow-icon done">🤝</div>
+            <div class="flow-label">Hire Operator</div>
+            <div class="flow-sub">Accept a bid</div>
+          </div>
+          <div class="flow-arrow flow-done">→</div>
+          <div class="flow-step">
+            <div class="flow-icon done">💳</div>
+            <div class="flow-label">Pay Stripe</div>
+            <div class="flow-sub">Funds go to escrow — not operator yet</div>
+          </div>
+          <div class="flow-arrow flow-active">→</div>
+          <div class="flow-step">
+            <div class="flow-icon active">🔒</div>
+            <div class="flow-label">Escrow Hold</div>
+            <div class="flow-sub">Stripe holds funds during the job</div>
+          </div>
+          <div class="flow-arrow" style="color:rgba(196,168,130,0.3)">→</div>
+          <div class="flow-step">
+            <div class="flow-icon pending">✅</div>
+            <div class="flow-label">Job Complete</div>
+            <div class="flow-sub">You confirm — or 72hrs auto-release</div>
+          </div>
+          <div class="flow-arrow" style="color:rgba(196,168,130,0.3)">→</div>
+          <div class="flow-step">
+            <div class="flow-icon pending">💸</div>
+            <div class="flow-label">Operator Paid</div>
+            <div class="flow-sub">Stripe sends payout in 2 days</div>
+          </div>
+        </div>
+
+        <div style="padding:1.5rem;border-top:1px solid rgba(196,168,130,0.08)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--amber);margin-bottom:1rem">Your Protections as a Client</div>
+              <div style="display:flex;flex-direction:column;gap:0.6rem">
+                <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> Money never leaves escrow until YOU release it</div>
+                <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> 72-hour dispute window after job is marked complete</div>
+                <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> DirtBidder reviews all disputes within 5 business days</div>
+                <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> Partial refunds available for incomplete work</div>
+                <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> Full refund if operator never starts the job</div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--amber);margin-bottom:1rem">Platform Fee Breakdown</div>
+              <div style="background:var(--clay);border-radius:3px;padding:1rem;display:flex;flex-direction:column;gap:0.5rem">
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--dust)"><span>Job value (bid amount)</span><span style="color:var(--chalk)">$5,000</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--dust)"><span>Client fee (5%) added</span><span style="color:var(--amber)">+$250</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--dust);border-top:1px solid rgba(196,168,130,0.1);padding-top:0.5rem;font-weight:600"><span style="color:var(--chalk)">You pay total</span><span style="color:var(--chalk)">$5,250</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--dust)"><span>Operator fee (5%) deducted</span><span style="color:var(--error)">−$250</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:600;border-top:1px solid rgba(196,168,130,0.1);padding-top:0.5rem"><span style="color:var(--success)">Operator receives</span><span style="color:var(--success)">$4,750</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--stone)"><span>DirtBidder total revenue</span><span>$500 (10%)</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(232,137,42,0.04);border-color:rgba(232,137,42,0.15)">
+        <div class="card-header" style="border-color:rgba(232,137,42,0.15)">
+          <div class="card-title" style="color:var(--amber)">Why No Escrow License Is Required</div>
+        </div>
+        <div style="padding:1.5rem;font-size:0.85rem;color:var(--dust);line-height:1.7">
+          DirtBidder uses <strong style="color:var(--chalk)">Stripe Connect</strong> — a licensed money transmitter in all 50 U.S. states — to hold and transfer all funds. DirtBidder itself never holds, stores, or transmits your money directly. We act as an escrow administrator: we instruct Stripe when to hold, release, or refund funds based on job status and disputes. This is the same model used by Airbnb, Uber, Fiverr, and thousands of other marketplaces. DirtBidder LLC does not need a broker's license, escrow license, or money transmitter license to operate this system.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STRIPE ACCOUNT ── -->
+    <div class="section-view" id="tab-stripe">
+      <div class="stripe-card">
+        <div class="stripe-header">
+          <div class="stripe-logo">stripe</div>
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;text-transform:uppercase;color:var(--chalk)">Payment Account</div>
+            <div class="stripe-status">Connected & Verified</div>
+          </div>
+          <div style="margin-left:auto">
+            <button class="btn-secondary" onclick="manageStripe()">Manage on Stripe →</button>
+          </div>
+        </div>
+        <div style="padding:1.5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(196,168,130,0.08)">
+          <div style="background:var(--dig);padding:1.25rem">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--stone);margin-bottom:0.4rem">Payment Method</div>
+            <div style="font-size:0.88rem;color:var(--chalk)">Visa •••• 4242</div>
+            <div style="font-size:0.75rem;color:var(--stone);margin-top:0.2rem">Expires 09/28</div>
+          </div>
+          <div style="background:var(--dig);padding:1.25rem">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--stone);margin-bottom:0.4rem">Billing Email</div>
+            <div style="font-size:0.88rem;color:var(--chalk)">daniel@email.com</div>
+            <div style="font-size:0.75rem;color:var(--success);margin-top:0.2rem">✓ Verified</div>
+          </div>
+          <div style="background:var(--dig);padding:1.25rem">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--stone);margin-bottom:0.4rem">Account Status</div>
+            <div style="font-size:0.88rem;color:var(--success)">✓ Active</div>
+            <div style="font-size:0.75rem;color:var(--stone);margin-top:0.2rem">No issues</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Payment Methods</div><button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.85rem" onclick="addCard()">+ Add Card</button></div>
+        <div style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(196,168,130,0.06)">
+          <div style="width:44px;height:28px;background:var(--clay);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#1A1F71;background:#f0f0f0">VISA</div>
+          <div style="flex:1"><div style="font-size:0.88rem;color:var(--chalk)">Visa ending in 4242</div><div style="font-size:0.75rem;color:var(--stone)">Expires 09/28 · Default</div></div>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(39,174,96,0.12);color:var(--success);padding:0.2rem 0.55rem;border-radius:2px">Default</span>
+        </div>
+        <div style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem">
+          <div style="width:44px;height:28px;background:#f0f0f0;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#EB001B">MC</div>
+          <div style="flex:1"><div style="font-size:0.88rem;color:var(--chalk)">Mastercard ending in 8888</div><div style="font-size:0.75rem;color:var(--stone)">Expires 03/27</div></div>
+          <button class="btn-secondary" style="font-size:0.72rem;padding:0.3rem 0.65rem">Set Default</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Billing & Tax</div></div>
+        <div style="padding:1.25rem 1.5rem;font-size:0.85rem;color:var(--dust);line-height:1.6">
+          <div style="margin-bottom:0.75rem">Receipts are emailed to <strong style="color:var(--chalk)">daniel@email.com</strong> after each payment.</div>
+          <div style="margin-bottom:0.75rem">You are responsible for any applicable taxes on services received. DirtBidder does not collect or remit sales tax on earthwork services.</div>
+          <button class="btn-secondary" style="margin-top:0.5rem" onclick="downloadTax()">⬇ Download 2026 Payment Summary</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DISPUTE MODAL -->
+<div class="modal-overlay" id="disputeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚠ File a Dispute</div>
+      <button class="modal-close" onclick="closeDispute()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:3px;padding:0.85rem 1rem;margin-bottom:1.25rem;font-size:0.82rem;color:var(--dust);line-height:1.5">
+        ⚠ Filing a dispute freezes escrow funds. DirtBidder will review your case and respond within <strong style="color:var(--chalk)">5 business days</strong>. Please only file if you have a genuine issue with the completed work.
+      </div>
+      <div style="font-size:0.82rem;color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem" id="disputeJobLabel">Job: Pond Excavation — 2 Acres</div>
+      <label class="modal-label">Reason for Dispute</label>
+      <select class="modal-input">
+        <option value="">Select reason...</option>
+        <option>Work was not completed as described</option>
+        <option>Job was only partially completed</option>
+        <option>Work does not meet agreed specifications</option>
+        <option>Operator caused damage to property</option>
+        <option>Operator did not show up</option>
+        <option>Materials not hauled off as agreed</option>
+        <option>Other</option>
+      </select>
+      <label class="modal-label">Describe the Issue</label>
+      <textarea class="modal-input" placeholder="Describe what was agreed vs. what was actually done. Be specific — include dates, what was missing or wrong, and what you expected..."></textarea>
+      <label class="modal-label">Supporting Evidence</label>
+      <div style="background:var(--clay);border:1.5px dashed rgba(196,168,130,0.2);border-radius:3px;padding:1rem;text-align:center;cursor:pointer;margin-bottom:1rem;font-size:0.82rem;color:var(--stone)" onclick="alert('Photo/video upload will be enabled when app goes live')">📷 Tap to upload photos or video of the issue</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeDispute()">Cancel</button>
+      <button class="btn-submit" onclick="submitDispute()">Submit Dispute</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(tab, btn) {
+    document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function toggleBreakdown(id, btn) {
+    const el = document.getElementById(id);
+    const isOpen = el.classList.toggle('open');
+    btn.textContent = isOpen ? 'Hide Breakdown ▴' : 'Show Breakdown ▾';
+  }
+
+  function releasePayment(cardId, opName, amount) {
+    if (!confirm(`Release payment to ${opName}?\n\nAmount: ${amount}\n\nOnly release if you're satisfied the job is complete. This cannot be undone.`)) return;
+    const card = document.getElementById(cardId);
+    card.classList.remove('status-progress');
+    card.classList.add('status-released');
+    card.querySelector('.escrow-badge').className = 'escrow-badge badge-released';
+    card.querySelector('.escrow-badge').textContent = '✓ Payment Released';
+    card.querySelector('.escrow-actions').innerHTML = `<span style="font-size:0.82rem;color:var(--success)">✓ ${amount} released to ${opName} — payout in 2 business days</span>`;
+    alert(`✓ Payment released!\n\n${opName} will receive ${amount} within 2 business days via Stripe.\n\nThank you for using DirtBidder!`);
+  }
+
+  function completePayment() {
+    alert('💳 Stripe payment page will open here.\n\nYour card on file (Visa •••• 4242) will be charged $4,410.\nFunds go directly into Stripe escrow — Smith Excavating LLC is notified to begin work.');
+  }
+
+  function openDispute(job, op) {
+    document.getElementById('disputeJobLabel').textContent = 'Job: ' + job + ' · Operator: ' + op;
+    document.getElementById('disputeModal').classList.add('active');
+  }
+
+  function closeDispute() {
+    document.getElementById('disputeModal').classList.remove('active');
+  }
+
+  function submitDispute() {
+    closeDispute();
+    alert('⚠ Dispute filed!\n\nEscrow funds are now frozen. DirtBidder will review your case and contact both you and the operator within 5 business days.\n\nYou\'ll receive an email confirmation shortly.');
+  }
+
+  function downloadCSV() {
+    alert('📊 Payment history CSV download will be available when the app goes live.\n\nThis will include all transactions, fees, and dates for your records.');
+  }
+
+  function manageStripe() {
+    alert('🔗 This will open your Stripe customer portal where you can manage payment methods, view receipts, and update billing details.\n\n(Opens stripe.com when app is live)');
+  }
+
+  function addCard() {
+    alert('💳 Stripe\'s secure card entry form will appear here.\n\nYour card details are handled entirely by Stripe — DirtBidder never sees or stores your card number.');
+  }
+
+  function downloadTax() {
+    alert('📄 Your 2026 payment summary PDF will download here.\n\nIncludes all jobs, amounts paid, fees, and operator details for your tax records.');
+  }
+
+  document.getElementById('disputeModal').addEventListener('click', function(e) { if (e.target === this) closeDispute(); });
+</script>
+
+</body>
+</html>

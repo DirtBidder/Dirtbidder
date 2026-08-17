@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Launch Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --amber-lt:#F5A94E; --dust:#C4A882; --stone:#8C7B6B; --chalk:#F2EDE6; --error:#E74C3C; --success:#27AE60; --sidebar:240px; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;background:var(--soil);color:var(--chalk);min-height:100vh;display:flex;}
+  .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--dig);border-right:1px solid rgba(196,168,130,0.08);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+  .sidebar-logo{padding:1.4rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.5rem;color:var(--chalk);text-decoration:none;display:block;}
+  .sidebar-logo span{color:var(--amber);}
+  .nav-section{padding:1rem 0;flex:1;}
+  .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1.5rem;font-size:0.88rem;color:var(--stone);cursor:pointer;border-left:3px solid transparent;}
+  .nav-item.active{color:var(--amber);border-left-color:var(--amber);background:rgba(232,137,42,0.07);}
+  .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:var(--dig);border-bottom:1px solid rgba(196,168,130,0.08);}
+  .topbar-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.3rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .progress-wrap{display:flex;align-items:center;gap:1rem;}
+  .progress-label{font-size:0.8rem;color:var(--stone);}
+  .progress-bar{width:140px;height:8px;background:var(--clay);border-radius:4px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--amber);border-radius:4px;transition:width 0.3s;}
+  .progress-pct{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.95rem;color:var(--amber);}
+  .content{padding:2rem;flex:1;}
+  .phase{margin-bottom:2rem;}
+  .phase-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;}
+  .phase-num{width:32px;height:32px;border-radius:50%;background:var(--amber);color:var(--soil);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .phase-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .phase-cost{margin-left:auto;font-size:0.78rem;color:var(--stone);background:var(--clay);padding:0.2rem 0.6rem;border-radius:4px;}
+  .checklist{display:flex;flex-direction:column;gap:0.6rem;padding-left:2.5rem;}
+  .item{display:flex;align-items:flex-start;gap:0.85rem;background:var(--dig);border:1px solid rgba(196,168,130,0.08);border-radius:5px;padding:0.9rem 1rem;cursor:pointer;transition:border-color 0.2s;}
+  .item:hover{border-color:rgba(232,137,42,0.2);}
+  .item.checked{border-color:rgba(39,174,96,0.3);background:rgba(39,174,96,0.04);}
+  .checkbox{width:22px;height:22px;border-radius:4px;border:2px solid var(--stone);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .item.checked .checkbox{background:var(--success);border-color:var(--success);color:#fff;font-size:0.8rem;}
+  .item-content{flex:1;}
+  .item-title{font-weight:600;font-size:0.9rem;margin-bottom:0.15rem;}
+  .item.checked .item-title{color:var(--stone);text-decoration:line-through;}
+  .item-detail{font-size:0.78rem;color:var(--stone);line-height:1.5;}
+  .item-link{color:var(--amber);text-decoration:none;font-size:0.75rem;display:inline-block;margin-top:0.25rem;}
+  .item-link:hover{text-decoration:underline;}
+  .item-cost{font-size:0.72rem;font-weight:600;color:var(--amber-lt);background:rgba(232,137,42,0.1);padding:0.15rem 0.5rem;border-radius:3px;margin-left:auto;flex-shrink:0;align-self:flex-start;margin-top:2px;}
+  .total-bar{background:var(--dig);border:1px solid rgba(232,137,42,0.2);border-radius:6px;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-top:1rem;}
+  .total-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .total-amount{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.4rem;color:var(--amber);}
+  @media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.checklist{padding-left:0}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <nav class="nav-section">
+    <div class="nav-item">Dashboard</div>
+    <div class="nav-item active">Launch Checklist</div>
+    <div class="nav-item">Outreach</div>
+    <div class="nav-item">Payments</div>
+  </nav>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Pre-Launch Checklist</div>
+    <div class="progress-wrap">
+      <span class="progress-label">Complete</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PHASE 1 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">1</div>
+        <div class="phase-title">Legal Foundation</div>
+        <div class="phase-cost">~$150–$500</div>
+      </div>
+      <div class="checklist">
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Form your LLC</div>
+            <div class="item-detail">File with your state's Secretary of State. Name it DirtBidder LLC. Most states are $50–$200 online and take 1–5 business days.</div>
+            <a class="item-link" href="https://www.sos.tn.gov" target="_blank">→ Tennessee SOS (or search your state)</a>
+          </div>
+          <div class="item-cost">$50–$200</div>
+        </div>
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Get your EIN from the IRS</div>
+            <div class="item-detail">Free, takes 10 minutes online. You need this before opening a business bank account or filing taxes. Apply at IRS.gov — select LLC as entity type.</div>
+            <a class="item-link" href="https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online" target="_blank">→ Apply at IRS.gov (free)</a>
+          </div>
+          <div class="item-cost">Free</div>
+        </div>
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Have an attorney review your Terms of Service</div>
+            <div class="item-detail">Optional but recommended before going live. Focus on Sections 18–20 (insurance, arbitration, anti-circumvention). Expect $300–$500 for a startup attorney review.</div>
+          </div>
+          <div class="item-cost">$300–$500</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">2</div>
+        <div class="phase-title">Banking & Insurance</div>
+        <div class="phase-cost">~$400–$800/yr</div>
+      </div>
+      <div class="checklist">
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Open a business bank account</div>
+            <div class="item-detail">Use Relay.fi or Mercury — both are free, online, and built for startups. You'll need your LLC docs and EIN. Never mix personal and business money.</div>
+            <a class="item-link" href="https://relay.fi" target="_blank">→ Relay.fi (recommended)</a>
+          </div>
+          <div class="item-cost">Free</div>
+        </div>
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Get General Liability Insurance</div>
+            <div class="item-detail">Covers DirtBidder LLC if a client or operator claims financial harm. Get it in the LLC's name. Next Insurance and Hiscox both offer online quotes in under 10 minutes.</div>
+            <a class="item-link" href="https://www.nextinsurance.com" target="_blank">→ Next Insurance (quick online quote)</a>
+          </div>
+          <div class="item-cost">$400–$800/yr</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">3</div>
+        <div class="phase-title">Domain & Branding</div>
+        <div class="phase-cost">~$10–$20/yr</div>
+      </div>
+      <div class="checklist">
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Buy dirtbidder.com</div>
+            <div class="item-detail">Check Namecheap or GoDaddy. Buy in the LLC's name if possible. Also grab dirtbidder.net and dirtbidder.co as backups if available (~$10–15 each).</div>
+            <a class="item-link" href="https://www.namecheap.com" target="_blank">→ Namecheap (recommended)</a>
+          </div>
+          <div class="item-cost">~$15/yr</div>
+        </div>
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Set up business email</div>
+            <div class="item-detail">daniel@dirtbidder.com looks professional. Google Workspace is $6/month. Set up at minimum: daniel@, support@, and privacy@dirtbidder.com.</div>
+          </div>
+          <div class="item-cost">$6/mo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 4 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">4</div>
+        <div class="phase-title">Payments & Tech</div>
+        <div class="phase-cost">~$0 upfront</div>
+      </div>
+      <div class="checklist">
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Create a Stripe Connect account</div>
+            <div class="item-detail">This is how DirtBidder holds escrow and pays operators. Free to set up — Stripe takes 2.9% + 30¢ per transaction, which is built into your 10% commission model.</div>
+            <a class="item-link" href="https://stripe.com/connect" target="_blank">→ Stripe Connect</a>
+          </div>
+          <div class="item-cost">Free setup</div>
+        </div>
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Deploy the app (Vercel + Railway)</div>
+            <div class="item-detail">Vercel hosts the frontend (free tier). Railway hosts the backend and database (~$5–20/mo). This is the step that makes DirtBidder live on the internet.</div>
+            <a class="item-link" href="https://vercel.com" target="_blank">→ Vercel</a>
+          </div>
+          <div class="item-cost">~$5–20/mo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 5 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">5</div>
+        <div class="phase-title">First Users</div>
+        <div class="phase-cost">$0 — Hustle</div>
+      </div>
+      <div class="checklist">
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Sign up 10 operators before launch</div>
+            <div class="item-detail">Use the cold outreach templates. Hit Facebook groups, equipment rental yards, Craigslist. You want supply on the platform before clients post jobs.</div>
+          </div>
+          <div class="item-cost">Free</div>
+        </div>
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Post your QR code cards at 5 job sites / rental yards</div>
+            <div class="item-detail">Print the DirtBidder QR code cards and drop them anywhere operators and clients gather. Equipment rental yards, lumber yards, job site trailers.</div>
+          </div>
+          <div class="item-cost">~$20 printing</div>
+        </div>
+        <div class="item" onclick="toggle(this)">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <div class="item-title">Get your first posted job</div>
+            <div class="item-detail">Even if you have to call in a favor — get one real job posted and bid on. A real transaction, even small, proves the model works end to end.</div>
+          </div>
+          <div class="item-cost">Free</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="total-bar">
+      <div class="total-label">Estimated Total to Launch</div>
+      <div class="total-amount">~$600 – $1,200</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggle(el) {
+  el.classList.toggle('checked');
+  const cb = el.querySelector('.checkbox');
+  cb.textContent = el.classList.contains('checked') ? '✓' : '';
+  updateProgress();
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('.item');
+  const done = document.querySelectorAll('.item.checked');
+  const pct = Math.round((done.length / all.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+</script>
+
+</body>
+</html>

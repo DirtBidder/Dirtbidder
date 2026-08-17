@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--soil);
+    color: var(--chalk);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 2rem;
+    border-bottom: 1px solid rgba(196,168,130,0.1);
+  }
+
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--chalk);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--amber); }
+
+  .nav-login {
+    font-size: 0.88rem;
+    color: var(--stone);
+  }
+
+  .nav-login a {
+    color: var(--amber);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.3rem;
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    width: 420px;
+    flex-shrink: 0;
+    background: var(--dig);
+    border-right: 1px solid rgba(196,168,130,0.08);
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .panel-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .panel-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--amber);
+  }
+
+  .panel-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2.6rem;
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: var(--chalk);
+    margin-bottom: 1.25rem;
+  }
+
+  .panel-title span { color: var(--amber); }
+
+  .panel-desc {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--dust);
+    margin-bottom: 2.5rem;
+  }
+
+  /* ROLE CARDS */
+  .role-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 0.75rem;
+  }
+
+  .role-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .role-card {
+    background: var(--clay);
+    border: 2px solid transparent;
+    border-radius: 4px;
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .role-card:hover { border-color: rgba(232,137,42,0.4); }
+
+  .role-card.selected {
+    border-color: var(--amber);
+    background: rgba(232,137,42,0.08);
+  }
+
+  .role-radio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--stone);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .role-card.selected .role-radio {
+    border-color: var(--amber);
+    background: var(--amber);
+  }
+
+  .role-radio::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--soil);
+    display: none;
+  }
+
+  .role-card.selected .role-radio::after { display: block; }
+
+  .role-info {}
+
+  .role-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--chalk);
+    margin-bottom: 0.2rem;
+  }
+
+  .role-desc {
+    font-size: 0.8rem;
+    color: var(--stone);
+    line-height: 1.4;
+  }
+
+  /* BENEFITS LIST */
+  .benefits {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .benefits li {
+    font-size: 0.83rem;
+    color: var(--dust);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .benefits li::before {
+    content: '▸';
+    color: var(--amber);
+    flex-shrink: 0;
+  }
+
+  /* RIGHT PANEL — FORM */
+  .right-panel {
+    flex: 1;
+    padding: 3rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-wrap {
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .form-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--chalk);
+    margin-bottom: 0.3rem;
+  }
+
+  .form-sub {
+    font-size: 0.85rem;
+    color: var(--stone);
+    margin-bottom: 2rem;
+  }
+
+  .form-sub span {
+    color: var(--amber);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 2rem;
+  }
+
+  .step-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(196,168,130,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--stone);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .step-dot.active {
+    border-color: var(--amber);
+    background: var(--amber);
+    color: var(--soil);
+  }
+
+  .step-dot.done {
+    border-color: var(--success);
+    background: var(--success);
+    color: white;
+  }
+
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: rgba(196,168,130,0.15);
+    transition: background 0.3s;
+  }
+
+  .step-line.done { background: var(--success); }
+
+  .step-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .step-label-text {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--stone);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+  }
+
+  .step-label-text.active { color: var(--amber); }
+
+  /* FORM FIELDS */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dust);
+  }
+
+  input, select {
+    background: var(--dig);
+    border: 1.5px solid rgba(196,168,130,0.18);
+    color: var(--chalk);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus { border-color: var(--amber); }
+  input::placeholder { color: var(--stone); }
+
+  select { cursor: pointer; }
+  select option { background: var(--dig); }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--stone);
+    margin-top: 0.1rem;
+  }
+
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--error);
+    margin-top: 0.1rem;
+    display: none;
+  }
+
+  .field-error.visible { display: block; }
+
+  /* PASSWORD STRENGTH */
+  .pw-strength {
+    margin-top: 0.4rem;
+    display: flex;
+    gap: 4px;
+  }
+
+  .pw-bar {
+    height: 3px;
+    flex: 1;
+    background: rgba(196,168,130,0.15);
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+
+  .pw-bar.weak { background: var(--error); }
+  .pw-bar.fair { background: #F39C12; }
+  .pw-bar.strong { background: var(--success); }
+
+  .pw-label {
+    font-size: 0.72rem;
+    color: var(--stone);
+    margin-top: 0.3rem;
+  }
+
+  /* CHECKBOX */
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: var(--amber);
+    cursor: pointer;
+  }
+
+  .checkbox-label {
+    font-size: 0.83rem;
+    color: var(--stone);
+    line-height: 1.5;
+  }
+
+  .checkbox-label a {
+    color: var(--amber);
+    text-decoration: none;
+  }
+
+  /* SUBMIT BUTTON */
+  .submit-btn {
+    width: 100%;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--amber);
+    color: var(--soil);
+    border: none;
+    padding: 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 1rem;
+  }
+
+  .submit-btn:hover { background: var(--amber-lt); transform: translateY(-1px); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .back-btn {
+    width: 100%;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--stone);
+    border: 1.5px solid rgba(196,168,130,0.2);
+    padding: 0.75rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 1.5rem;
+  }
+
+  .back-btn:hover { border-color: var(--dust); color: var(--dust); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(196,168,130,0.12);
+  }
+
+  .divider-text {
+    font-size: 0.75rem;
+    color: var(--stone);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .google-btn {
+    width: 100%;
+    font-family: 'Barlow', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--dig);
+    color: var(--dust);
+    border: 1.5px solid rgba(196,168,130,0.2);
+    padding: 0.8rem;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    transition: border-color 0.2s;
+  }
+
+  .google-btn:hover { border-color: var(--dust); }
+
+  /* SUCCESS SCREEN */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  .success-screen.active { display: block; }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(39,174,96,0.15);
+    border: 2px solid var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin: 0 auto 1.5rem;
+  }
+
+  .success-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    text-transform: uppercase;
+    color: var(--chalk);
+    margin-bottom: 0.75rem;
+  }
+
+  .success-sub {
+    font-size: 0.9rem;
+    color: var(--dust);
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto 2rem;
+  }
+
+  /* FORM PANELS */
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 2rem 1.25rem; align-items: flex-start; }
+    .field-row { grid-template-columns: 1fr; }
+    nav { padding: 1rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <div class="nav-login">Already have an account? <a href="dirtbidder-login.html">Sign In</a></div>
+</nav>
+
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-eyebrow">Join DirtBidder</div>
+    <h2 class="panel-title">The Dirt Work<br><span>Marketplace</span></h2>
+    <p class="panel-desc">Choose your role to get started. You can always add a second role later.</p>
+
+    <div class="role-label">I am a...</div>
+    <div class="role-cards">
+      <div class="role-card selected" id="leftClient" onclick="selectRole('client')">
+        <div class="role-radio"></div>
+        <div class="role-info">
+          <div class="role-name">Client</div>
+          <div class="role-desc">I need excavation, grading, or dirt work done on my property</div>
+        </div>
+      </div>
+      <div class="role-card" id="leftOperator" onclick="selectRole('operator')">
+        <div class="role-radio"></div>
+        <div class="role-info">
+          <div class="role-name">Operator</div>
+          <div class="role-desc">I run heavy equipment and want to find local jobs</div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="benefits" id="benefitsList">
+      <li>Post jobs for free — no credit card required</li>
+      <li>Get bids from local operators within 72 hours</li>
+      <li>Payment held in escrow until job is complete</li>
+      <li>Leave and read verified reviews</li>
+      <li>Message operators directly in the app</li>
+    </ul>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="form-wrap">
+
+      <!-- STEP INDICATOR -->
+      <div class="steps">
+        <div class="step-dot active" id="dot1">1</div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-dot" id="dot2">2</div>
+        <div class="step-line" id="line2"></div>
+        <div class="step-dot" id="dot3">3</div>
+      </div>
+      <div class="step-labels">
+        <span class="step-label-text active" id="lbl1">Your Role</span>
+        <span class="step-label-text" id="lbl2">Account Info</span>
+        <span class="step-label-text" id="lbl3">Profile</span>
+      </div>
+
+      <!-- STEP 1 — ROLE SELECT (mobile only, desktop uses left panel) -->
+      <div class="form-panel active" id="step1">
+        <div class="form-title">Create Your Account</div>
+        <div class="form-sub">Already have one? <span onclick="goToLogin()">Sign in here</span></div>
+
+        <div class="role-label" style="margin-bottom:0.75rem">I am a...</div>
+        <div class="role-cards" style="margin-bottom:2rem">
+          <div class="role-card selected" id="roleClient" onclick="selectRole('client')">
+            <div class="role-radio"></div>
+            <div class="role-info">
+              <div class="role-name">Client — I Need Work Done</div>
+              <div class="role-desc">Post jobs, receive bids, hire operators, release payment when complete</div>
+            </div>
+          </div>
+          <div class="role-card" id="roleOperator" onclick="selectRole('operator')">
+            <div class="role-radio"></div>
+            <div class="role-info">
+              <div class="role-name">Operator — I Run Equipment</div>
+              <div class="role-desc">Browse local jobs, submit bids, get hired, get paid via Stripe</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="submit-btn" onclick="goToStep(2)">Continue</button>
+
+        <div class="divider"><span class="divider-text">or sign up with</span></div>
+        <button class="google-btn">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <!-- STEP 2 — ACCOUNT INFO -->
+      <div class="form-panel" id="step2">
+        <div class="form-title" id="step2Title">Create Your Account</div>
+        <div class="form-sub" id="step2Sub">Step 2 of 3 — Basic Info</div>
+
+        <div class="field-group">
+          <div class="field-row">
+            <div class="field">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" placeholder="John" />
+            </div>
+            <div class="field">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" placeholder="Smith" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="john@example.com" />
+            <span class="field-error" id="emailError">Please enter a valid email</span>
+          </div>
+          <div class="field">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="(555) 000-0000" oninput="formatPhone(this)" />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Min. 8 characters" oninput="checkPassword(this)" />
+            <div class="pw-strength">
+              <div class="pw-bar" id="pwBar1"></div>
+              <div class="pw-bar" id="pwBar2"></div>
+              <div class="pw-bar" id="pwBar3"></div>
+              <div class="pw-bar" id="pwBar4"></div>
+            </div>
+            <div class="pw-label" id="pwLabel">Enter a password</div>
+          </div>
+          <div class="field">
+            <label for="confirmPw">Confirm Password</label>
+            <input type="password" id="confirmPw" placeholder="Repeat password" />
+            <span class="field-error" id="pwError">Passwords do not match</span>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="terms" />
+          <label class="checkbox-label" for="terms">
+            I agree to DirtBidder's <a href="#">Terms of Service</a> and <a href="#">Payment & Escrow Policy</a>
+          </label>
+        </div>
+
+        <button class="submit-btn" onclick="goToStep(3)">Continue</button>
+        <button class="back-btn" onclick="goToStep(1)">← Back</button>
+      </div>
+
+      <!-- STEP 3 — PROFILE (changes based on role) -->
+      <div class="form-panel" id="step3">
+
+        <!-- CLIENT PROFILE -->
+        <div id="clientProfile">
+          <div class="form-title">Your Project Info</div>
+          <div class="form-sub">Step 3 of 3 — Tell us about your property</div>
+          <div class="field-group">
+            <div class="field">
+              <label for="clientCity">City / State</label>
+              <input type="text" id="clientCity" placeholder="e.g. Nashville, TN" />
+            </div>
+            <div class="field">
+              <label for="clientZip">ZIP Code</label>
+              <input type="text" id="clientZip" placeholder="37201" maxlength="5" />
+            </div>
+            <div class="field">
+              <label for="jobType">What type of work do you need?</label>
+              <select id="jobType">
+                <option value="">Select job type...</option>
+                <option>Land Clearing</option>
+                <option>Rough Grading</option>
+                <option>Fine Grading</option>
+                <option>Excavation</option>
+                <option>Trenching</option>
+                <option>Pond Digging</option>
+                <option>Road Building</option>
+                <option>Foundation Prep</option>
+                <option>Site Prep</option>
+                <option>Haul Off / Spoils Removal</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="acreage">Approximate Size</label>
+              <select id="acreage">
+                <option value="">Select size...</option>
+                <option>Less than 1 acre</option>
+                <option>1–5 acres</option>
+                <option>5–20 acres</option>
+                <option>20–100 acres</option>
+                <option>100+ acres</option>
+                <option>Not sure yet</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="timeline">When do you need work to start?</label>
+              <select id="timeline">
+                <option value="">Select timeline...</option>
+                <option>ASAP</option>
+                <option>Within 2 weeks</option>
+                <option>Within a month</option>
+                <option>1–3 months</option>
+                <option>Just planning ahead</option>
+              </select>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="completeRegistration()">Create My Account</button>
+          <button class="back-btn" onclick="goToStep(2)">← Back</button>
+        </div>
+
+        <!-- OPERATOR PROFILE -->
+        <div id="operatorProfile" style="display:none">
+          <div class="form-title">Your Equipment & Area</div>
+          <div class="form-sub">Step 3 of 3 — Tell us what you run</div>
+          <div class="field-group">
+            <div class="field">
+              <label for="companyName">Company Name (optional)</label>
+              <input type="text" id="companyName" placeholder="Smith Excavating LLC" />
+            </div>
+            <div class="field">
+              <label for="opZip">Your Home ZIP Code</label>
+              <input type="text" id="opZip" placeholder="37201" maxlength="5" />
+              <span class="field-hint">We use this to match you with nearby jobs</span>
+            </div>
+            <div class="field">
+              <label for="serviceRadius">How far will you travel for work?</label>
+              <select id="serviceRadius">
+                <option value="">Select radius...</option>
+                <option>Up to 25 miles</option>
+                <option>Up to 50 miles</option>
+                <option>Up to 100 miles</option>
+                <option>Statewide</option>
+                <option>Multi-state</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Equipment You Operate (select all that apply)</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.25rem">
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Excavator
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Bulldozer
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Dump Truck
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Skid Steer
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Motor Grader
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Compactor
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Frontend Loader
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Impact Hammer
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Scraper
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Water Truck
+                </label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="yearsExp">Years of Experience</label>
+              <select id="yearsExp">
+                <option value="">Select...</option>
+                <option>Less than 1 year</option>
+                <option>1–3 years</option>
+                <option>3–5 years</option>
+                <option>5–10 years</option>
+                <option>10–20 years</option>
+                <option>20+ years</option>
+              </select>
+            </div>
+          </div>
+          <!-- LEGAL CONFIRMATIONS -->
+          <div style="background:rgba(232,137,42,0.06);border:1.5px solid rgba(232,137,42,0.2);border-radius:3px;padding:1.25rem;margin-top:0.5rem;display:flex;flex-direction:column;gap:0.85rem">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--amber);margin-bottom:0.25rem">⚠ Required Confirmations</div>
+
+            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust)">
+              <input type="checkbox" id="hasInsurance" required style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)" />
+              <span>I confirm that I carry <strong style="color:var(--chalk)">general liability insurance</strong> and will maintain active coverage for all jobs booked through DirtBidder. I understand DirtBidder is not responsible for property damage or injuries occurring on job sites.</span>
+            </label>
+
+            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust)">
+              <input type="checkbox" id="hasLicense" required style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)" />
+              <span>I confirm that I hold all <strong style="color:var(--chalk)">required licenses and permits</strong> to perform excavation, grading, and earthwork services in my state and will only bid on jobs I am legally authorized to perform.</span>
+            </label>
+
+            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust)">
+              <input type="checkbox" id="agreeDispute" required style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)" />
+              <span>I agree that DirtBidder has <strong style="color:var(--chalk)">final authority over escrow disputes</strong> and that DirtBidder's decision on fund release is binding with respect to the platform. I understand I may pursue independent legal remedies separately.</span>
+            </label>
+
+            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust)">
+              <input type="checkbox" id="agreeIndependent" required style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)" />
+              <span>I understand I am an <strong style="color:var(--chalk)">independent contractor</strong>, not an employee of DirtBidder, and am solely responsible for the quality, safety, and legality of all work I perform.</span>
+            </label>
+          </div>
+
+          <button class="submit-btn" onclick="completeOperatorRegistration()" style="margin-top:1.25rem">Create My Operator Account</button>
+          <button class="back-btn" onclick="goToStep(2)">← Back</button>
+        </div>
+
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">✓</div>
+        <div class="success-title">You're In!</div>
+        <p class="success-sub" id="successMsg">Your DirtBidder account is ready. Let's get to work.</p>
+        <button class="submit-btn" onclick="goToDashboard()" style="max-width:280px;margin:0 auto">
+          Go to My Dashboard →
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentRole = 'client';
+  let currentStep = 1;
+
+  function selectRole(role) {
+    currentRole = role;
+
+    // Update left panel
+    document.getElementById('leftClient').classList.toggle('selected', role === 'client');
+    document.getElementById('leftOperator').classList.toggle('selected', role === 'operator');
+
+    // Update right panel step 1
+    document.getElementById('roleClient').classList.toggle('selected', role === 'client');
+    document.getElementById('roleOperator').classList.toggle('selected', role === 'operator');
+
+    // Update benefits
+    const benefits = document.getElementById('benefitsList');
+    if (role === 'client') {
+      benefits.innerHTML = `
+        <li>Post jobs for free — no credit card required</li>
+        <li>Get bids from local operators within 72 hours</li>
+        <li>Payment held in escrow until job is complete</li>
+        <li>Compare operator reviews and equipment</li>
+        <li>Message operators directly in the app</li>`;
+    } else {
+      benefits.innerHTML = `
+        <li>Free to join — only pay 5% when you get paid</li>
+        <li>Browse jobs matched to your equipment and area</li>
+        <li>Get paid to your bank in 2 business days</li>
+        <li>Access Cat Financial and rental partners</li>
+        <li>Build reviews and grow your reputation</li>`;
+    }
+  }
+
+  function goToStep(step) {
+    // Hide all panels
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step' + step).classList.add('active');
+    currentStep = step;
+
+    // Update step dots
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById('dot' + i);
+      const lbl = document.getElementById('lbl' + i);
+      dot.classList.remove('active', 'done');
+      lbl.classList.remove('active');
+      if (i < step) { dot.classList.add('done'); dot.innerHTML = '✓'; }
+      else if (i === step) { dot.classList.add('active'); dot.innerHTML = i; lbl.classList.add('active'); }
+      else { dot.innerHTML = i; }
+    }
+
+    // Update step lines
+    for (let i = 1; i <= 2; i++) {
+      document.getElementById('line' + i).classList.toggle('done', i < step);
+    }
+
+    // Show correct profile on step 3
+    if (step === 3) {
+      document.getElementById('clientProfile').style.display = currentRole === 'client' ? 'block' : 'none';
+      document.getElementById('operatorProfile').style.display = currentRole === 'operator' ? 'block' : 'none';
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  function checkPassword(input) {
+    const pw = input.value;
+    const bars = [document.getElementById('pwBar1'), document.getElementById('pwBar2'),
+                  document.getElementById('pwBar3'), document.getElementById('pwBar4')];
+    const label = document.getElementById('pwLabel');
+
+    bars.forEach(b => b.className = 'pw-bar');
+
+    if (pw.length === 0) { label.textContent = 'Enter a password'; return; }
+    if (pw.length < 6) {
+      bars[0].classList.add('weak');
+      label.textContent = 'Too short'; label.style.color = 'var(--error)';
+    } else if (pw.length < 8) {
+      bars[0].classList.add('fair'); bars[1].classList.add('fair');
+      label.textContent = 'Fair'; label.style.color = '#F39C12';
+    } else if (pw.match(/[A-Z]/) && pw.match(/[0-9]/)) {
+      bars.forEach(b => b.classList.add('strong'));
+      label.textContent = 'Strong password'; label.style.color = 'var(--success)';
+    } else {
+      bars[0].classList.add('fair'); bars[1].classList.add('fair'); bars[2].classList.add('fair');
+      label.textContent = 'Good — add numbers or capitals for stronger'; label.style.color = 'var(--dust)';
+    }
+  }
+
+  function formatPhone(input) {
+    let v = input.value.replace(/\D/g, '').substring(0, 10);
+    if (v.length >= 6) v = '(' + v.substring(0,3) + ') ' + v.substring(3,6) + '-' + v.substring(6);
+    else if (v.length >= 3) v = '(' + v.substring(0,3) + ') ' + v.substring(3);
+    input.value = v;
+  }
+
+  function completeOperatorRegistration() {
+    const checks = ['hasInsurance', 'hasLicense', 'agreeDispute', 'agreeIndependent'];
+    const labels = [
+      'general liability insurance',
+      'required licenses and permits',
+      'DirtBidder dispute authority',
+      'independent contractor status'
+    ];
+    for (let i = 0; i < checks.length; i++) {
+      const el = document.getElementById(checks[i]);
+      if (el && !el.checked) {
+        alert('⚠ Please confirm: ' + labels[i] + '\n\nAll four confirmations are required to create an operator account.');
+        el.focus();
+        return;
+      }
+    }
+    completeRegistration();
+  }
+
+  function completeRegistration() {
+    // Show success
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('successScreen').classList.add('active');
+
+    // Update dots all done
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById('dot' + i);
+      dot.classList.remove('active');
+      dot.classList.add('done');
+      dot.innerHTML = '✓';
+    }
+    document.getElementById('line1').classList.add('done');
+    document.getElementById('line2').classList.add('done');
+
+    const msg = currentRole === 'client'
+      ? 'Your account is ready. Post your first job and start receiving bids within 72 hours.'
+      : 'Your operator account is ready. Set up your profile and start browsing local jobs.';
+    document.getElementById('successMsg').textContent = msg;
+  }
+
+  function goToDashboard() {
+    alert('Dashboard coming soon! This will take you to your ' + currentRole + ' dashboard.');
+  }
+
+  function goToLogin() {
+    alert('Login page coming soon!');
+  }
+</script>
+
+</body>
+</html>

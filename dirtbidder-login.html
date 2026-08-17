@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--soil);
+    color: var(--chalk);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 2rem;
+    border-bottom: 1px solid rgba(196,168,130,0.1);
+  }
+
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--chalk);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--amber); }
+
+  .nav-register {
+    font-size: 0.88rem;
+    color: var(--stone);
+  }
+
+  .nav-register a {
+    color: var(--amber);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.3rem;
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+  }
+
+  /* LEFT — BRANDING PANEL */
+  .left-panel {
+    width: 440px;
+    flex-shrink: 0;
+    background: var(--dig);
+    border-right: 1px solid rgba(196,168,130,0.08);
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Hazard stripe accent top */
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--amber) 0px, var(--amber) 24px,
+      var(--soil) 24px, var(--soil) 36px
+    );
+  }
+
+  .panel-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .panel-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px; height: 2px;
+    background: var(--amber);
+  }
+
+  .panel-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 3rem;
+    line-height: 0.92;
+    text-transform: uppercase;
+    color: var(--chalk);
+    margin-bottom: 1.25rem;
+  }
+
+  .panel-title span { color: var(--amber); }
+
+  .panel-desc {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--dust);
+    margin-bottom: 2.5rem;
+  }
+
+  /* STAT CARDS */
+  .stat-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    background: var(--clay);
+    border-left: 3px solid var(--amber);
+    padding: 1rem 1.25rem;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    color: var(--chalk);
+    line-height: 1;
+  }
+
+  .stat-num span { color: var(--amber); }
+
+  .stat-text {
+    font-size: 0.78rem;
+    color: var(--stone);
+    margin-top: 0.2rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── RIGHT — FORM ── */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+  }
+
+  .form-wrap {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .form-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--chalk);
+    margin-bottom: 0.3rem;
+  }
+
+  .form-sub {
+    font-size: 0.85rem;
+    color: var(--stone);
+    margin-bottom: 2rem;
+  }
+
+  .form-sub a {
+    color: var(--amber);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* FIELDS */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.1rem;
+  }
+
+  label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dust);
+  }
+
+  input {
+    background: var(--dig);
+    border: 1.5px solid rgba(196,168,130,0.18);
+    color: var(--chalk);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.95rem;
+    padding: 0.8rem 1rem;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  input:focus { border-color: var(--amber); }
+  input::placeholder { color: var(--stone); }
+
+  input.error { border-color: var(--error); }
+
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--error);
+    display: none;
+  }
+
+  .field-error.visible { display: block; }
+
+  /* PASSWORD ROW */
+  .pw-row {
+    position: relative;
+  }
+
+  .pw-toggle {
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--stone);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem;
+    transition: color 0.2s;
+  }
+
+  .pw-toggle:hover { color: var(--amber); }
+
+  /* REMEMBER / FORGOT */
+  .remember-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .remember-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.83rem;
+    color: var(--stone);
+    cursor: pointer;
+  }
+
+  .remember-label input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--amber);
+    cursor: pointer;
+  }
+
+  .forgot-link {
+    font-size: 0.83rem;
+    color: var(--amber);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .forgot-link:hover { color: var(--amber-lt); }
+
+  /* ERROR BANNER */
+  .error-banner {
+    background: rgba(231,76,60,0.1);
+    border: 1.5px solid rgba(231,76,60,0.3);
+    border-radius: 3px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: var(--error);
+    margin-bottom: 1.25rem;
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .error-banner.visible { display: flex; }
+
+  /* BUTTONS */
+  .submit-btn {
+    width: 100%;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--amber);
+    color: var(--soil);
+    border: none;
+    padding: 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 1.25rem;
+    position: relative;
+  }
+
+  .submit-btn:hover { background: var(--amber-lt); transform: translateY(-1px); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(28,20,16,0.3);
+    border-top-color: var(--soil);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .btn-spinner.active { display: block; }
+
+  @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(196,168,130,0.12);
+  }
+
+  .divider-text {
+    font-size: 0.75rem;
+    color: var(--stone);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .google-btn {
+    width: 100%;
+    font-family: 'Barlow', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--dig);
+    color: var(--dust);
+    border: 1.5px solid rgba(196,168,130,0.2);
+    padding: 0.8rem;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    transition: border-color 0.2s, color 0.2s;
+    margin-bottom: 2rem;
+  }
+
+  .google-btn:hover { border-color: var(--dust); color: var(--chalk); }
+
+  .register-prompt {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--stone);
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(196,168,130,0.1);
+  }
+
+  .register-prompt a {
+    color: var(--amber);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.3rem;
+  }
+
+  /* FORGOT PASSWORD SCREEN */
+  .forgot-screen {
+    display: none;
+  }
+
+  .forgot-screen.active { display: block; }
+  .login-screen { display: block; }
+  .login-screen.hidden { display: none; }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.83rem;
+    color: var(--stone);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover { color: var(--amber); }
+
+  .success-msg {
+    background: rgba(39,174,96,0.1);
+    border: 1.5px solid rgba(39,174,96,0.3);
+    border-radius: 3px;
+    padding: 1rem;
+    font-size: 0.88rem;
+    color: #2ECC71;
+    display: none;
+    margin-bottom: 1.25rem;
+  }
+
+  .success-msg.visible { display: block; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 2rem 1.25rem; align-items: flex-start; }
+    nav { padding: 1rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <div class="nav-register">New to DirtBidder? <a href="dirtbidder-register.html">Create Account</a></div>
+</nav>
+
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-eyebrow">Welcome Back</div>
+    <h2 class="panel-title">Good to Have<br>You <span>Back.</span></h2>
+    <p class="panel-desc">Sign in to your account to post jobs, check your bids, or see what's new in your area.</p>
+
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-num">10<span>%</span></div>
+        <div class="stat-text">Platform fee — only when work gets done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">$0</div>
+        <div class="stat-text">To post a job or browse operators</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">2<span>-day</span></div>
+        <div class="stat-text">Operator payouts via Stripe direct deposit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="form-wrap">
+
+      <!-- LOGIN FORM -->
+      <div class="login-screen" id="loginScreen">
+        <div class="form-title">Sign In</div>
+        <div class="form-sub">Don't have an account? <a href="dirtbidder-register.html">Create one free</a></div>
+
+        <!-- ERROR BANNER -->
+        <div class="error-banner" id="errorBanner">
+          ⚠️ <span id="errorText">Incorrect email or password. Please try again.</span>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="field">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="john@example.com" oninput="clearErrors()" />
+          <span class="field-error" id="emailError">Please enter a valid email address</span>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-row">
+            <input type="password" id="password" placeholder="Your password" oninput="clearErrors()" style="padding-right:4rem" />
+            <button class="pw-toggle" onclick="togglePassword()" id="pwToggle">Show</button>
+          </div>
+          <span class="field-error" id="pwError">Password is required</span>
+        </div>
+
+        <!-- REMEMBER / FORGOT -->
+        <div class="remember-row">
+          <label class="remember-label">
+            <input type="checkbox" id="remember" />
+            Remember me
+          </label>
+          <a class="forgot-link" onclick="showForgot()">Forgot password?</a>
+        </div>
+
+        <!-- SIGN IN BUTTON -->
+        <button class="submit-btn" id="signInBtn" onclick="handleLogin()">
+          Sign In
+          <div class="btn-spinner" id="btnSpinner"></div>
+        </button>
+
+        <div class="divider"><span class="divider-text">or continue with</span></div>
+
+        <button class="google-btn" onclick="handleGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18">
+            <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+            <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+            <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
+            <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
+          </svg>
+          Sign in with Google
+        </button>
+
+        <div class="register-prompt">
+          New to DirtBidder?
+          <a href="dirtbidder-register.html">Create a free account</a>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD SCREEN -->
+      <div class="forgot-screen" id="forgotScreen">
+        <span class="back-link" onclick="showLogin()">← Back to Sign In</span>
+
+        <div class="form-title">Reset Password</div>
+        <div class="form-sub" style="margin-bottom:1.5rem">
+          Enter your email and we'll send you a reset link.
+        </div>
+
+        <div class="success-msg" id="resetSuccess">
+          ✓ Reset link sent! Check your email inbox — it may take a minute to arrive.
+        </div>
+
+        <div class="field" id="resetEmailField">
+          <label for="resetEmail">Email Address</label>
+          <input type="email" id="resetEmail" placeholder="john@example.com" />
+          <span class="field-error" id="resetEmailError">Please enter a valid email</span>
+        </div>
+
+        <button class="submit-btn" id="resetBtn" onclick="handleReset()" style="margin-top:0.5rem">
+          Send Reset Link
+          <div class="btn-spinner" id="resetSpinner"></div>
+        </button>
+
+        <div class="register-prompt" style="margin-top:1rem">
+          Remember it now?
+          <a onclick="showLogin()" style="cursor:pointer">Sign in</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle password visibility
+  function togglePassword() {
+    const input = document.getElementById('password');
+    const btn = document.getElementById('pwToggle');
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = 'Hide';
+    } else {
+      input.type = 'password';
+      btn.textContent = 'Show';
+    }
+  }
+
+  // Clear errors on input
+  function clearErrors() {
+    document.getElementById('errorBanner').classList.remove('visible');
+    document.getElementById('emailError').classList.remove('visible');
+    document.getElementById('pwError').classList.remove('visible');
+    document.getElementById('email').classList.remove('error');
+    document.getElementById('password').classList.remove('error');
+  }
+
+  // Handle login
+  function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    let valid = true;
+
+    clearErrors();
+
+    // Validate email
+    if (!email || !email.includes('@')) {
+      document.getElementById('emailError').classList.add('visible');
+      document.getElementById('email').classList.add('error');
+      valid = false;
+    }
+
+    // Validate password
+    if (!password) {
+      document.getElementById('pwError').classList.add('visible');
+      document.getElementById('password').classList.add('error');
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    // Show loading
+    const btn = document.getElementById('signInBtn');
+    const spinner = document.getElementById('btnSpinner');
+    btn.disabled = true;
+    spinner.classList.add('active');
+    btn.childNodes[0].textContent = 'Signing In... ';
+
+    // Simulate API call
+    setTimeout(() => {
+      btn.disabled = false;
+      spinner.classList.remove('active');
+      btn.childNodes[0].textContent = 'Sign In ';
+
+      // Demo: show error for wrong credentials, success for demo@dirtbidder.com
+      if (email === 'demo@dirtbidder.com' && password === 'demo1234') {
+        // Redirect to dashboard
+        alert('✓ Login successful! Redirecting to your dashboard...\n\n(Dashboard page coming up next in the build!)');
+      } else {
+        document.getElementById('errorBanner').classList.add('visible');
+        document.getElementById('email').classList.add('error');
+        document.getElementById('password').classList.add('error');
+        document.getElementById('errorText').textContent =
+          'Incorrect email or password. Try: demo@dirtbidder.com / demo1234';
+      }
+    }, 1400);
+  }
+
+  // Handle Google sign in
+  function handleGoogle() {
+    alert('Google Sign-In will be connected when the app goes live with your domain.');
+  }
+
+  // Show forgot password
+  function showForgot() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('forgotScreen').classList.add('active');
+    document.getElementById('resetSuccess').classList.remove('visible');
+    document.getElementById('resetEmail').value = '';
+  }
+
+  // Back to login
+  function showLogin() {
+    document.getElementById('forgotScreen').classList.remove('active');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    clearErrors();
+  }
+
+  // Handle password reset
+  function handleReset() {
+    const email = document.getElementById('resetEmail').value.trim();
+
+    if (!email || !email.includes('@')) {
+      document.getElementById('resetEmailError').classList.add('visible');
+      return;
+    }
+
+    const btn = document.getElementById('resetBtn');
+    const spinner = document.getElementById('resetSpinner');
+    btn.disabled = true;
+    spinner.classList.add('active');
+
+    setTimeout(() => {
+      btn.disabled = false;
+      spinner.classList.remove('active');
+      document.getElementById('resetSuccess').classList.add('visible');
+      document.getElementById('resetEmailField').style.display = 'none';
+      btn.style.display = 'none';
+    }, 1200);
+  }
+
+  // Allow Enter key to submit
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (!document.getElementById('forgotScreen').classList.contains('active')) {
+        handleLogin();
+      } else {
+        handleReset();
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

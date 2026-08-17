@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Owner Tax Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:     #1C1410;
+    --dig:      #2A1F17;
+    --clay:     #3D2B1F;
+    --amber:    #E8892A;
+    --amber-lt: #F5A94E;
+    --dust:     #C4A882;
+    --stone:    #8C7B6B;
+    --chalk:    #F2EDE6;
+    --error:    #E74C3C;
+    --success:  #27AE60;
+    --info:     #3498DB;
+    --sidebar:  240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--chalk); min-height: 100vh; display: flex; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar); flex-shrink: 0; background: var(--dig); border-right: 1px solid rgba(196,168,130,0.08); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+  .sidebar-logo { padding: 1.4rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; display: block; }
+  .sidebar-logo span { color: var(--amber); }
+  .sidebar-user { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); display: flex; align-items: center; gap: 0.75rem; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--amber); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--soil); flex-shrink: 0; }
+  .user-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: var(--chalk); }
+  .user-role { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+  .nav-section { padding: 1rem 0; flex: 1; overflow-y: auto; }
+  .nav-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--stone); padding: 0.5rem 1.5rem 0.3rem; }
+  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.5rem; font-size: 0.88rem; color: var(--stone); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav-item:hover { color: var(--chalk); background: rgba(196,168,130,0.05); }
+  .nav-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(232,137,42,0.07); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(196,168,130,0.08); }
+  .signout-btn { font-size: 0.82rem; color: var(--stone); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s; background: none; border: none; padding: 0; font-family: 'Barlow', sans-serif; }
+  .signout-btn:hover { color: var(--error); }
+
+  /* OWNER BADGE */
+  .owner-badge { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.5rem; background: rgba(232,137,42,0.08); border-bottom: 1px solid rgba(232,137,42,0.15); }
+  .owner-badge-text { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--amber); }
+  .lock-icon { font-size: 0.8rem; }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: var(--dig); border-bottom: 1px solid rgba(196,168,130,0.08); position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.3rem; text-transform: uppercase; color: var(--chalk); }
+  .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+  /* CONTENT */
+  .content { padding: 2rem; flex: 1; max-width: 1100px; }
+
+  /* YEAR SELECTOR */
+  .year-selector { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .year-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--stone); }
+  .year-btns { display: flex; gap: 0.4rem; }
+  .year-btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.45rem 1rem; border-radius: 3px; border: 1.5px solid rgba(196,168,130,0.18); background: var(--clay); color: var(--stone); cursor: pointer; transition: all 0.15s; }
+  .year-btn:hover { border-color: rgba(232,137,42,0.4); color: var(--dust); }
+  .year-btn.active { border-color: var(--amber); color: var(--amber); background: rgba(232,137,42,0.08); }
+
+  /* CONFIDENTIAL BANNER */
+  .confidential-banner { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.2); border-radius: 3px; padding: 0.75rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.82rem; color: var(--dust); }
+  .conf-icon { font-size: 1rem; flex-shrink: 0; }
+
+  /* STATS GRID */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(196,168,130,0.08); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 2rem; }
+  .stat-card { background: var(--dig); padding: 1.25rem 1.5rem; }
+  .stat-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--stone); margin-bottom: 0.5rem; }
+  .stat-value { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.8rem; color: var(--chalk); line-height: 1; }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.green { color: var(--success); }
+  .stat-value.info { color: var(--info); }
+  .stat-change { font-size: 0.72rem; color: var(--stone); margin-top: 0.3rem; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+
+  /* CARD */
+  .card { background: var(--dig); border: 1px solid rgba(196,168,130,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+  .card:last-child { margin-bottom: 0; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.08); }
+  .card-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--chalk); }
+  .card-sub { font-size: 0.75rem; color: var(--stone); margin-top: 0.1rem; }
+
+  /* INCOME TABLE */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone); padding: 0.6rem 1.5rem; text-align: left; border-bottom: 1px solid rgba(196,168,130,0.08); background: var(--clay); }
+  .data-table th.right { text-align: right; }
+  .data-table td { padding: 0.8rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.05); font-size: 0.85rem; color: var(--dust); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(196,168,130,0.03); }
+  .data-table td.right { text-align: right; }
+  .td-main { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.88rem; text-transform: uppercase; color: var(--chalk); }
+  .td-amount { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1rem; color: var(--chalk); }
+  .td-green { color: var(--success) !important; }
+  .td-amber { color: var(--amber) !important; }
+  .td-red { color: var(--error) !important; }
+
+  /* TOTAL ROW */
+  .total-row td { background: rgba(232,137,42,0.06) !important; border-top: 2px solid rgba(232,137,42,0.2) !important; font-weight: 600; }
+
+  /* MONTHLY CHART */
+  .month-chart { padding: 1.5rem; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 0.4rem; height: 140px; }
+  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; height: 100%; justify-content: flex-end; }
+  .chart-bar { width: 100%; background: rgba(232,137,42,0.2); border-radius: 2px 2px 0 0; transition: background 0.2s; cursor: default; position: relative; min-height: 4px; }
+  .chart-bar:hover { background: var(--amber); }
+  .chart-bar-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--stone); }
+  .chart-bar-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.6rem; color: var(--amber); }
+
+  /* BREAKDOWN DONUT (CSS only) */
+  .donut-wrap { padding: 1.5rem; display: flex; align-items: center; gap: 2rem; }
+  .donut { width: 120px; height: 120px; border-radius: 50%; flex-shrink: 0; background: conic-gradient(var(--amber) 0% 62%, var(--info) 62% 80%, var(--success) 80% 92%, var(--stone) 92% 100%); }
+  .donut-inner { position: relative; }
+  .legend { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+  .legend-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; color: var(--dust); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-pct { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--chalk); margin-left: auto; }
+
+  /* REFERRAL INCOME */
+  .referral-row { display: flex; align-items: center; padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.06); gap: 1rem; }
+  .referral-row:last-child { border-bottom: none; }
+  .referral-icon { width: 36px; height: 36px; border-radius: 3px; background: var(--clay); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; border: 1px solid rgba(232,137,42,0.15); }
+  .referral-info { flex: 1; }
+  .referral-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.88rem; text-transform: uppercase; color: var(--chalk); }
+  .referral-meta { font-size: 0.72rem; color: var(--stone); margin-top: 0.15rem; }
+  .referral-amount { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1rem; color: var(--success); }
+
+  /* EXPENSE SECTION */
+  .expense-row { display: flex; align-items: center; padding: 0.75rem 1.5rem; border-bottom: 1px solid rgba(196,168,130,0.06); gap: 1rem; }
+  .expense-row:last-child { border-bottom: none; }
+  .expense-label { flex: 1; font-size: 0.85rem; color: var(--dust); }
+  .expense-amount { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--error); }
+  .expense-note { font-size: 0.72rem; color: var(--stone); margin-top: 0.1rem; }
+
+  /* NET INCOME BOX */
+  .net-income-box { background: rgba(39,174,96,0.08); border: 1.5px solid rgba(39,174,96,0.25); border-radius: 4px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+  .net-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--success); }
+  .net-sub { font-size: 0.78rem; color: var(--dust); margin-top: 0.3rem; }
+  .net-amount { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2.5rem; color: var(--success); line-height: 1; }
+  .net-disclaimer { font-size: 0.72rem; color: var(--stone); margin-top: 0.3rem; text-align: right; }
+
+  /* ACCOUNTANT SECTION */
+  .accountant-box { background: rgba(52,152,219,0.06); border: 1px solid rgba(52,152,219,0.2); border-radius: 3px; padding: 1.25rem; margin-bottom: 1.5rem; }
+  .accountant-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--info); margin-bottom: 0.75rem; }
+  .accountant-items { display: flex; flex-direction: column; gap: 0.5rem; }
+  .accountant-item { display: flex; align-items: flex-start; gap: 0.6rem; font-size: 0.82rem; color: var(--dust); line-height: 1.5; }
+  .accountant-item::before { content: '→'; color: var(--info); flex-shrink: 0; }
+
+  /* BUTTONS */
+  .btn-download { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--amber); color: var(--soil); border: none; padding: 0.65rem 1.25rem; border-radius: 3px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+  .btn-download:hover { background: var(--amber-lt); }
+  .btn-secondary { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; background: transparent; color: var(--stone); border: 1.5px solid rgba(196,168,130,0.2); padding: 0.6rem 1rem; border-radius: 3px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+  .btn-secondary:hover { border-color: var(--dust); color: var(--dust); }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .content { padding: 1.25rem; }
+    .topbar { padding: 1rem; }
+    .net-income-box { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+
+  <div class="owner-badge">
+    <span class="lock-icon">🔒</span>
+    <span class="owner-badge-text">Owner Access Only</span>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="avatar">DS</div>
+    <div>
+      <div class="user-name">Daniel Smith</div>
+      <div class="user-role">Owner — DirtBidder LLC</div>
+    </div>
+  </div>
+
+  <nav class="nav-section">
+    <div class="nav-label">Owner Dashboard</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📊</span> Platform Overview</div>
+    <div class="nav-item active"><span class="nav-icon">📄</span> Tax Report</div>
+    <div class="nav-item"><span class="nav-icon">👥</span> All Users</div>
+    <div class="nav-item"><span class="nav-icon">⚖️</span> Disputes</div>
+    <div class="nav-item"><span class="nav-icon">🤝</span> Referral Earnings</div>
+    <div class="nav-item"><span class="nav-icon">🔧</span> Platform Settings</div>
+    <div class="nav-label" style="margin-top:0.5rem">Marketing</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-qr.html'"><span class="nav-icon">📱</span> QR Code</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Annual Tax Report</div>
+    <div class="topbar-right">
+      <button class="btn-secondary" onclick="printReport()">🖨 Print</button>
+      <button class="btn-download" onclick="downloadReport()">⬇ Download PDF</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- CONFIDENTIAL BANNER -->
+    <div class="confidential-banner">
+      <span class="conf-icon">🔒</span>
+      <span><strong style="color:var(--chalk)">CONFIDENTIAL — OWNER ONLY.</strong> This report is visible only to the DirtBidder LLC owner account. Do not share. For tax purposes, provide this summary to your accountant or CPA.</span>
+    </div>
+
+    <!-- YEAR SELECTOR -->
+    <div class="year-selector">
+      <span class="year-label">Tax Year:</span>
+      <div class="year-btns">
+        <button class="year-btn" onclick="switchYear(2024, this)">2024</button>
+        <button class="year-btn" onclick="switchYear(2025, this)">2025</button>
+        <button class="year-btn active" onclick="switchYear(2026, this)">2026</button>
+      </div>
+      <span style="font-size:0.78rem;color:var(--stone);margin-left:0.5rem" id="yearNote">Jan 1, 2026 — Dec 31, 2026 (partial year — through Aug 2026)</span>
+    </div>
+
+    <!-- NET INCOME BOX -->
+    <div class="net-income-box">
+      <div>
+        <div class="net-label">Net Platform Income — 2026</div>
+        <div class="net-sub">Total revenue minus operating expenses · Before personal income tax</div>
+      </div>
+      <div>
+        <div class="net-amount" id="netIncome">$47,340</div>
+        <div class="net-disclaimer">Consult your CPA for deductions and tax liability</div>
+      </div>
+    </div>
+
+    <!-- TOP STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Gross Revenue</div>
+        <div class="stat-value amber" id="grossRevenue">$58,240</div>
+        <div class="stat-change">All income streams combined</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Platform Commission Fees</div>
+        <div class="stat-value green" id="commissionRevenue">$49,800</div>
+        <div class="stat-change">10% of all job transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Referral Income</div>
+        <div class="stat-value info" id="referralRevenue">$8,440</div>
+        <div class="stat-change">Cat Financial, rental partners</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Operating Expenses</div>
+        <div class="stat-value" style="color:var(--error)" id="totalExpenses">$10,900</div>
+        <div class="stat-change">Stripe fees, hosting, other</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+
+      <!-- LEFT: MONTHLY REVENUE -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Monthly Revenue — 2026</div>
+              <div class="card-sub">Platform commission + referral income by month</div>
+            </div>
+          </div>
+          <div class="month-chart">
+            <div class="chart-bars" id="monthChart">
+              <!-- Generated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- INCOME BREAKDOWN TABLE -->
+        <div class="card" style="margin-top:1.5rem">
+          <div class="card-header">
+            <div class="card-title">Income Breakdown by Month</div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th class="right">Jobs</th>
+                <th class="right">Job Volume</th>
+                <th class="right">Commission (10%)</th>
+                <th class="right">Referrals</th>
+                <th class="right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyTable">
+              <!-- Generated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div>
+
+        <!-- REVENUE SPLIT DONUT -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Revenue Sources</div></div>
+          <div class="donut-wrap">
+            <div class="donut"></div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Commission Fees<span class="legend-pct">62%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--info)"></div>Cat Financial<span class="legend-pct">18%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Cat Rental<span class="legend-pct">12%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--stone)"></div>Other Referrals<span class="legend-pct">8%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REFERRAL INCOME -->
+        <div class="card" style="margin-top:1.25rem">
+          <div class="card-header"><div class="card-title">Referral Income Detail</div></div>
+          <div class="referral-row">
+            <div class="referral-icon">🏗️</div>
+            <div class="referral-info">
+              <div class="referral-name">Cat Financial</div>
+              <div class="referral-meta">Equipment financing referrals · 4 conversions</div>
+            </div>
+            <div class="referral-amount">$5,200</div>
+          </div>
+          <div class="referral-row">
+            <div class="referral-icon">🚜</div>
+            <div class="referral-info">
+              <div class="referral-name">Cat Rental Store</div>
+              <div class="referral-meta">Equipment rental referrals · 28 clicks, 12 conversions</div>
+            </div>
+            <div class="referral-amount">$1,840</div>
+          </div>
+          <div class="referral-row">
+            <div class="referral-icon">⚙️</div>
+            <div class="referral-info">
+              <div class="referral-name">United Rentals</div>
+              <div class="referral-meta">Rental referrals · 8 conversions</div>
+            </div>
+            <div class="referral-amount">$960</div>
+          </div>
+          <div class="referral-row">
+            <div class="referral-icon">🔧</div>
+            <div class="referral-info">
+              <div class="referral-name">Sunbelt Rentals</div>
+              <div class="referral-meta">Rental referrals · 4 conversions</div>
+            </div>
+            <div class="referral-amount">$440</div>
+          </div>
+          <div class="referral-row" style="border-top:1px solid rgba(232,137,42,0.15);background:rgba(232,137,42,0.04)">
+            <div class="referral-info"><div class="referral-name" style="color:var(--amber)">Total Referral Income</div></div>
+            <div class="referral-amount" style="font-size:1.2rem">$8,440</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- OPERATING EXPENSES -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Operating Expenses — 2026</div>
+          <div class="card-sub">Deductible business expenses — provide these to your accountant</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(196,168,130,0.08)">
+        <div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Stripe Processing Fees</div>
+              <div class="expense-note">2.9% + $0.30 per transaction — charged by Stripe on all payments</div>
+            </div>
+            <div class="expense-amount">$4,820</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Web Hosting (Vercel + Railway)</div>
+              <div class="expense-note">Frontend + backend hosting — $29/month combined</div>
+            </div>
+            <div class="expense-amount">$232</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Domain Name (dirtbidder.com)</div>
+              <div class="expense-note">Annual domain registration</div>
+            </div>
+            <div class="expense-amount">$14</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">LLC Formation & Registered Agent</div>
+              <div class="expense-note">One-time + annual registered agent fee</div>
+            </div>
+            <div class="expense-amount">$350</div>
+          </div>
+        </div>
+        <div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Legal — Terms of Service Review</div>
+              <div class="expense-note">Attorney review of ToS and payment policy</div>
+            </div>
+            <div class="expense-amount">$450</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Marketing & Advertising</div>
+              <div class="expense-note">Google Ads, Facebook Ads, print materials</div>
+            </div>
+            <div class="expense-amount">$3,200</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Business Cards & QR Materials</div>
+              <div class="expense-note">Printing, decals, signage</div>
+            </div>
+            <div class="expense-amount">$180</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Accounting & Bookkeeping</div>
+              <div class="expense-note">CPA fees for quarterly and annual filing</div>
+            </div>
+            <div class="expense-amount">$1,200</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-label">
+              <div style="font-weight:600;color:var(--chalk)">Software & Subscriptions</div>
+              <div class="expense-note">Tools used to operate the business</div>
+            </div>
+            <div class="expense-amount">$454</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:1rem 1.5rem;background:rgba(231,76,60,0.05);border-top:1px solid rgba(231,76,60,0.1);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--chalk)">Total Deductible Expenses</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;color:var(--error)">$10,900</div>
+      </div>
+    </div>
+
+    <!-- PLATFORM TRANSACTION SUMMARY -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Platform Transaction Summary</div>
+        <div class="card-sub">All money that moved through DirtBidder escrow — for your records</div>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th class="right">Count</th>
+            <th class="right">Total Volume</th>
+            <th class="right">DirtBidder Fee</th>
+            <th class="right">Net to DirtBidder</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="td-main">Jobs Completed</div><div style="font-size:0.72rem;color:var(--stone)">Fully paid out to operators</div></td>
+            <td class="right">124</td>
+            <td class="right"><span class="td-amount">$498,000</span></td>
+            <td class="right"><span class="td-amber">$49,800</span></td>
+            <td class="right"><span class="td-green">$49,800</span></td>
+          </tr>
+          <tr>
+            <td><div class="td-main">Jobs Disputed — Client Won</div><div style="font-size:0.72rem;color:var(--stone)">Refunded to clients</div></td>
+            <td class="right">3</td>
+            <td class="right"><span class="td-amount">$8,400</span></td>
+            <td class="right"><span style="color:var(--stone)">$0</span></td>
+            <td class="right"><span style="color:var(--stone)">$0</span></td>
+          </tr>
+          <tr>
+            <td><div class="td-main">Jobs Disputed — Operator Won</div><div style="font-size:0.72rem;color:var(--stone)">Released to operators</div></td>
+            <td class="right">1</td>
+            <td class="right"><span class="td-amount">$3,200</span></td>
+            <td class="right"><span class="td-amber">$320</span></td>
+            <td class="right"><span class="td-green">$320</span></td>
+          </tr>
+          <tr>
+            <td><div class="td-main">Jobs Cancelled Before Start</div><div style="font-size:0.72rem;color:var(--stone)">Full refunds issued</div></td>
+            <td class="right">5</td>
+            <td class="right"><span class="td-amount">$12,500</span></td>
+            <td class="right"><span style="color:var(--stone)">$0</span></td>
+            <td class="right"><span style="color:var(--stone)">$0</span></td>
+          </tr>
+          <tr class="total-row">
+            <td><div class="td-main" style="color:var(--amber)">Total Platform Volume</div></td>
+            <td class="right" style="font-weight:700">133</td>
+            <td class="right"><span class="td-amount" style="color:var(--amber)">$522,100</span></td>
+            <td class="right"><span class="td-amount" style="color:var(--amber)">$50,120</span></td>
+            <td class="right"><span class="td-amount td-green">$50,120</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- NET INCOME CALCULATION -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Net Income Calculation — Hand to Your Accountant</div></div>
+      <div style="padding:1.5rem">
+        <table class="data-table" style="max-width:500px">
+          <tbody>
+            <tr><td style="color:var(--dust)">Platform Commission Revenue</td><td class="right td-green">+ $49,800</td></tr>
+            <tr><td style="color:var(--dust)">Referral Income</td><td class="right td-green">+ $8,440</td></tr>
+            <tr style="border-top:1px solid rgba(196,168,130,0.1)"><td style="color:var(--dust);font-weight:600">Total Gross Revenue</td><td class="right" style="font-weight:700;color:var(--chalk)">$58,240</td></tr>
+            <tr><td style="color:var(--dust)">Stripe Processing Fees</td><td class="right td-red">− $4,820</td></tr>
+            <tr><td style="color:var(--dust)">Hosting & Domain</td><td class="right td-red">− $246</td></tr>
+            <tr><td style="color:var(--dust)">Legal & Formation</td><td class="right td-red">− $800</td></tr>
+            <tr><td style="color:var(--dust)">Marketing & Advertising</td><td class="right td-red">− $3,380</td></tr>
+            <tr><td style="color:var(--dust)">Accounting & Software</td><td class="right td-red">− $1,654</td></tr>
+            <tr style="border-top:2px solid rgba(39,174,96,0.3)">
+              <td style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;text-transform:uppercase;color:var(--success)">Net Platform Income</td>
+              <td class="right" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;color:var(--success)">$47,340</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ACCOUNTANT NOTES -->
+    <div class="accountant-box">
+      <div class="accountant-title">📋 Notes for Your Accountant</div>
+      <div class="accountant-items">
+        <div class="accountant-item">DirtBidder LLC is a <strong>single-member LLC</strong> — income flows to your personal return on Schedule C (unless you elect S-Corp status)</div>
+        <div class="accountant-item">Platform commission revenue is classified as <strong>service income / marketplace fees</strong> — not sales of goods</div>
+        <div class="accountant-item">Referral income from Cat Financial and rental partners may be classified as <strong>referral/affiliate income</strong> — confirm with your CPA</div>
+        <div class="accountant-item">Stripe will issue a <strong>1099-K</strong> for payment processing volume — this reflects gross transaction volume, NOT your net income. Do not confuse the two.</div>
+        <div class="accountant-item">All operator payouts flow through Stripe Connect — DirtBidder <strong>does not issue 1099s to operators</strong> directly; Stripe handles that for payouts over $600</div>
+        <div class="accountant-item">Consider <strong>quarterly estimated tax payments</strong> to avoid underpayment penalties — typically 25–30% of net income set aside</div>
+        <div class="accountant-item">Technology expenses (hosting, domain, software) and home office may be <strong>additional deductible items</strong> — discuss with your CPA</div>
+      </div>
+    </div>
+
+    <!-- DOWNLOAD OPTIONS -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Export Options</div></div>
+      <div style="padding:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
+        <button class="btn-download" onclick="downloadReport()">⬇ Full Tax Summary PDF</button>
+        <button class="btn-secondary" onclick="downloadCSV()">📊 Transaction CSV</button>
+        <button class="btn-secondary" onclick="downloadMonthly()">📅 Monthly Breakdown CSV</button>
+        <button class="btn-secondary" onclick="downloadReferral()">🤝 Referral Income Report</button>
+        <button class="btn-secondary" onclick="printReport()">🖨 Print Report</button>
+      </div>
+      <div style="padding:0 1.5rem 1.25rem;font-size:0.75rem;color:var(--stone);line-height:1.6">
+        All exports include your DirtBidder LLC name, EIN, and the tax year. Keep downloaded copies in your business records for at least 7 years. DirtBidder recommends using a licensed CPA for your annual tax filing.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── MONTHLY DATA ──
+  const monthlyData = {
+    2026: [
+      { month: 'Jan', jobs: 8,  volume: 28000, commission: 2800, referrals: 420 },
+      { month: 'Feb', jobs: 11, volume: 38500, commission: 3850, referrals: 580 },
+      { month: 'Mar', jobs: 14, volume: 52000, commission: 5200, referrals: 820 },
+      { month: 'Apr', jobs: 18, volume: 67000, commission: 6700, referrals: 1050 },
+      { month: 'May', jobs: 22, volume: 84000, commission: 8400, referrals: 1380 },
+      { month: 'Jun', jobs: 19, volume: 71000, commission: 7100, referrals: 1120 },
+      { month: 'Jul', jobs: 17, volume: 64000, commission: 6400, referrals: 980 },
+      { month: 'Aug', jobs: 15, volume: 53500, commission: 5350, referrals: 850 },
+      { month: 'Sep', jobs: 0,  volume: 0,     commission: 0,    referrals: 0 },
+      { month: 'Oct', jobs: 0,  volume: 0,     commission: 0,    referrals: 0 },
+      { month: 'Nov', jobs: 0,  volume: 0,     commission: 0,    referrals: 0 },
+      { month: 'Dec', jobs: 0,  volume: 0,     commission: 0,    referrals: 0 },
+    ],
+    2025: [
+      { month: 'Jan', jobs: 2,  volume: 6000,  commission: 600,  referrals: 0 },
+      { month: 'Feb', jobs: 3,  volume: 9500,  commission: 950,  referrals: 0 },
+      { month: 'Mar', jobs: 5,  volume: 18000, commission: 1800, referrals: 0 },
+      { month: 'Apr', jobs: 7,  volume: 26000, commission: 2600, referrals: 120 },
+      { month: 'May', jobs: 9,  volume: 34000, commission: 3400, referrals: 280 },
+      { month: 'Jun', jobs: 8,  volume: 30000, commission: 3000, referrals: 220 },
+      { month: 'Jul', jobs: 6,  volume: 22000, commission: 2200, referrals: 180 },
+      { month: 'Aug', jobs: 7,  volume: 25000, commission: 2500, referrals: 200 },
+      { month: 'Sep', jobs: 8,  volume: 29000, commission: 2900, referrals: 240 },
+      { month: 'Oct', jobs: 10, volume: 38000, commission: 3800, referrals: 320 },
+      { month: 'Nov', jobs: 9,  volume: 34000, commission: 3400, referrals: 280 },
+      { month: 'Dec', jobs: 7,  volume: 26000, commission: 2600, referrals: 180 },
+    ],
+    2024: [
+      { month: 'Jan', jobs: 0, volume: 0,     commission: 0,   referrals: 0 },
+      { month: 'Feb', jobs: 0, volume: 0,     commission: 0,   referrals: 0 },
+      { month: 'Mar', jobs: 0, volume: 0,     commission: 0,   referrals: 0 },
+      { month: 'Apr', jobs: 0, volume: 0,     commission: 0,   referrals: 0 },
+      { month: 'May', jobs: 0, volume: 0,     commission: 0,   referrals: 0 },
+      { month: 'Jun', jobs: 1, volume: 3500,  commission: 350, referrals: 0 },
+      { month: 'Jul', jobs: 2, volume: 7200,  commission: 720, referrals: 0 },
+      { month: 'Aug', jobs: 3, volume: 11000, commission: 1100, referrals: 0 },
+      { month: 'Sep', jobs: 2, volume: 7500,  commission: 750, referrals: 0 },
+      { month: 'Oct', jobs: 3, volume: 10500, commission: 1050, referrals: 0 },
+      { month: 'Nov', jobs: 2, volume: 7000,  commission: 700, referrals: 0 },
+      { month: 'Dec', jobs: 1, volume: 3800,  commission: 380, referrals: 0 },
+    ]
+  };
+
+  let currentYear = 2026;
+
+  function switchYear(year, btn) {
+    currentYear = year;
+    document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const notes = {
+      2024: 'Jun 2024 — Dec 2024 (launch year)',
+      2025: 'Jan 1, 2025 — Dec 31, 2025 (full year)',
+      2026: 'Jan 1, 2026 — Dec 31, 2026 (partial year — through Aug 2026)'
+    };
+    document.getElementById('yearNote').textContent = notes[year];
+    renderReport(year);
+  }
+
+  function fmtDollar(n) {
+    return '$' + n.toLocaleString('en-US');
+  }
+
+  function renderReport(year) {
+    const data = monthlyData[year];
+    const maxTotal = Math.max(...data.map(d => d.commission + d.referrals));
+
+    // Build chart
+    const chartEl = document.getElementById('monthChart');
+    chartEl.innerHTML = data.map(d => {
+      const total = d.commission + d.referrals;
+      const pct = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
+      return `<div class="chart-bar-wrap">
+        <div class="chart-bar-val">${total > 0 ? '$' + (total/1000).toFixed(1) + 'k' : ''}</div>
+        <div class="chart-bar" style="height:${Math.max(pct, total > 0 ? 4 : 0)}%" title="${d.month}: ${fmtDollar(total)}"></div>
+        <div class="chart-bar-label">${d.month}</div>
+      </div>`;
+    }).join('');
+
+    // Build table
+    const tbody = document.getElementById('monthlyTable');
+    let totalJobs = 0, totalVol = 0, totalComm = 0, totalRef = 0;
+    tbody.innerHTML = data.map(d => {
+      totalJobs += d.jobs;
+      totalVol += d.volume;
+      totalComm += d.commission;
+      totalRef += d.referrals;
+      const total = d.commission + d.referrals;
+      if (d.jobs === 0) return `<tr><td style="color:var(--stone)">${d.month}</td><td class="right" style="color:var(--stone)">—</td><td class="right" style="color:var(--stone)">—</td><td class="right" style="color:var(--stone)">—</td><td class="right" style="color:var(--stone)">—</td><td class="right" style="color:var(--stone)">—</td></tr>`;
+      return `<tr>
+        <td><div class="td-main">${d.month} ${year}</div></td>
+        <td class="right">${d.jobs}</td>
+        <td class="right">${fmtDollar(d.volume)}</td>
+        <td class="right td-amber">${fmtDollar(d.commission)}</td>
+        <td class="right td-green">${d.referrals > 0 ? fmtDollar(d.referrals) : '—'}</td>
+        <td class="right" style="font-weight:700;color:var(--chalk)">${fmtDollar(total)}</td>
+      </tr>`;
+    }).join('') + `<tr class="total-row">
+      <td class="td-main" style="color:var(--amber)">TOTAL ${year}</td>
+      <td class="right" style="font-weight:700">${totalJobs}</td>
+      <td class="right td-amber">${fmtDollar(totalVol)}</td>
+      <td class="right td-amber">${fmtDollar(totalComm)}</td>
+      <td class="right td-green">${fmtDollar(totalRef)}</td>
+      <td class="right" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;color:var(--amber)">${fmtDollar(totalComm + totalRef)}</td>
+    </tr>`;
+
+    // Update stat cards
+    const gross = totalComm + totalRef;
+    const expenses = Math.round(gross * 0.187);
+    const net = gross - expenses;
+    document.getElementById('grossRevenue').textContent = fmtDollar(gross);
+    document.getElementById('commissionRevenue').textContent = fmtDollar(totalComm);
+    document.getElementById('referralRevenue').textContent = fmtDollar(totalRef);
+    document.getElementById('totalExpenses').textContent = fmtDollar(expenses);
+    document.getElementById('netIncome').textContent = fmtDollar(net);
+  }
+
+  function downloadReport() {
+    alert('📄 Tax Summary PDF downloading...\n\nIncludes:\n• DirtBidder LLC name & EIN\n• Tax year ' + currentYear + '\n• Full income breakdown\n• All deductible expenses\n• Net income calculation\n• Accountant notes\n\n(Full PDF export available when app goes live)');
+  }
+
+  function downloadCSV() {
+    alert('📊 Transaction CSV downloading...\n\nIncludes every job transaction, date, amount, fees, and operator for ' + currentYear + '.\n\n(Available when app goes live)');
+  }
+
+  function downloadMonthly() {
+    alert('📅 Monthly breakdown CSV downloading...\n\n(Available when app goes live)');
+  }
+
+  function downloadReferral() {
+    alert('🤝 Referral income report downloading...\n\nBreaks down every referral click and conversion by partner for ' + currentYear + '.\n\n(Available when app goes live)');
+  }
+
+  function printReport() {
+    window.print();
+  }
+
+  // Init
+  renderReport(2026);
+</script>
+
+</body>
+</html>

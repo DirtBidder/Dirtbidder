@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DirtBidder — Cold Email Outreach Templates</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --amber-lt:#F5A94E; --dust:#C4A882; --stone:#8C7B6B; --chalk:#F2EDE6; --error:#E74C3C; --success:#27AE60; --sidebar:240px; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;background:var(--soil);color:var(--chalk);min-height:100vh;display:flex;}
+  .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--dig);border-right:1px solid rgba(196,168,130,0.08);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+  .sidebar-logo{padding:1.4rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.5rem;color:var(--chalk);text-decoration:none;display:block;}
+  .sidebar-logo span{color:var(--amber);}
+  .nav-section{padding:1rem 0;flex:1;}
+  .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1.5rem;font-size:0.88rem;color:var(--stone);cursor:pointer;border-left:3px solid transparent;}
+  .nav-item.active{color:var(--amber);border-left-color:var(--amber);background:rgba(232,137,42,0.07);}
+  .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:var(--dig);border-bottom:1px solid rgba(196,168,130,0.08);}
+  .topbar-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.3rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .topbar-badge{background:rgba(232,137,42,0.15);border:1px solid rgba(232,137,42,0.3);color:var(--amber);font-size:0.72rem;font-weight:600;padding:0.25rem 0.6rem;border-radius:20px;text-transform:uppercase;letter-spacing:0.05em;}
+  .content{padding:2rem;flex:1;}
+  .tabs{display:flex;gap:0.5rem;margin-bottom:2rem;}
+  .tab{padding:0.55rem 1.25rem;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;border:1px solid rgba(196,168,130,0.15);color:var(--stone);background:transparent;}
+  .tab.active{background:var(--amber);color:var(--soil);border-color:var(--amber);}
+  .template-panel{display:none;}
+  .template-panel.active{display:block;}
+  .template-card{background:var(--dig);border:1px solid rgba(196,168,130,0.08);border-radius:6px;margin-bottom:1.5rem;overflow:hidden;}
+  .template-header{padding:1.1rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);display:flex;align-items:center;justify-content:space-between;}
+  .template-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.05rem;text-transform:uppercase;letter-spacing:0.03em;}
+  .template-tag{font-size:0.7rem;font-weight:600;padding:0.2rem 0.55rem;border-radius:20px;text-transform:uppercase;letter-spacing:0.05em;}
+  .tag-operator{background:rgba(232,137,42,0.15);color:var(--amber-lt);border:1px solid rgba(232,137,42,0.25);}
+  .tag-client{background:rgba(39,174,96,0.12);color:#4CD07D;border:1px solid rgba(39,174,96,0.25);}
+  .tag-followup{background:rgba(196,168,130,0.1);color:var(--dust);border:1px solid rgba(196,168,130,0.2);}
+  .template-meta{padding:0.75rem 1.5rem;background:rgba(0,0,0,0.15);border-bottom:1px solid rgba(196,168,130,0.08);font-size:0.8rem;color:var(--stone);}
+  .template-meta strong{color:var(--chalk);}
+  .template-body{padding:1.5rem;font-size:0.88rem;line-height:1.75;color:var(--chalk);}
+  .template-body p{margin-bottom:0.85rem;}
+  .template-body p:last-child{margin-bottom:0;}
+  .highlight{color:var(--amber);font-style:italic;}
+  .copy-btn{display:inline-flex;align-items:center;gap:0.4rem;margin-top:1rem;background:rgba(232,137,42,0.12);border:1px solid rgba(232,137,42,0.3);color:var(--amber);font-size:0.78rem;font-weight:600;padding:0.45rem 1rem;border-radius:4px;cursor:pointer;font-family:'Barlow',sans-serif;text-transform:uppercase;letter-spacing:0.04em;}
+  .copy-btn:hover{background:rgba(232,137,42,0.22);}
+  .tips-box{background:rgba(232,137,42,0.06);border:1px solid rgba(232,137,42,0.2);border-radius:6px;padding:1.25rem 1.5rem;margin-bottom:2rem;}
+  .tips-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.95rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--amber);margin-bottom:0.75rem;}
+  .tips-list{list-style:none;display:flex;flex-direction:column;gap:0.45rem;}
+  .tips-list li{font-size:0.84rem;color:var(--dust);padding-left:1rem;position:relative;}
+  .tips-list li::before{content:'→';position:absolute;left:0;color:var(--amber);}
+  @media(max-width:900px){.sidebar{display:none}.main{margin-left:0}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
+  <nav class="nav-section">
+    <div class="nav-item">Dashboard</div>
+    <div class="nav-item">Job Status</div>
+    <div class="nav-item">Messages</div>
+    <div class="nav-item active">Outreach</div>
+  </nav>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Cold Email Outreach Templates</div>
+    <div class="topbar-badge">Ready to Send — Not Live Yet</div>
+  </div>
+
+  <div class="content">
+
+    <div class="tips-box">
+      <div class="tips-title">📋 Outreach Tips Before You Send</div>
+      <ul class="tips-list">
+        <li>Personalize the <span style="color:var(--amber)">[brackets]</span> with the person's real name and company before sending.</li>
+        <li>Send from a real inbox — daniel@dirtbidder.com looks far more credible than Gmail.</li>
+        <li>Operators: target Facebook groups, Craigslist "heavy equipment" ads, and equipment rental yards.</li>
+        <li>Clients: target general contractors, land developers, and real estate investors in your area.</li>
+        <li>Follow up once after 4–5 days if no response — most deals happen on the second touch.</li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('operators', this)">Operators</div>
+      <div class="tab" onclick="switchTab('clients', this)">Clients</div>
+      <div class="tab" onclick="switchTab('followups', this)">Follow-Ups</div>
+    </div>
+
+    <!-- OPERATORS -->
+    <div id="operators" class="template-panel active">
+
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">Operator Cold Outreach — Email #1</div>
+          <span class="template-tag tag-operator">Operator</span>
+        </div>
+        <div class="template-meta">
+          <strong>Subject:</strong> Get more excavation jobs in [City] — no monthly fees
+        </div>
+        <div class="template-body">
+          <p>Hey [First Name],</p>
+          <p>My name's Daniel — I'm the founder of DirtBidder, a new platform built specifically for excavation and earthwork operators like you.</p>
+          <p>Here's the quick version: clients post jobs (land clearing, grading, demolition, etc.), operators bid sealed, and DirtBidder handles the contracts, escrow, and payment. You get paid fast, protected.</p>
+          <p>No monthly subscription. No pay-to-play. We only make money when you make money — 5% on completed jobs.</p>
+          <p>We're building our operator roster in [City/Region] right now and I'd love to add [Company Name] to the platform. Takes about 10 minutes to get set up.</p>
+          <p><span class="highlight">→ Sign up free at www.dirtbidder.com</span></p>
+          <p>Happy to answer any questions — just reply here.</p>
+          <p>Daniel Smith<br>Founder, DirtBidder<br>daniel@dirtbidder.com</p>
+          <button class="copy-btn" onclick="copyTemplate(this)">📋 Copy Email</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">Operator — Equipment Rental Yard Drop</div>
+          <span class="template-tag tag-operator">Operator</span>
+        </div>
+        <div class="template-meta">
+          <strong>Subject:</strong> For your operators — a new way to find jobs
+        </div>
+        <div class="template-body">
+          <p>Hey [Manager Name],</p>
+          <p>I run DirtBidder — a job marketplace for excavation and earthwork operators. Clients post jobs, operators bid, we handle the payment and contracts.</p>
+          <p>I'd love to leave some cards here for your customers. A lot of operators are looking for steady work between rentals, and this gives them a way to find it without relying on word-of-mouth alone.</p>
+          <p>No cost to your business — just a resource for your guys.</p>
+          <p>Would that be okay? I can drop them off anytime this week.</p>
+          <p>Daniel Smith<br>Founder, DirtBidder<br>daniel@dirtbidder.com</p>
+          <button class="copy-btn" onclick="copyTemplate(this)">📋 Copy Email</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">Operator — Facebook Group DM</div>
+          <span class="template-tag tag-operator">Operator</span>
+        </div>
+        <div class="template-meta">
+          <strong>Channel:</strong> Facebook Groups / Direct Message
+        </div>
+        <div class="template-body">
+          <p>Hey [Name] — saw your post in the group. I started a platform called DirtBidder that connects excavation operators with clients who need earthwork done. Clients post jobs, you bid sealed, we handle payment and contracts. Free to join, 5% only on jobs you complete. Check it out at www.dirtbidder.com if you're interested in more work.</p>
+          <button class="copy-btn" onclick="copyTemplate(this)">📋 Copy Message</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CLIENTS -->
+    <div id="clients" class="template-panel">
+
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">Client Cold Outreach — General Contractor</div>
+          <span class="template-tag tag-client">Client</span>
+        </div>
+        <div class="template-meta">
+          <strong>Subject:</strong> Find excavation subs faster — DirtBidder
+        </div>
+        <div class="template-body">
+          <p>Hey [First Name],</p>
+          <p>Finding a reliable excavation sub on short notice is a headache — I know. That's exactly why I built DirtBidder.</p>
+          <p>It's a marketplace where you post your earthwork job (clearing, grading, demolition, ponds — anything), local operators bid on it, and you pick the best one. Payment goes through escrow so nobody gets burned.</p>
+          <p>No monthly fee to post. We take 5% on the client side only when you hire someone and the job is done.</p>
+          <p>If you've got a job coming up, post it free at <span class="highlight">www.dirtbidder.com</span> and see what bids come in. No obligation to hire.</p>
+          <p>Daniel Smith<br>Founder, DirtBidder<br>daniel@dirtbidder.com</p>
+          <button class="copy-btn" onclick="copyTemplate(this)">📋 Copy Email</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">Client — Land Developer / Real Estate Investor</div>
+          <span class="template-tag tag-client">Client</span>
+        </div>
+        <div class="template-meta">
+          <strong>Subject:</strong> Earthwork bids for your next project — faster
+        </div>
+        <div class="template-body">
+          <p>Hi [First Name],</p>
+          <p>If you're developing land, you know how long it takes to get excavation quotes. Calls that go unanswered, subs booked out for weeks.</p>
+          <p>DirtBidder fixes that. Post your job — clearing, grading, site prep, whatever — and get sealed bids from local operators within 24–48 hours. Escrow-protected payment. Simple contracts. No chasing checks.</p>
+          <p>It's free to post. We only charge 5% when you hire and the work is done.</p>
+          <p>Worth trying on your next project: <span class="highlight">www.dirtbidder.com</span></p>
+          <p>Daniel Smith<br>Founder, DirtBidder</p>
+          <button class="copy-btn" onclick="copyTemplate(this)">📋 Copy Email</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOLLOW-UPS -->
+    <div id="followups" class="template-panel">
+
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">Follow-Up #1 — Operator (Day 5)</div>
+          <span class="template-tag tag-followup">Follow-Up</span>
+        </div>
+        <div class="template-meta">
+          <strong>Subject:</strong> Re: Get more excavation jobs in [City]
+        </div>
+        <div class="template-body">
+          <p>Hey [First Name],</p>
+          <p>Just circling back on this — wanted to make sure my last email didn't get buried.</p>
+          <p>DirtBidder is building its operator list in [City] now. Once we go live, operators already on the platform get first look at incoming jobs. Takes 10 minutes to sign up.</p>
+          <p><span class="highlight">→ www.dirtbidder.com</span></p>
+          <p>No pressure — just didn't want you to miss it.</p>
+          <p>Daniel</p>
+          <button class="copy-btn" onclick="copyTemplate(this)">📋 Copy Email</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">Follow-Up #1 — Client (Day 5)</div>
+          <span class="template-tag tag-followup">Follow-Up</span>
+        </div>
+        <div class="template-meta">
+          <strong>Subject:</strong> Re: Earthwork bids for your next project
+        </div>
+        <div class="template-body">
+          <p>Hi [First Name],</p>
+          <p>Following up quickly — do you have any site work coming up in the next 30–60 days? Even if it's early, you can post the job now and start getting bids lined up before you need them.</p>
+          <p>Free to post, no obligation to hire: <span class="highlight">www.dirtbidder.com</span></p>
+          <p>Daniel</p>
+          <button class="copy-btn" onclick="copyTemplate(this)">📋 Copy Email</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchTab(id, el) {
+  document.querySelectorAll('.template-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+function copyTemplate(btn) {
+  const body = btn.closest('.template-body');
+  const paragraphs = [...body.querySelectorAll('p')].map(p => p.innerText).join('\n\n');
+  navigator.clipboard.writeText(paragraphs).then(() => {
+    const orig = btn.innerText;
+    btn.innerText = '✓ Copied!';
+    setTimeout(() => btn.innerText = orig, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
