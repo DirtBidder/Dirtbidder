@@ -1107,7 +1107,18 @@
     if (!success) {
       submitBtns.forEach(b => { b.disabled = false; });
       document.getElementById('clientProfile').querySelector('.submit-btn').textContent = 'Create My Account';
-      document.getElementById('operatorProfile').querySelector('.submit-btn').text
+      document.getElementById('operatorProfile').querySelector('.submit-btn').textContent = 'Create My Operator Account';
+    }
+  }
+
+  function goToDashboard() {
+    window.location.href = currentRole === 'client' ? 'dirtbidder-client-dashboard.html' : 'dirtbidder-dashboard.html';
+  }
+
+  function goToLogin() {
+    window.location.href = 'dirtbidder-login.html';
+  }
+
 
 </script>
   
