@@ -615,21 +615,21 @@
   }
 
   // Handle login
-  function handleLogin() {
+    const BACKEND_URL = 'https://dirtbidder-backend-production.up.railway.app';
+
+  async function handleLogin() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     let valid = true;
 
     clearErrors();
 
-    // Validate email
     if (!email || !email.includes('@')) {
       document.getElementById('emailError').classList.add('visible');
       document.getElementById('email').classList.add('error');
       valid = false;
     }
 
-    // Validate password
     if (!password) {
       document.getElementById('pwError').classList.add('visible');
       document.getElementById('password').classList.add('error');
@@ -638,32 +638,48 @@
 
     if (!valid) return;
 
-    // Show loading
     const btn = document.getElementById('signInBtn');
     const spinner = document.getElementById('btnSpinner');
     btn.disabled = true;
     spinner.classList.add('active');
     btn.childNodes[0].textContent = 'Signing In... ';
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const res = await fetch(BACKEND_URL + '/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+      });
+
+      const data = await res.json();
+
       btn.disabled = false;
       spinner.classList.remove('active');
       btn.childNodes[0].textContent = 'Sign In ';
 
-      // Demo: show error for wrong credentials, success for demo@dirtbidder.com
-      if (email === 'demo@dirtbidder.com' && password === 'demo1234') {
-        // Redirect to dashboard
-        alert('✓ Login successful! Redirecting to your dashboard...\n\n(Dashboard page coming up next in the build!)');
-      } else {
+      if (!res.ok) {
         document.getElementById('errorBanner').classList.add('visible');
         document.getElementById('email').classList.add('error');
         document.getElementById('password').classList.add('error');
-        document.getElementById('errorText').textContent =
-          'Incorrect email or password. Try: demo@dirtbidder.com / demo1234';
+        document.getElementById('errorText').textContent = data.error || 'Incorrect email or password.';
+        return;
       }
-    }, 1400);
+
+      if (data.token) {
+        localStorage.setItem('dirtbidder_token', data.token);
+      }
+
+      window.location.href = data.role === 'operator' ? 'dirtbidder-dashboard.html' : 'dirtbidder-client-dashboard.html';
+
+    } catch (err) {
+      btn.disabled = false;
+      spinner.classList.remove('active');
+      btn.childNodes[0].textContent = 'Sign In ';
+      document.getElementById('errorBanner').classList.add('visible');
+      document.getElementById('errorText').textContent = 'Could not connect to server. Please check your connection.';
+    }
   }
+
 
   // Handle Google sign in
   function handleGoogle() {
