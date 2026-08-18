@@ -904,22 +904,19 @@
   </div>
 </div>
 
-<script>
+<script>   const BACKEND_URL = 'https://dirtbidder-backend-production.up.railway.app';
+
   let currentRole = 'client';
   let currentStep = 1;
 
   function selectRole(role) {
     currentRole = role;
 
-    // Update left panel
     document.getElementById('leftClient').classList.toggle('selected', role === 'client');
     document.getElementById('leftOperator').classList.toggle('selected', role === 'operator');
-
-    // Update right panel step 1
     document.getElementById('roleClient').classList.toggle('selected', role === 'client');
     document.getElementById('roleOperator').classList.toggle('selected', role === 'operator');
 
-    // Update benefits
     const benefits = document.getElementById('benefitsList');
     if (role === 'client') {
       benefits.innerHTML = `
@@ -939,12 +936,36 @@
   }
 
   function goToStep(step) {
-    // Hide all panels
+    if (step === 3 && currentStep === 2) {
+      const email = document.getElementById('email').value;
+      const pw = document.getElementById('password').value;
+      const confirmPw = document.getElementById('confirmPw').value;
+
+      document.getElementById('emailError').classList.remove('visible');
+      document.getElementById('pwError').classList.remove('visible');
+
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        document.getElementById('emailError').classList.add('visible');
+        return;
+      }
+      if (!pw || pw.length < 8) {
+        alert('Password must be at least 8 characters.');
+        return;
+      }
+      if (pw !== confirmPw) {
+        document.getElementById('pwError').classList.add('visible');
+        return;
+      }
+      if (!document.getElementById('terms').checked) {
+        alert('Please agree to the Terms of Service and Payment & Escrow Policy to continue.');
+        return;
+      }
+    }
+
     document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('step' + step).classList.add('active');
     currentStep = step;
 
-    // Update step dots
     for (let i = 1; i <= 3; i++) {
       const dot = document.getElementById('dot' + i);
       const lbl = document.getElementById('lbl' + i);
@@ -954,18 +975,13 @@
       else if (i === step) { dot.classList.add('active'); dot.innerHTML = i; lbl.classList.add('active'); }
       else { dot.innerHTML = i; }
     }
-
-    // Update step lines
     for (let i = 1; i <= 2; i++) {
       document.getElementById('line' + i).classList.toggle('done', i < step);
     }
-
-    // Show correct profile on step 3
     if (step === 3) {
       document.getElementById('clientProfile').style.display = currentRole === 'client' ? 'block' : 'none';
       document.getElementById('operatorProfile').style.display = currentRole === 'operator' ? 'block' : 'none';
     }
-
     window.scrollTo(0, 0);
   }
 
@@ -974,9 +990,7 @@
     const bars = [document.getElementById('pwBar1'), document.getElementById('pwBar2'),
                   document.getElementById('pwBar3'), document.getElementById('pwBar4')];
     const label = document.getElementById('pwLabel');
-
     bars.forEach(b => b.className = 'pw-bar');
-
     if (pw.length === 0) { label.textContent = 'Enter a password'; return; }
     if (pw.length < 6) {
       bars[0].classList.add('weak');
@@ -1000,6 +1014,71 @@
     input.value = v;
   }
 
+  function collectProfileData() {
+    if (currentRole === 'client') {
+      return {
+        city: document.getElementById('clientCity').value,
+        zip: document.getElementById('clientZip').value,
+        jobType: document.getElementById('jobType').value,
+        acreage: document.getElementById('acreage').value,
+        timeline: document.getElementById('timeline').value
+      };
+    } else {
+      const equipmentBoxes = document.querySelectorAll('#operatorProfile .field-group > .field:nth-of-type(4) input[type="checkbox"]');
+      const equipmentLabels = ['Excavator','Bulldozer','Dump Truck','Skid Steer','Motor Grader','Compactor','Frontend Loader','Impact Hammer','Water Truck'];
+      const equipment = [];
+      equipmentBoxes.forEach((box, i) => { if (box.checked) equipment.push(equipmentLabels[i]); });
+
+      return {
+        companyName: document.getElementById('companyName').value,
+        zip: document.getElementById('opZip').value,
+        serviceRadius: document.getElementById('serviceRadius').value,
+        equipment: equipment,
+        yearsExp: document.getElementById('yearsExp').value
+      };
+    }
+  }
+
+  async function submitSignup() {
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    const password = document.getElementById('password').value;
+    const profile = collectProfileData();
+
+    try {
+      const res = await fetch(BACKEND_URL + '/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          name: firstName + ' ' + lastName,
+          phone: phone,
+          role: currentRole,
+          profile: profile
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert('Signup failed: ' + (data.error || 'Please try again.'));
+        return false;
+      }
+
+      if (data.token) {
+        localStorage.setItem('dirtbidder_token', data.token);
+      }
+      return true;
+
+    } catch (err) {
+      alert('Could not connect to server. Please check your connection and try again.');
+      return false;
+    }
+  }
+
   function completeOperatorRegistration() {
     const checks = ['hasInsurance', 'hasLicense', 'agreeDispute', 'agreeIndependent'];
     const labels = [
@@ -1019,35 +1098,18 @@
     completeRegistration();
   }
 
-  function completeRegistration() {
-    // Show success
-    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('successScreen').classList.add('active');
+  async function completeRegistration() {
+    const submitBtns = document.querySelectorAll('#step3 .submit-btn');
+    submitBtns.forEach(b => { b.disabled = true; b.textContent = 'Creating Account...'; });
 
-    // Update dots all done
-    for (let i = 1; i <= 3; i++) {
-      const dot = document.getElementById('dot' + i);
-      dot.classList.remove('active');
-      dot.classList.add('done');
-      dot.innerHTML = '✓';
-    }
-    document.getElementById('line1').classList.add('done');
-    document.getElementById('line2').classList.add('done');
+    const success = await submitSignup();
 
-    const msg = currentRole === 'client'
-      ? 'Your account is ready. Post your first job and start receiving bids within 72 hours.'
-      : 'Your operator account is ready. Set up your profile and start browsing local jobs.';
-    document.getElementById('successMsg').textContent = msg;
-  }
+    if (!success) {
+      submitBtns.forEach(b => { b.disabled = false; });
+      document.getElementById('clientProfile').querySelector('.submit-btn').textContent = 'Create My Account';
+      document.getElementById('operatorProfile').querySelector('.submit-btn').text
 
-  function goToDashboard() {
-    alert('Dashboard coming soon! This will take you to your ' + currentRole + ' dashboard.');
-  }
-
-  function goToLogin() {
-    alert('Login page coming soon!');
-  }
 </script>
-
+  
 </body>
 </html>
