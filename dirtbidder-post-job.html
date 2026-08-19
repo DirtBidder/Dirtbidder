@@ -1047,8 +1047,9 @@
 
   </div>
 </div>
-
 <script>
+  const API_BASE = 'https://dirtbidder-backend-production.up.railway.app';
+
   let currentStep = 1;
   let photoCount = 0;
   const photoEmojis = ['🌲','🏔️','🌾','🚜','🌄','📷','🗺️','🏗️'];
@@ -1057,7 +1058,6 @@
     document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
     document.getElementById('step' + step).classList.add('active');
 
-    // Update progress bar
     for (let i = 1; i <= 5; i++) {
       const ps = document.getElementById('ps' + i);
       ps.classList.remove('active','done');
@@ -1065,7 +1065,6 @@
       else if (i === step) ps.classList.add('active');
     }
 
-    // Update preview on step 5
     if (step === 5) updatePreview();
 
     currentStep = step;
@@ -1117,6 +1116,64 @@
     photoCount--;
   }
 
+  function getSelectedJobType() {
+    const btn = document.querySelector('.job-type-btn.selected');
+    return btn ? btn.querySelector('.jt-name').textContent.trim() : '';
+  }
+
+  function getSelectedEquipment() {
+    return Array.from(document.querySelectorAll('.equip-check.selected .equip-check-label'))
+      .map(el => el.textContent.trim());
+  }
+
+  function buildLocationString() {
+    const address = document.getElementById('address').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value;
+    const zip = document.getElementById('zip').value.trim();
+    const parts = [];
+    if (address) parts.push(address);
+    const cityState = [city, state].filter(Boolean).join(', ');
+    if (cityState) parts.push(cityState);
+    if (zip) parts.push(zip);
+    return parts.join(' — ');
+  }
+
+  function buildFullDescription() {
+    const desc = document.getElementById('jobDesc').value.trim();
+    const acreage = document.getElementById('acreage').value;
+    const terrain = document.getElementById('terrain').value;
+    const landState = document.getElementById('landState').value;
+    const soilType = document.getElementById('soilType').value;
+    const spoils = document.getElementById('spoils').value;
+    const access = document.getElementById('access').value.trim();
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const flexibility = document.getElementById('flexibility').value;
+    const minExp = document.getElementById('minExp').value;
+    const extraNotes = document.getElementById('extraNotes').value.trim();
+    const equipment = getSelectedEquipment();
+    const budgetMin = document.getElementById('budgetMin').value;
+    const budgetMax = document.getElementById('budgetMax').value;
+
+    let extra = [];
+    if (acreage) extra.push(`Size: ${acreage}`);
+    if (terrain) extra.push(`Terrain: ${terrain}`);
+    if (landState) extra.push(`Current land state: ${landState}`);
+    if (soilType) extra.push(`Soil: ${soilType}`);
+    if (spoils) extra.push(`Spoils/haul-off: ${spoils}`);
+    if (access) extra.push(`Site access: ${access}`);
+    if (startDate) extra.push(`Preferred start: ${startDate}`);
+    if (endDate) extra.push(`Must be done by: ${endDate}`);
+    if (flexibility) extra.push(`Timeline flexibility: ${flexibility}`);
+    if (minExp) extra.push(`Operator requirement: ${minExp}`);
+    if (equipment.length) extra.push(`Equipment requested: ${equipment.join(', ')}`);
+    if (budgetMin && budgetMax) extra.push(`Budget range given: $${Number(budgetMin).toLocaleString()} – $${Number(budgetMax).toLocaleString()}`);
+    if (extraNotes) extra.push(`Additional notes: ${extraNotes}`);
+
+    return desc + (extra.length ? '\n\n' + extra.join('\n') : '');
+  }
+
   function updatePreview() {
     const title = document.getElementById('jobTitle').value || 'Land Clearing — 12 Acres';
     const desc = document.getElementById('jobDesc').value || 'Need approximately 12 acres of wooded land cleared for a new residential development. Land has moderate to heavy tree cover — mostly pine and hardwood 6–18 inches diameter. Some rocky areas in the northwest corner.';
@@ -1140,11 +1197,72 @@
     }
   }
 
-  function publishJob() {
-    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-    document.getElementById('progressBar').style.display = 'none';
-    document.getElementById('successScreen').classList.add('active');
-    window.scrollTo(0, 0);
+  async function publishJob() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('You need to be signed in to post a job. Redirecting to login...');
+      window.location = 'dirtbidder-login.html';
+      return;
+    }
+
+    const title = document.getElementById('jobTitle').value.trim();
+    if (!title) {
+      alert('Please enter a job title (Step 1).');
+      goToStep(1);
+      return;
+    }
+
+    const budgetMin = document.getElementById('budgetMin').value;
+    const budgetMax = document.getElementById('budgetMax').value;
+    let budget = null;
+    if (budgetMin && budgetMax) budget = Math.round((Number(budgetMin) + Number(budgetMax)) / 2);
+    else if (budgetMax) budget = Number(budgetMax);
+    else if (budgetMin) budget = Number(budgetMin);
+
+    const payload = {
+      title: title,
+      description: buildFullDescription(),
+      location: buildLocationString(),
+      job_type: getSelectedJobType(),
+      acreage: document.getElementById('acreage').value,
+      timeline: document.getElementById('startTimeline').value,
+      budget: budget
+    };
+
+    const publishBtn = document.querySelector('.btn-publish');
+    const originalText = publishBtn.textContent;
+    publishBtn.disabled = true;
+    publishBtn.textContent = 'Posting...';
+
+    try {
+      const res = await fetch(API_BASE + '/api/jobs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert('Could not post job: ' + (data.error || 'Server error'));
+        publishBtn.disabled = false;
+        publishBtn.textContent = originalText;
+        return;
+      }
+
+      document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('progressBar').style.display = 'none';
+      document.getElementById('successScreen').classList.add('active');
+      window.scrollTo(0, 0);
+    } catch (err) {
+      console.error(err);
+      alert('Network error — could not reach the server. Please try again.');
+      publishBtn.disabled = false;
+      publishBtn.textContent = originalText;
+    }
   }
 
   function resetForm() {
@@ -1153,6 +1271,8 @@
     goToStep(1);
   }
 </script>
+
+
 
 </body>
 </html>
