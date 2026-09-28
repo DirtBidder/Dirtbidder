@@ -600,9 +600,9 @@
 <aside class="sidebar">
   <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
   <div class="sidebar-user">
-    <div class="avatar">DS</div>
+    <div class="avatar" id="userAvatar">··</div>
     <div>
-      <div class="user-name">Daniel Smith</div>
+      <div class="user-name" id="userName">Loading…</div>
       <div class="user-role">Client Account</div>
     </div>
   </div>
@@ -721,7 +721,7 @@
           <div class="field-row">
             <div class="field">
               <label>City <span class="field-req">*</span></label>
-              <input type="text" id="city" placeholder="Nashville" />
+              <input type="text" id="city" placeholder="e.g. Humboldt" />
             </div>
             <div class="field">
               <label>State <span class="field-req">*</span></label>
@@ -1006,15 +1006,9 @@
               <div class="preview-item-value" id="previewSpoils">—</div>
             </div>
           </div>
-          <div class="preview-desc" id="previewDesc">
-            Need approximately 12 acres of wooded land cleared for a new residential development. Land has moderate to heavy tree cover — mostly pine and hardwood 6–18 inches diameter. Some rocky areas in the northwest corner. Access via gravel road off County Road 45. Need all stumps ground and material hauled off site.
-          </div>
-          <div class="preview-tags">
-            <span class="preview-tag-pill">Land Clearing</span>
-            <span class="preview-tag-pill">Excavator</span>
-            <span class="preview-tag-pill">Bulldozer</span>
-            <span class="preview-tag-pill">Dump Truck</span>
-          </div>
+          <div class="preview-desc" id="previewDesc"></div>
+          <div class="preview-tags" id="previewTags"></div>
+          <div id="previewPhotos" style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.75rem"></div>
         </div>
       </div>
 
@@ -1051,6 +1045,20 @@
 </div>
 <script>
   const API_BASE = 'https://dirtbidder-backend-production.up.railway.app';
+
+  // Show the logged-in user in the sidebar
+  (async () => {
+    const t = localStorage.getItem('dirtbidder_token');
+    if (!t) { window.location.replace('dirtbidder-login.html'); return; }
+    try {
+      const r = await fetch(API_BASE + '/api/me', { headers: { 'Authorization': 'Bearer ' + t } });
+      if (r.status === 401) { localStorage.removeItem('dirtbidder_token'); window.location.replace('dirtbidder-login.html'); return; }
+      const me = await r.json();
+      const name = (me.name || me.email || '').trim();
+      document.getElementById('userName').textContent = name || 'My Account';
+      document.getElementById('userAvatar').textContent = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
+    } catch (e) { document.getElementById('userName').textContent = 'My Account'; }
+  })();
 
   let currentStep = 1;
   let photos = []; // resized JPEG data URLs, uploaded after the job is created
@@ -1208,19 +1216,19 @@
   }
 
   function updatePreview() {
-    const title = document.getElementById('jobTitle').value || 'Land Clearing — 12 Acres';
-    const desc = document.getElementById('jobDesc').value || 'Need approximately 12 acres of wooded land cleared for a new residential development. Land has moderate to heavy tree cover — mostly pine and hardwood 6–18 inches diameter. Some rocky areas in the northwest corner.';
+    const title = document.getElementById('jobTitle').value || '(No title yet)';
+    const desc = document.getElementById('jobDesc').value || '';
     const budgetMin = document.getElementById('budgetMin').value;
     const budgetMax = document.getElementById('budgetMax').value;
-    const city = document.getElementById('city').value || 'Nashville';
-    const state = document.getElementById('state').value || 'TN';
-    const acreage = document.getElementById('acreage').value || '10–20 acres';
-    const timeline = document.getElementById('startTimeline').value || 'ASAP';
-    const terrain = document.getElementById('terrain').value || 'Wooded / Heavy Brush';
+    const city = document.getElementById('city').value || '—';
+    const state = document.getElementById('state').value || '';
+    const acreage = document.getElementById('acreage').value || 'Not specified';
+    const timeline = document.getElementById('startTimeline').value || 'Not specified';
+    const terrain = document.getElementById('terrain').value || 'Not specified';
 
     document.getElementById('previewTitle').textContent = title;
     document.getElementById('previewDesc').textContent = desc;
-    document.getElementById('previewLocation').textContent = city + ', ' + state;
+    document.getElementById('previewLocation').textContent = state ? city + ', ' + state : city;
     document.getElementById('previewSize').textContent = acreage;
     document.getElementById('previewTimeline').textContent = timeline;
     document.getElementById('previewTerrain').textContent = terrain;
@@ -1228,7 +1236,13 @@
     const jt = document.querySelector('.job-type-btn.selected');
     const jtIcon = jt ? jt.querySelector('.jt-icon').textContent : '';
     const jtName = jt ? jt.querySelector('.jt-name').textContent : 'Job';
-    document.getElementById('previewTag').textContent = jtIcon + ' ' + jtName + ' · ' + city + ', ' + state;
+    document.getElementById('previewTag').textContent = jtIcon + ' ' + jtName + ' · ' + (state ? city + ', ' + state : city);
+    const pillEsc = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const pills = [jt ? jtName.trim() : ''].concat(getSelectedEquipment()).filter(Boolean);
+    document.getElementById('previewTags').innerHTML = pills.map(t => `<span class="preview-tag-pill">${pillEsc(t)}</span>`).join('');
+    document.getElementById('previewPhotos').innerHTML = photos.length
+      ? photos.map(src => `<img src="${src}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:3px">`).join('')
+      : '<span style="font-size:0.78rem;color:var(--stone)">No photos added</span>';
 
     if (budgetMin && budgetMax) {
       document.getElementById('previewBudget').textContent = '$' + Number(budgetMin).toLocaleString() + ' – $' + Number(budgetMax).toLocaleString();
