@@ -974,7 +974,7 @@
 
       <div class="preview-card" style="margin-bottom:1.25rem">
         <div class="preview-header">
-          <div class="preview-tag">🌲 Land Clearing · Nashville, TN</div>
+          <div class="preview-tag" id="previewTag">🌲 Land Clearing · Nashville, TN</div>
           <div class="preview-title" id="previewTitle">Land Clearing — 12 Acres</div>
         </div>
         <div class="preview-body">
@@ -1001,7 +1001,7 @@
             </div>
             <div>
               <div class="preview-item-label">Spoils</div>
-              <div class="preview-item-value">Haul off excess</div>
+              <div class="preview-item-value" id="previewSpoils">—</div>
             </div>
           </div>
           <div class="preview-desc" id="previewDesc">
@@ -1191,6 +1191,11 @@
     document.getElementById('previewSize').textContent = acreage;
     document.getElementById('previewTimeline').textContent = timeline;
     document.getElementById('previewTerrain').textContent = terrain;
+    document.getElementById('previewSpoils').textContent = document.getElementById('spoils').value || 'Not specified';
+    const jt = document.querySelector('.job-type-btn.selected');
+    const jtIcon = jt ? jt.querySelector('.jt-icon').textContent : '';
+    const jtName = jt ? jt.querySelector('.jt-name').textContent : 'Job';
+    document.getElementById('previewTag').textContent = jtIcon + ' ' + jtName + ' · ' + city + ', ' + state;
 
     if (budgetMin && budgetMax) {
       document.getElementById('previewBudget').textContent = '$' + Number(budgetMin).toLocaleString() + ' – $' + Number(budgetMax).toLocaleString();
