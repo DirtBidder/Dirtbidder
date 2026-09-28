@@ -1110,7 +1110,14 @@
       submitBtns.forEach(b => { b.disabled = false; });
       document.getElementById('clientProfile').querySelector('.submit-btn').textContent = 'Create My Account';
       document.getElementById('operatorProfile').querySelector('.submit-btn').textContent = 'Create My Operator Account';
+      return;
     }
+
+    // Success: hide the form, show the "You're In!" screen
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    const steps = document.querySelector('.steps');
+    if (steps) steps.style.display = 'none';
+    document.getElementById('successScreen').classList.add('active');
   }
 
   function goToDashboard() {
