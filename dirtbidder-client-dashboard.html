@@ -915,7 +915,7 @@
     const si = statusInfo(job);
     const meta = [esc(job.location)];
     if (detailed && job.budget) meta.push('Budget: ' + money(job.budget));
-    meta.push((si.cls === 'progress' ? 'Hired ' : 'Posted ') + ago(job.created_at));
+    meta.push(si.cls === 'progress' && job.hired_at ? 'Hired ' + ago(job.hired_at) : 'Posted ' + ago(job.created_at));
     let right = job.bid_count ? job.bid_count + (job.bid_count === 1 ? ' bid' : ' bids') : '0 bids';
     if (job.hired_operator_name || job.accepted_amount) right = money(job.accepted_amount) || '—';
     const click = job.pending_bid_count ? `onclick="showSection('bids')"` : '';
@@ -968,7 +968,9 @@
       ? "You haven't posted a job yet. Post one and local operators can start bidding."
       : pendingBids
         ? `You have ${pendingBids} bid${pendingBids === 1 ? '' : 's'} waiting across your jobs.`
-        : `You have ${active.length} active job${active.length === 1 ? '' : 's'}. We'll show bids here as they come in.`;
+        : inProgress && inProgress === active.length
+          ? `${inProgress === 1 ? 'Your job is' : inProgress + ' jobs are'} in progress.`
+          : `You have ${active.length} active job${active.length === 1 ? '' : 's'}. We'll show bids here as they come in.`;
 
     const bJobs = document.getElementById('badgeJobs');
     bJobs.textContent = active.length; bJobs.style.display = active.length ? '' : 'none';
