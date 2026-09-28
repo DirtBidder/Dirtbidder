@@ -1132,7 +1132,7 @@
     const state = document.getElementById('state').value;
     const zip = document.getElementById('zip').value.trim();
     const parts = [];
-    if (address) parts.push(address);
+    // Street address is private until an operator is hired (not stored publicly yet)
     const cityState = [city, state].filter(Boolean).join(', ');
     if (cityState) parts.push(cityState);
     if (zip) parts.push(zip);
@@ -1162,7 +1162,7 @@
     if (landState) extra.push(`Current land state: ${landState}`);
     if (soilType) extra.push(`Soil: ${soilType}`);
     if (spoils) extra.push(`Spoils/haul-off: ${spoils}`);
-    if (access) extra.push(`Site access: ${access}`);
+    // Site access notes (gate codes etc.) are private — not posted publicly
     if (startDate) extra.push(`Preferred start: ${startDate}`);
     if (endDate) extra.push(`Must be done by: ${endDate}`);
     if (flexibility) extra.push(`Timeline flexibility: ${flexibility}`);
