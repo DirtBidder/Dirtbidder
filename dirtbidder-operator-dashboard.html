@@ -963,6 +963,8 @@
         <div class="greeting-sub" id="greetSub">Loading jobs…</div>
       </div>
 
+      <div id="payoutBanner" class="card" style="display:none;margin-bottom:1rem;border-color:rgba(232,137,42,0.4)"></div>
+
       <div id="loadError" class="card" style="display:none;margin-bottom:1rem;border-color:var(--error)">
         <div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Couldn't load your dashboard</div><div class="empty-sub" id="loadErrorText">Check your connection and refresh.</div></div>
       </div>
@@ -1094,6 +1096,7 @@
     <!-- ── EARNINGS ── -->
     <div id="section-earnings" style="display:none">
       <div class="greeting"><div class="greeting-text">My <span>Earnings</span></div><div class="greeting-sub">Payments released to you by clients, after DirtBidder's fee</div></div>
+      <div class="card" style="margin-bottom:1rem"><div class="card-header"><div class="card-title">Payout Account</div></div><div id="payoutCard"></div></div>
       <div class="card"><div class="card-header"><div class="card-title">Released Payments</div></div><div id="earningsList"></div></div>
     </div>
 
@@ -1181,6 +1184,7 @@
   let jobs = [];     // open jobs visible to this operator
   let myBids = [];   // this operator's bids
   let escrows = [];  // payments on jobs I was hired for
+  let payout = null; // payout account status
   let currentJobId = null;
   let currentFilter = '';
 
@@ -1278,6 +1282,48 @@
     return '<div style="font-size:0.9rem;color:var(--stone)">Payment issue — contact support</div>';
   }
 
+  function renderPayout() {
+    const banner = document.getElementById('payoutBanner');
+    const card = document.getElementById('payoutCard');
+    if (!payout) { banner.style.display = 'none'; card.innerHTML = ''; return; }
+    const waiting = escrows.filter(e => e.status === 'released' && !e.paid_out);
+    const btn = (label) => `<button class="bid-btn" onclick="startPayoutSetup(this)">${label}</button>`;
+    let html;
+    if (payout.transfers_active) {
+      html = `<div style="padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div style="font-size:0.9rem;color:var(--success)">✓ Payouts are set up. Released payments go straight to your bank.</div>
+        <button class="bid-btn" style="background:transparent;border:1px solid var(--amber);color:var(--amber)" onclick="openPayoutDashboard(this)">View payouts &amp; bank</button></div>`;
+      banner.style.display = 'none';
+    } else {
+      const started = payout.connected;
+      html = `<div style="padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div style="font-size:0.88rem;color:var(--dust)">${started ? 'Payout setup isn\u2019t finished yet. Stripe needs a bit more info before we can pay you.' : 'Connect your bank through Stripe so you can get paid when clients release payment.'}</div>
+        ${btn(started ? 'Finish Payout Setup' : 'Set Up Payouts')}</div>`;
+      banner.innerHTML = `<div style="padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div style="font-size:0.88rem;color:var(--chalk)">🏦 <strong>${waiting.length ? 'You have money waiting.' : 'Get ready to get paid.'}</strong> <span style="color:var(--dust)">Connect your bank so released payments reach you.</span></div>
+        ${btn(started ? 'Finish Setup' : 'Set Up Payouts')}</div>`;
+      banner.style.display = '';
+    }
+    card.innerHTML = html;
+  }
+
+  async function startPayoutSetup(btn) {
+    btn.disabled = true;
+    try {
+      const r = await api('/api/connect/onboard', { method: 'POST' });
+      window.location.href = r.url;
+    } catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
+  async function openPayoutDashboard(btn) {
+    btn.disabled = true;
+    try {
+      const r = await api('/api/connect/dashboard', { method: 'POST' });
+      window.open(r.url, '_blank', 'noopener');
+    } catch (err) { alert(err.message); }
+    btn.disabled = false;
+  }
+
   function render() {
     const available = jobs.filter(j => !j.my_bid_id);
     const pending = myBids.filter(b => b.status === 'pending');
@@ -1292,7 +1338,8 @@
     const fmt2 = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.getElementById('earningsList').innerHTML = released.length
       ? released.map(e => `<div class="earnings-row"><div class="earnings-info"><div class="earnings-job">${esc(e.job_title)}</div>
-          <div class="earnings-client">${fmt2(e.amount)} job − ${fmt2(e.operator_fee)} DirtBidder fee · released ${ago(e.released_at)}</div></div>
+          <div class="earnings-client">${fmt2(e.amount)} job − ${fmt2(e.operator_fee)} DirtBidder fee · released ${ago(e.released_at)}</div>
+          <div class="earnings-client" style="color:${e.paid_out ? 'var(--success)' : 'var(--amber)'}">${e.paid_out ? '✓ Sent to your bank' : '⏳ Waiting on your payout setup'}</div></div>
           <div class="earnings-amount">${fmt2(e.operator_payout)}</div></div>`).join('')
       : empty('🏦', 'No earnings yet', 'When a client releases payment for a job you completed, it will show here');
 
@@ -1330,6 +1377,7 @@
       ? myBids.map(bidRow).join('')
       : empty('💰', 'No bids yet', 'Browse open jobs and submit your first bid');
 
+    renderPayout();
     document.getElementById('activeJobs').innerHTML = won.length
       ? won.map(b => `<div class="card" style="margin-bottom:1rem">${activeCard(b, true)}</div>`).join('')
       : `<div class="card">${empty('🚜', 'No active jobs', 'Jobs you’re hired for will show up here')}</div>`;
@@ -1345,6 +1393,7 @@
       document.getElementById('greetName').textContent = (name.split(/[\s@]/)[0] || 'there') + '.';
       jobs = list;
       myBids = bids;
+      payout = await api('/api/connect/status').catch(() => null);
       escrows = await api('/api/payments/mine').catch(() => []);
       render();
     } catch (err) {
@@ -1455,7 +1504,27 @@
     if (e.target === this) closeBidModal();
   });
 
-  if (token) load();
+  // Coming back from Stripe payout setup
+  (function () {
+    const q = new URLSearchParams(location.search);
+    const c = q.get('connect');
+    if (!c) return;
+    history.replaceState(null, '', location.pathname);
+    window.__afterConnect = c;
+  })();
+
+  if (token) load().then(() => {
+    if (window.__afterConnect === 'return') {
+      showSection('earnings');
+      if (payout && payout.transfers_active) {
+        alert(payout.payouts_sent_now ? 'Payouts are set up! Your waiting payment is on its way to your bank.' : 'Payouts are set up! Released payments will go straight to your bank.');
+      } else {
+        alert('Thanks! Stripe is still reviewing your info, or a step is missing. Check back here in a few minutes.');
+      }
+    } else if (window.__afterConnect === 'refresh') {
+      alert('That setup link expired. Tap Set Up Payouts to continue.');
+    }
+  });
   // Phone menu
   function toggleMenu(open) {
     const sb = document.querySelector('.sidebar');
