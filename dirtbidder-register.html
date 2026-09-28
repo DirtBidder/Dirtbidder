@@ -1114,7 +1114,7 @@
   }
 
   function goToDashboard() {
-    window.location.href = currentRole === 'client' ? 'dirtbidder-client-dashboard.html' : 'dirtbidder-dashboard.html';
+    window.location.href = currentRole === 'client' ? 'dirtbidder-client-dashboard.html' : 'dirtbidder-operator-dashboard.html';
   }
 
   function goToLogin() {
@@ -1122,6 +1122,11 @@
   }
 
 
+
+  // Preselect operator when arriving from "I'm an Operator" links (?role=operator)
+  document.addEventListener('DOMContentLoaded', function () {
+    if (new URLSearchParams(window.location.search).get('role') === 'operator') selectRole('operator');
+  });
 </script>
   
 </body>

@@ -1198,7 +1198,7 @@
   }
 
   async function publishJob() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('dirtbidder_token');
     if (!token) {
       alert('You need to be signed in to post a job. Redirecting to login...');
       window.location = 'dirtbidder-login.html';
