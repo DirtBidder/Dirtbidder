@@ -1088,12 +1088,15 @@
     icon.textContent = el.classList.contains('selected') ? '✓' : '';
   }
 
+  // DirtBidder fee for one side: 5% first $10K, 3% to $100K, 2% to $500K, 1% above (bracket style)
+  function dbFeePerSide(a){a=Number(a)||0;const t=[[10000,.05],[100000,.03],[500000,.02],[Infinity,.01]];let f=0,lo=0;for(const[hi,r]of t){if(a>lo)f+=(Math.min(a,hi)-lo)*r;lo=hi;}return f;}
+
   function updateBudgetPreview() {
     const min = document.getElementById('budgetMin').value;
     const max = document.getElementById('budgetMax').value;
     const preview = document.getElementById('budgetPreview');
     if (min && max) {
-      preview.innerHTML = `<span style="color:var(--amber);font-weight:600">$${Number(min).toLocaleString()} – $${Number(max).toLocaleString()}</span> · DirtBidder's 5% fee ($${Math.round(Number(max)*0.05).toLocaleString()} max) is added at checkout`;
+      preview.innerHTML = `<span style="color:var(--amber);font-weight:600">$${Number(min).toLocaleString()} – $${Number(max).toLocaleString()}</span> · DirtBidder's client fee (5% or less, about $${Math.round(dbFeePerSide(max)).toLocaleString()} max) is added at checkout`;
     } else if (min) {
       preview.textContent = `Budget minimum: $${Number(min).toLocaleString()}`;
     } else {

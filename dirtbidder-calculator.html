@@ -405,13 +405,13 @@
               <div class="result-row"><span class="result-label">Haul Off + Other</span><span class="result-value" id="jc_extracost">—</span></div>
               <div class="result-row"><span class="result-label">Total Job Cost</span><span class="result-value" id="jc_totalcost">—</span></div>
               <div class="result-row"><span class="result-label">Profit (at selected margin)</span><span class="result-value success" id="jc_profit">—</span></div>
-              <div class="result-row"><span class="result-label">DirtBidder Fee (5%)</span><span class="result-value" id="jc_dbfee">—</span></div>
+              <div class="result-row"><span class="result-label">DirtBidder Fee (5% or less)</span><span class="result-value" id="jc_dbfee">—</span></div>
             </div>
           </div>
           <div class="bid-helper" id="jc_bidhelper">
             <div class="bid-helper-title">✓ Recommended Bid Range</div>
             <div class="bid-range" id="jc_bidrange">—</div>
-            <div class="bid-note" id="jc_bidnote">This range covers your costs, your profit margin, and DirtBidder's 5% fee. The low end is your floor — don't go below it.</div>
+            <div class="bid-note" id="jc_bidnote">This range covers your costs, your profit margin, and DirtBidder's operator fee (5% or less). The low end is your floor — don't go below it.</div>
             <button class="use-bid-btn" onclick="alert('Opens the bid form with this price pre-filled — available when app goes live')">Use This Price in a Bid →</button>
           </div>
           <div class="card" style="margin-top:1.25rem">
@@ -764,6 +764,9 @@
 </div>
 
 <script>
+  // DirtBidder fee for one side: 5% first $10K, 3% to $100K, 2% to $500K, 1% above (bracket style)
+  function dbFeePerSide(a){a=Number(a)||0;const t=[[10000,.05],[100000,.03],[500000,.02],[Infinity,.01]];let f=0,lo=0;for(const[hi,r]of t){if(a>lo)f+=(Math.min(a,hi)-lo)*r;lo=hi;}return f;}
+
   // ── TAB SWITCHER ──
   function showCalc(name, btn) {
     document.querySelectorAll('.calc-section').forEach(s => s.classList.remove('active'));
@@ -842,7 +845,7 @@
     const totalCost = equipCost + fuelCost + laborCost + haul + other;
     const profit = totalCost * margin;
     const subtotal = totalCost + profit;
-    const dbFee = subtotal * 0.05;
+    const dbFee = dbFeePerSide(subtotal);
     const bidMin = subtotal + dbFee;
     const bidMax = bidMin * 1.15;
     document.getElementById('jc_totalhours').textContent = fmt(totalHours) + ' hrs';
