@@ -858,6 +858,14 @@
     .topbar-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   }
   @media (max-width: 480px) { #availLabel { display: none; } }
+  @media (max-width: 600px) {
+    .topbar { padding: 0.75rem 1rem; gap: 0.5rem; }
+    .topbar-title { font-size: 1rem; }
+    .topbar-right { gap: 0.5rem; flex-shrink: 0; }
+    .post-job-btn { white-space: nowrap; padding: 0.55rem 0.8rem; font-size: 0.72rem; }
+    .job-title, .job-card-title, .bid-job-title { white-space: normal; overflow: visible; text-overflow: clip; }
+    .job-row { padding: 0.9rem 1rem; gap: 0.75rem; }
+  }
 </style>
 </head>
 <body>
@@ -933,7 +941,7 @@
   <div class="topbar">
     <div class="topbar-left">
       <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">☰</button>
-      <div class="topbar-title" id="topbarTitle">Operator Dashboard</div>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
     </div>
     <div class="topbar-right">
       <div class="availability-toggle" onclick="toggleAvailability()">
@@ -1323,7 +1331,7 @@
       item.classList.toggle('active', (item.getAttribute('onclick') || '').includes("'" + name + "'"));
     });
     const titles = {
-      overview:'Operator Dashboard', browse:'Browse Jobs', mybids:'My Bids',
+      overview:'Dashboard', browse:'Browse Jobs', mybids:'My Bids',
       active:'Active Jobs', earnings:'Earnings', equipment:'My Equipment',
       partners:'Equipment Resources', messages:'Messages', reviews:'My Reviews',
       profile:'Edit Profile', settings:'Settings'
