@@ -689,7 +689,11 @@
   /* ── MOBILE ── */
   @media (max-width: 768px) {
     nav { padding: 0.9rem 1.25rem; }
-    .nav-links { display: none; }
+    .nav-links { gap: 1rem; }
+    .nav-links a[href^="#"]:not(.btn-nav) { display: none; }
+    .nav-links a { font-size: 0.8rem; }
+    .btn-nav { padding: 0.45rem 0.9rem; }
+    .hero-bg { background: none; }
     .hero { padding: 7rem 1.25rem 3rem; }
     .hero-stats { gap: 1.5rem; }
     .who-inner { grid-template-columns: 1fr; }
@@ -757,6 +761,7 @@
     <a href="#how-it-works">How It Works</a>
     <a href="#for-who">Who It's For</a>
     <a href="#jobs">Job Types</a>
+    <a href="dirtbidder-login.html">Log In</a>
     <a href="#register" class="btn-nav">Get Started</a>
   </div>
 </nav>
