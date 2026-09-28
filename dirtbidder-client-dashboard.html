@@ -331,7 +331,7 @@
   /* TWO COLUMN LAYOUT */
   .two-col {
     display: grid;
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     gap: 1.5rem;
     margin-bottom: 2rem;
   }
@@ -673,6 +673,11 @@
   }
 
   .empty-sub { font-size: 0.8rem; color: var(--clay); }
+
+  /* Stack the two cards before the job list gets too narrow */
+  @media (max-width: 1200px) {
+    .two-col { grid-template-columns: minmax(0, 1fr); }
+  }
 
   /* MOBILE */
   @media (max-width: 900px) {
