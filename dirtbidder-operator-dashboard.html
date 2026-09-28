@@ -838,6 +838,26 @@
     .content { padding: 1.25rem; }
     .topbar { padding: 1rem; }
   }
+  /* PHONE MENU */
+  .menu-btn {
+    display: none;
+    background: none; border: 1px solid rgba(196,168,130,0.2); border-radius: 3px;
+    color: var(--chalk); font-size: 1.2rem; line-height: 1;
+    width: 40px; height: 40px; margin-right: 0.75rem; cursor: pointer; flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; min-width: 0; }
+  .sidebar { overflow-y: auto; }
+  .sidebar-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 45;
+  }
+  @media (max-width: 900px) {
+    .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+    .sidebar { transition: transform 0.25s ease; }
+    .sidebar.open { transform: translateX(0) !important; }
+    .sidebar-backdrop.open { display: block; }
+    .topbar-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  }
+  @media (max-width: 480px) { #availLabel { display: none; } }
 </style>
 </head>
 <body>
@@ -905,11 +925,16 @@
   </div>
 </aside>
 
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMenu(false)"></div>
+
 <!-- MAIN -->
 <div class="main">
 
   <div class="topbar">
-    <div class="topbar-title" id="topbarTitle">Operator Dashboard</div>
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">☰</button>
+      <div class="topbar-title" id="topbarTitle">Operator Dashboard</div>
+    </div>
     <div class="topbar-right">
       <div class="availability-toggle" onclick="toggleAvailability()">
         <div class="toggle-switch" id="availToggle">
@@ -1384,6 +1409,14 @@
   });
 
   if (token) load();
+  // Phone menu
+  function toggleMenu(open) {
+    const sb = document.querySelector('.sidebar');
+    const isOpen = typeof open === 'boolean' ? open : !sb.classList.contains('open');
+    sb.classList.toggle('open', isOpen);
+    document.getElementById('sidebarBackdrop').classList.toggle('open', isOpen);
+  }
+  document.querySelectorAll('.sidebar .nav-item').forEach(el => el.addEventListener('click', () => toggleMenu(false)));
 </script>
 
 </body>
