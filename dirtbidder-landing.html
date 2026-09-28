@@ -37,7 +37,8 @@
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 2rem;
-    background: rgba(28,20,16,0.92);
+    background: rgba(28,20,16,0.96);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid rgba(232,137,42,0.15);
   }
@@ -53,7 +54,8 @@
 
   .nav-logo span { color: var(--amber); }
 
-  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links { display: flex; gap: 2rem; align-items: center; flex-shrink: 0; position: relative; z-index: 1; }
+  .nav-links a { white-space: nowrap; }
 
   .nav-links a {
     font-family: 'Barlow Semi Condensed', sans-serif;
@@ -749,6 +751,10 @@
   .db-send:hover { background: var(--amber-lt); }
   .db-bubble a { color: var(--amber); text-decoration: underline; font-weight: 600; }
   .db-msg.user .db-bubble a { color: var(--soil); }
+  @media (max-width: 480px) {
+    .hero-stats { flex-wrap: wrap; gap: 1.75rem 2rem; padding-right: 4.5rem; }
+    .hero-stats > div { flex: 1 1 40%; }
+  }
   @media (max-width: 480px) { .db-chat-window { width: calc(100vw - 2rem); right: 1rem; bottom: 5rem; } }
 </style>
 </head>
@@ -786,8 +792,8 @@
     </div>
     <div class="hero-stats">
       <div>
-        <div class="stat-num">≤5<span>%</span></div>
-        <div class="stat-label">Fee per side — lower on big jobs, only when work gets done</div>
+        <div class="stat-num">5<span>%</span></div>
+        <div class="stat-label">Max fee per side — lower on big jobs</div>
       </div>
       <div>
         <div class="stat-num">$0</div>
