@@ -1093,8 +1093,8 @@
 
     <!-- ── EARNINGS ── -->
     <div id="section-earnings" style="display:none">
-      <div class="greeting"><div class="greeting-text">My <span>Earnings</span></div><div class="greeting-sub">Payouts go straight to your bank through Stripe once escrow is live</div></div>
-      <div class="card"><div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">No earnings yet</div><div class="empty-sub">When a client releases payment for a job you completed, it will show here</div></div></div>
+      <div class="greeting"><div class="greeting-text">My <span>Earnings</span></div><div class="greeting-sub">Payments released to you by clients, after DirtBidder's fee</div></div>
+      <div class="card"><div class="card-header"><div class="card-title">Released Payments</div></div><div id="earningsList"></div></div>
     </div>
 
     <!-- ── EQUIPMENT ── -->
@@ -1180,6 +1180,7 @@
   let isAvailable = true;
   let jobs = [];     // open jobs visible to this operator
   let myBids = [];   // this operator's bids
+  let escrows = [];  // payments on jobs I was hired for
   let currentJobId = null;
   let currentFilter = '';
 
@@ -1250,21 +1251,40 @@
         <div>${lbl('Client')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.client_name || '—')}</div></div>
         <div>${lbl('Location')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_location || '—')}</div></div>
         <div>${lbl('Agreed Price')}<div style="font-size:0.9rem;color:var(--amber);font-weight:600">${money(b.amount)}</div></div>
-        <div>${lbl('Payment')}<div style="font-size:0.9rem;color:var(--stone)">Escrow coming soon</div></div>
+        <div>${lbl('Payment')}${payInfo(b)}</div>
       </div>
+      ${b.job_status === 'in_progress' ? `<button class="bid-btn" onclick="markComplete(${b.job_id})" style="background:var(--success);margin-top:1rem">✓ Mark Job Complete</button>`
+        : b.job_status === 'awaiting_release' ? `<div style="margin-top:1rem;font-size:0.82rem;color:var(--amber)">Marked complete — waiting on the client to release payment</div>` : ''}
       ${full && b.job_timeline ? `<div style="margin-top:1rem">${lbl('Timeline')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_timeline)}</div></div>` : ''}
     </div>`;
+  }
+
+  function payInfo(b) {
+    const e = escrows.find(x => x.job_id === b.job_id);
+    if (!e) return '<div style="font-size:0.9rem;color:var(--stone)">Not funded through escrow</div>';
+    const out = '$' + Number(e.operator_payout).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (e.status === 'held') return `<div style="font-size:0.9rem;color:var(--success)">🔒 Funded — you get ${out}</div>`;
+    if (e.status === 'released') return `<div style="font-size:0.9rem;color:var(--success)">✓ Released — ${out}</div>`;
+    return '<div style="font-size:0.9rem;color:var(--stone)">Payment issue — contact support</div>';
   }
 
   function render() {
     const available = jobs.filter(j => !j.my_bid_id);
     const pending = myBids.filter(b => b.status === 'pending');
-    const won = myBids.filter(b => b.status === 'accepted');
+    const allWon = myBids.filter(b => b.status === 'accepted');
+    const won = allWon.filter(b => b.job_status === 'in_progress' || b.job_status === 'awaiting_release');
 
     document.getElementById('statOpen').textContent = jobs.length;
     document.getElementById('statOpenSub').textContent = available.length ? available.length + ' you haven’t bid on' : (jobs.length ? 'You’ve bid on all of them' : 'Check back soon');
     document.getElementById('statPending').textContent = pending.length;
-    document.getElementById('statWon').textContent = won.length;
+    document.getElementById('statWon').textContent = allWon.length;
+    const released = escrows.filter(e => e.status === 'released');
+    const fmt2 = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('earningsList').innerHTML = released.length
+      ? released.map(e => `<div class="earnings-row"><div class="earnings-info"><div class="earnings-job">${esc(e.job_title)}</div>
+          <div class="earnings-client">${fmt2(e.amount)} job − ${fmt2(e.operator_fee)} DirtBidder fee · released ${ago(e.released_at)}</div></div>
+          <div class="earnings-amount">${fmt2(e.operator_payout)}</div></div>`).join('')
+      : empty('🏦', 'No earnings yet', 'When a client releases payment for a job you completed, it will show here');
 
     document.getElementById('greetSub').textContent = available.length
       ? `${available.length} open job${available.length === 1 ? '' : 's'} ready for your bid.`
@@ -1315,6 +1335,7 @@
       document.getElementById('greetName').textContent = (name.split(/[\s@]/)[0] || 'there') + '.';
       jobs = list;
       myBids = bids;
+      escrows = await api('/api/payments/mine').catch(() => []);
       render();
     } catch (err) {
       if (err.message === 'Session expired') return;
@@ -1387,6 +1408,14 @@
       errEl.textContent = err.message; errEl.style.display = '';
       btn.disabled = false;
     }
+  }
+
+  async function markComplete(jobId) {
+    if (!confirm('Mark this job complete?\n\nThe client will be asked to confirm and release your payment.')) return;
+    try {
+      await api('/api/jobs/' + jobId + '/complete', { method: 'POST' });
+      await load();
+    } catch (err) { alert(err.message); }
   }
 
   function openPartner(partner) {

@@ -821,8 +821,8 @@
         </div>
         <div class="stat-card">
           <div class="stat-label">Held in Escrow</div>
-          <div class="stat-value">$<span>0</span></div>
-          <div class="stat-change neutral">Escrow coming soon</div>
+          <div class="stat-value">$<span id="statEscrow">0</span></div>
+          <div class="stat-change neutral" id="statEscrowSub">Escrow coming soon</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Jobs Completed</div>
@@ -865,8 +865,8 @@
     </div>
 
     <div id="section-payments" style="display:none">
-      <div class="greeting"><div class="greeting-text">Payments &amp; <span>Escrow</span></div><div class="greeting-sub">Payments will be held securely by Stripe until you release them</div></div>
-      <div class="card"><div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">No payments yet</div><div class="empty-sub">When you hire an operator, the job amount will be held in escrow here until the work is done</div></div></div>
+      <div class="greeting"><div class="greeting-text">Payments &amp; <span>Escrow</span></div><div class="greeting-sub">Your payment is held securely by Stripe until you release it to the operator</div></div>
+      <div class="card"><div id="paymentsList"></div></div>
     </div>
 
     <div id="section-messages" style="display:none">
@@ -900,6 +900,12 @@
 
   let jobs = [];
   let bidsByJob = {}; // jobId -> [bids]
+  let escrows = [];   // payments held / released
+  let paymentsOn = false;
+
+  // DirtBidder fee for one side: 5% first $10K, 3% to $100K, 2% to $500K, 1% above (bracket style)
+  function dbFeePerSide(a){a=Number(a)||0;const t=[[10000,.05],[100000,.03],[500000,.02],[Infinity,.01]];let f=0,lo=0;for(const[hi,r]of t){if(a>lo)f+=(Math.min(a,hi)-lo)*r;lo=hi;}return Math.round(f*100)/100;}
+  function money2(n){ return '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
   // ── helpers ──
   function esc(v) {
@@ -936,6 +942,7 @@
   function statusInfo(job) {
     const st = job.status;
     if (st === 'completed') return { label: 'Complete', cls: 'complete' };
+    if (st === 'awaiting_release') return { label: 'Done — Release Pay', cls: 'hired' };
     if (st === 'in_progress') return { label: 'In Progress', cls: 'progress' };
     if (st === 'hired') return { label: 'Hired', cls: 'hired' };
     if (job.pending_bid_count > 0) return { label: 'Bidding', cls: 'bidding' };
@@ -951,12 +958,16 @@
     let right = job.bid_count ? job.bid_count + (job.bid_count === 1 ? ' bid' : ' bids') : '0 bids';
     if (job.hired_operator_name || job.accepted_amount) right = money(job.accepted_amount) || '—';
     const click = job.pending_bid_count ? `onclick="showSection('bids')"` : '';
+    const heldHere = escrows.find(e => e.job_id === job.id && e.status === 'held');
+    const releaseBtn = heldHere && (job.status === 'awaiting_release' || job.status === 'in_progress')
+      ? `<button class="release-btn" style="margin-left:0.5rem" onclick="event.stopPropagation();releasePayment(${job.id})">Release ${money(heldHere.amount)}</button>` : '';
     return `<div class="job-row" ${click}>
       <div class="job-status-dot dot-${si.cls}"></div>
       <div class="job-info"><div class="job-title">${esc(job.title)}</div>
         <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div></div>
       <div class="job-bids">${right}</div>
       <div class="job-badge badge-${si.cls}">${si.label}</div>
+      ${releaseBtn}
     </div>`;
   }
 
@@ -987,7 +998,7 @@
   function render() {
     const active = jobs.filter(isActive);
     const done = jobs.filter(j => j.status === 'completed').length;
-    const inProgress = jobs.filter(j => j.status === 'in_progress').length;
+    const inProgress = jobs.filter(j => j.status === 'in_progress' || j.status === 'awaiting_release').length;
     const pendingBids = jobs.reduce((n, j) => n + (j.pending_bid_count || 0), 0);
 
     document.getElementById('statActive').textContent = active.length;
@@ -995,6 +1006,22 @@
     document.getElementById('statBids').textContent = pendingBids;
     document.getElementById('statBidsSub').textContent = pendingBids ? 'Ready to review' : 'None yet';
     document.getElementById('statDone').textContent = done;
+    const held = escrows.filter(e => e.status === 'held');
+    document.getElementById('statEscrow').textContent = Number(held.reduce((n, e) => n + Number(e.amount), 0)).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    document.getElementById('statEscrowSub').textContent = held.length ? held.length + ' job' + (held.length === 1 ? '' : 's') + ' funded' : (paymentsOn ? 'Nothing held' : 'Escrow coming soon');
+
+    const payRow = e => {
+      const st = e.status === 'held' ? '<div class="payment-status status-held">🔒 Held in Escrow</div>'
+        : e.status === 'released' ? '<div class="payment-status status-release">✓ Released</div>'
+        : '<div class="payment-status" style="color:var(--error)">Refund pending</div>';
+      const btn = e.status === 'held' ? `<button class="release-btn" onclick="releasePayment(${e.job_id})">Release Funds</button>` : '';
+      return `<div class="payment-row"><div class="payment-info"><div class="payment-job">${esc(e.job_title)}</div>
+        <div class="payment-op">You paid ${money2(e.client_total)} (${money2(e.amount)} job + ${money2(e.client_fee)} fee)</div></div>
+        <div><div class="payment-amount">${money(e.amount)}</div>${st}</div>${btn}</div>`;
+    };
+    document.getElementById('paymentsList').innerHTML = escrows.length
+      ? escrows.map(payRow).join('')
+      : empty('🏦', 'No payments yet', 'When you hire an operator, the job amount is held in escrow here until you release it');
 
     document.getElementById('greetSub').textContent = !jobs.length
       ? "You haven't posted a job yet. Post one and local operators can start bidding."
@@ -1058,6 +1085,9 @@
       document.getElementById('greetWord').textContent = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
 
       jobs = list;
+      const [pStatus, pList] = await Promise.all([api('/api/payments/status').catch(() => ({})), api('/api/payments/mine').catch(() => [])]);
+      paymentsOn = !!pStatus.enabled;
+      escrows = pList;
       const needBids = jobs.filter(j => j.bid_count > 0);
       const results = await Promise.all(needBids.map(j => api('/api/jobs/' + j.id + '/bids').catch(() => [])));
       bidsByJob = {};
@@ -1087,12 +1117,46 @@
   }
 
   async function acceptBid(id, btn) {
-    if (!confirm('Hire this operator? The other bids on this job will be declined.')) return;
+    let bid = null;
+    Object.values(bidsByJob).forEach(l => l.forEach(b => { if (b.id === id) bid = b; }));
+    const amt = bid ? Number(bid.amount) : 0;
+    const fee = dbFeePerSide(amt);
+    const msg = paymentsOn
+      ? `Hire this operator?\n\nYou'll pay ${money2(amt + fee)} now (${money2(amt)} job + ${money2(fee)} DirtBidder fee). It's held in escrow and only released to the operator when you say the job is done.\n\nThe other bids on this job will be declined.`
+      : 'Hire this operator? The other bids on this job will be declined.';
+    if (!confirm(msg)) return;
     btn.disabled = true;
     try {
-      await api('/api/bids/' + id + '/accept', { method: 'POST' });
+      const r = await api('/api/bids/' + id + '/accept', { method: 'POST' });
+      if (r.checkout_url) { window.location.href = r.checkout_url; return; }
       await load();
     } catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
+  async function releasePayment(jobId) {
+    const e = escrows.find(x => x.job_id === jobId && x.status === 'held');
+    const job = jobs.find(j => j.id === jobId);
+    const who = job && job.hired_operator_name ? job.hired_operator_name : 'the operator';
+    if (!confirm(`Release ${e ? money2(e.amount) : 'the payment'} to ${who}?\n\nOnly do this when the job is done to your satisfaction. This can't be undone.`)) return;
+    try {
+      await api('/api/jobs/' + jobId + '/release', { method: 'POST' });
+      await load();
+      alert('Payment released. The job is marked complete.');
+    } catch (err) { alert(err.message); }
+  }
+
+  // Coming back from Stripe Checkout
+  async function handleCheckoutReturn() {
+    const q = new URLSearchParams(location.search);
+    const sid = q.get('session_id');
+    const cancelled = q.get('payment') === 'cancelled';
+    if (!sid && !cancelled) return;
+    history.replaceState(null, '', location.pathname);
+    if (cancelled) { alert('Payment cancelled. The operator was not hired. You can accept the bid again any time.'); return; }
+    try {
+      await api('/api/payments/confirm', { method: 'POST', body: JSON.stringify({ session_id: sid }) });
+      alert('Payment received and held in escrow. Your operator is hired!');
+    } catch (err) { alert(err.message); }
   }
 
   async function declineBid(id, btn) {
@@ -1109,7 +1173,7 @@
     window.location.href = 'dirtbidder-login.html';
   }
 
-  if (token) load();
+  if (token) handleCheckoutReturn().then(load);
   // Phone menu
   function toggleMenu(open) {
     const sb = document.querySelector('.sidebar');
