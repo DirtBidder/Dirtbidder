@@ -945,7 +945,8 @@
     }
     return `<div class="bid-card">
       <div class="bid-top"><div class="bid-operator">🚜 ${who}</div><div class="bid-price">${money(bid.amount)}</div></div>
-      <div class="bid-job">${compact ? esc(job.title) + ' · ' : ''}${ago(bid.created_at)}${msg ? ' · ' + msg : ''}</div>
+      <div class="bid-job">${[compact ? esc(job.title) : '', bid.est_days ? bid.est_days + ' day' + (bid.est_days == 1 ? '' : 's') + ' est.' : '', bid.equipment ? esc(bid.equipment) : '', ago(bid.created_at)].filter(Boolean).join(' · ')}</div>
+      ${msg && !compact ? `<div class="bid-job" style="color:var(--dust);margin-top:0.35rem">“${msg}”</div>` : ''}
       ${actions}
     </div>`;
   }
