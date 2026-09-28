@@ -950,6 +950,15 @@
   }
   const isActive = j => j.status !== 'completed' && j.status !== 'cancelled';
 
+  // Job photo thumbnails (tap opens full size)
+  function photoStrip(job) {
+    const p = Array.isArray(job.photos) ? job.photos : [];
+    if (!p.length) return '';
+    return `<div style="display:flex;gap:0.4rem;margin:0.5rem 0;overflow-x:auto" onclick="event.stopPropagation()">` +
+      p.map(t => `<a href="${API_BASE}/api/photos/${encodeURIComponent(t)}" target="_blank" rel="noopener"><img src="${API_BASE}/api/photos/${encodeURIComponent(t)}" alt="Site photo" loading="lazy" style="width:64px;height:64px;object-fit:cover;border-radius:3px;border:1px solid rgba(196,168,130,0.15);display:block"></a>`).join('') +
+      `</div>`;
+  }
+
   function jobRow(job, detailed) {
     const si = statusInfo(job);
     const meta = [esc(job.location)];
@@ -964,7 +973,7 @@
     return `<div class="job-row" ${click}>
       <div class="job-status-dot dot-${si.cls}"></div>
       <div class="job-info"><div class="job-title">${esc(job.title)}</div>
-        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div></div>
+        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div>${detailed ? photoStrip(job) : ''}</div>
       <div class="job-bids">${right}</div>
       <div class="job-badge badge-${si.cls}">${si.label}</div>
       ${releaseBtn}

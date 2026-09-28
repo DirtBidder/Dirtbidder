@@ -1214,6 +1214,15 @@
     return data;
   }
 
+  // Job photo thumbnails (tap opens full size)
+  function photoStrip(job) {
+    const p = Array.isArray(job.photos) ? job.photos : [];
+    if (!p.length) return '';
+    return `<div style="display:flex;gap:0.4rem;margin:0.5rem 0;overflow-x:auto" onclick="event.stopPropagation()">` +
+      p.map(t => `<a href="${API_BASE}/api/photos/${encodeURIComponent(t)}" target="_blank" rel="noopener"><img src="${API_BASE}/api/photos/${encodeURIComponent(t)}" alt="Site photo" loading="lazy" style="width:64px;height:64px;object-fit:cover;border-radius:3px;border:1px solid rgba(196,168,130,0.15);display:block"></a>`).join('') +
+      `</div>`;
+  }
+
   function jobCard(job) {
     const tags = [];
     if (job.job_type) tags.push(`<span class="tag">${esc(job.job_type)}</span>`);
@@ -1229,6 +1238,7 @@
     return `<div class="job-card" ${job.my_bid_id ? '' : `onclick="openBidModal(${job.id})"`}>
       <div class="job-card-top"><div class="job-card-title">${esc(job.title)}</div><div class="job-budget">${job.budget ? money(job.budget) : ''}</div></div>
       ${job.description ? `<div class="job-card-meta" style="margin-bottom:0.4rem;color:var(--dust)">${esc(job.description.length > 160 ? job.description.slice(0, 160) + '…' : job.description)}</div>` : ''}
+      ${photoStrip(job)}
       <div class="job-tags">${tags.join('')}</div>
       <div class="job-card-meta">${meta.join(' · ')}</div>
       <div class="job-card-footer"><div class="bid-count">${count}</div>${action}</div>
