@@ -669,7 +669,7 @@
         localStorage.setItem('dirtbidder_token', data.token);
       }
 
-      window.location.href = data.role === 'operator' ? 'dirtbidder-operator-dashboard.html' : 'dirtbidder-client-dashboard.html';
+      window.location.href = (data.user && data.user.role) === 'operator' ? 'dirtbidder-operator-dashboard.html' : 'dirtbidder-client-dashboard.html';
 
     } catch (err) {
       btn.disabled = false;

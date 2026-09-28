@@ -693,9 +693,9 @@
   <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
 
   <div class="sidebar-user">
-    <div class="avatar">DS</div>
+    <div class="avatar" id="userAvatar">··</div>
     <div class="user-info">
-      <div class="user-name">Daniel Smith</div>
+      <div class="user-name" id="userName">Loading…</div>
       <div class="user-role">Client Account</div>
     </div>
   </div>
@@ -707,11 +707,11 @@
     </div>
     <div class="nav-item" onclick="showSection('jobs')">
       <span class="nav-icon">📋</span> My Jobs
-      <span class="nav-badge">3</span>
+      <span class="nav-badge" id="badgeJobs" style="display:none"></span>
     </div>
     <div class="nav-item" onclick="showSection('bids')">
       <span class="nav-icon">💰</span> Bids Received
-      <span class="nav-badge">5</span>
+      <span class="nav-badge" id="badgeBids" style="display:none"></span>
     </div>
     <div class="nav-item" onclick="showSection('payments')">
       <span class="nav-icon">🏦</span> Payments
@@ -720,7 +720,6 @@
     <div class="nav-label" style="margin-top:0.5rem">Communication</div>
     <div class="nav-item" onclick="showSection('messages')">
       <span class="nav-icon">💬</span> Messages
-      <span class="nav-badge">2</span>
     </div>
     <div class="nav-item" onclick="showSection('notifications')">
       <span class="nav-icon">🔔</span> Notifications
@@ -736,7 +735,7 @@
   </nav>
 
   <div class="sidebar-footer">
-    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">
+    <button class="signout-btn" onclick="signOut()">
       🚪 Sign Out
     </button>
   </div>
@@ -750,7 +749,7 @@
     <div class="topbar-title" id="topbarTitle">Dashboard Overview</div>
     <div class="topbar-right">
       <div class="notif-btn" onclick="showSection('notifications')">
-        🔔 <div class="notif-dot"></div>
+        🔔 <div class="notif-dot" id="notifDot" style="display:none"></div>
       </div>
       <button class="post-job-btn" onclick="window.location='dirtbidder-post-job.html'">+ Post a Job</button>
     </div>
@@ -763,177 +762,54 @@
     <div id="section-overview">
 
       <div class="greeting">
-        <div class="greeting-text">Good Morning, <span>Daniel.</span></div>
-        <div class="greeting-sub">You have 5 new bids across your active jobs. Here's your summary.</div>
+        <div class="greeting-text"><span id="greetWord">Welcome</span>, <span id="greetName">there.</span></div>
+        <div class="greeting-sub" id="greetSub">Loading your jobs…</div>
+      </div>
+
+      <div id="loadError" class="card" style="display:none;margin-bottom:1rem;border-color:var(--error)">
+        <div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Couldn't load your dashboard</div><div class="empty-sub" id="loadErrorText">Check your connection and refresh.</div></div>
       </div>
 
       <!-- STATS -->
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">Active Jobs</div>
-          <div class="stat-value">3</div>
-          <div class="stat-change neutral">1 in progress</div>
+          <div class="stat-value" id="statActive">–</div>
+          <div class="stat-change neutral" id="statActiveSub">&nbsp;</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Bids Received</div>
-          <div class="stat-value">5</div>
-          <div class="stat-change">↑ 3 new today</div>
+          <div class="stat-label">Bids Waiting</div>
+          <div class="stat-value" id="statBids">–</div>
+          <div class="stat-change neutral" id="statBidsSub">&nbsp;</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Held in Escrow</div>
-          <div class="stat-value">$<span>8,500</span></div>
-          <div class="stat-change neutral">1 job hired</div>
+          <div class="stat-value">$<span>0</span></div>
+          <div class="stat-change neutral">Escrow coming soon</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Jobs Completed</div>
-          <div class="stat-value">2</div>
+          <div class="stat-value" id="statDone">–</div>
           <div class="stat-change neutral">All time</div>
         </div>
       </div>
 
-      <!-- TWO COL -->
       <div class="two-col">
-
-        <!-- ACTIVE JOBS -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">Active Jobs</div>
             <span class="card-link" onclick="showSection('jobs')">View All →</span>
           </div>
-          <div class="job-row" onclick="showSection('bids')">
-            <div class="job-status-dot dot-bidding"></div>
-            <div class="job-info">
-              <div class="job-title">Land Clearing — 12 Acres</div>
-              <div class="job-meta">Nashville, TN · Posted 2 days ago</div>
-            </div>
-            <div class="job-bids">5 bids</div>
-            <div class="job-badge badge-bidding">Bidding</div>
-          </div>
-          <div class="job-row">
-            <div class="job-status-dot dot-progress"></div>
-            <div class="job-info">
-              <div class="job-title">Pond Excavation — 2 Acres</div>
-              <div class="job-meta">Franklin, TN · Started 5 days ago</div>
-            </div>
-            <div class="job-bids">—</div>
-            <div class="job-badge badge-progress">In Progress</div>
-          </div>
-          <div class="job-row">
-            <div class="job-status-dot dot-open"></div>
-            <div class="job-info">
-              <div class="job-title">Rough Grading — 5 Acres</div>
-              <div class="job-meta">Brentwood, TN · Posted 1 hour ago</div>
-            </div>
-            <div class="job-bids">0 bids</div>
-            <div class="job-badge badge-open">Open</div>
-          </div>
+          <div id="overviewJobs"></div>
         </div>
 
-        <!-- RECENT BIDS -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">Recent Bids</div>
             <span class="card-link" onclick="showSection('bids')">View All →</span>
           </div>
-
-          <div class="bid-card">
-            <div class="bid-top">
-              <div class="bid-operator">🚜 Smith Excavating LLC</div>
-              <div class="bid-price">$4,200</div>
-            </div>
-            <div class="bid-job">Land Clearing — 12 Acres · 4 days est.</div>
-            <div class="bid-stars">★★★★★ <span style="color:var(--stone);font-size:0.72rem">4.9 (38 reviews)</span></div>
-            <div class="bid-actions">
-              <button class="btn-accept" onclick="acceptBid(this)">✓ Accept</button>
-              <button class="btn-decline">Decline</button>
-              <button class="btn-view">View Profile</button>
-            </div>
-          </div>
-
-          <div class="bid-card">
-            <div class="bid-top">
-              <div class="bid-operator">🏗️ TN Dirt Works</div>
-              <div class="bid-price">$3,800</div>
-            </div>
-            <div class="bid-job">Land Clearing — 12 Acres · 5 days est.</div>
-            <div class="bid-stars">★★★★☆ <span style="color:var(--stone);font-size:0.72rem">4.6 (22 reviews)</span></div>
-            <div class="bid-actions">
-              <button class="btn-accept" onclick="acceptBid(this)">✓ Accept</button>
-              <button class="btn-decline">Decline</button>
-              <button class="btn-view">View Profile</button>
-            </div>
-          </div>
+          <div id="overviewBids"></div>
         </div>
-
-      </div>
-
-      <!-- BOTTOM ROW -->
-      <div class="two-col">
-
-        <!-- PAYMENTS -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Payments & Escrow</div>
-            <span class="card-link" onclick="showSection('payments')">View All →</span>
-          </div>
-          <div class="payment-row">
-            <div class="payment-info">
-              <div class="payment-job">Pond Excavation</div>
-              <div class="payment-op">Operator: Mike's Dirt Co.</div>
-            </div>
-            <div>
-              <div class="payment-amount">$8,500</div>
-              <div class="payment-status status-held">🔒 Held in Escrow</div>
-            </div>
-            <button class="release-btn" onclick="releasePayment(this)">Release Funds</button>
-          </div>
-          <div class="payment-row">
-            <div class="payment-info">
-              <div class="payment-job">Site Prep — Completed</div>
-              <div class="payment-op">Operator: Ridge Runner Excavating</div>
-            </div>
-            <div>
-              <div class="payment-amount">$3,200</div>
-              <div class="payment-status status-release">✓ Released</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ACTIVITY FEED -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Recent Activity</div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon icon-bid">💰</div>
-            <div>
-              <div class="activity-text"><strong>Smith Excavating LLC</strong> submitted a bid of <span class="hi">$4,200</span> on your land clearing job</div>
-              <div class="activity-time">2 hours ago</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon icon-message">💬</div>
-            <div>
-              <div class="activity-text"><strong>Mike's Dirt Co.</strong> sent you a message about the pond job</div>
-              <div class="activity-time">Yesterday, 4:32 PM</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon icon-bid">💰</div>
-            <div>
-              <div class="activity-text"><strong>TN Dirt Works</strong> submitted a bid of <span class="hi">$3,800</span> on your land clearing job</div>
-              <div class="activity-time">Yesterday, 11:10 AM</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon icon-hired">🤝</div>
-            <div>
-              <div class="activity-text">You hired <strong>Mike's Dirt Co.</strong> for the pond excavation job</div>
-              <div class="activity-time">5 days ago</div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -942,33 +818,18 @@
       <div class="greeting"><div class="greeting-text">My <span>Jobs</span></div><div class="greeting-sub">All jobs you've posted on DirtBidder</div></div>
       <div class="card">
         <div class="card-header"><div class="card-title">All Jobs</div><button class="post-job-btn" onclick="window.location='dirtbidder-post-job.html'">+ Post New Job</button></div>
-        <div class="job-row"><div class="job-status-dot dot-bidding"></div><div class="job-info"><div class="job-title">Land Clearing — 12 Acres</div><div class="job-meta">Nashville, TN · Budget: $3,000–$6,000 · Posted 2 days ago</div></div><div class="job-bids">5 bids</div><div class="job-badge badge-bidding">Bidding</div></div>
-        <div class="job-row"><div class="job-status-dot dot-progress"></div><div class="job-info"><div class="job-title">Pond Excavation — 2 Acres</div><div class="job-meta">Franklin, TN · Budget: $7,000–$10,000 · Started 5 days ago</div></div><div class="job-bids">—</div><div class="job-badge badge-progress">In Progress</div></div>
-        <div class="job-row"><div class="job-status-dot dot-open"></div><div class="job-info"><div class="job-title">Rough Grading — 5 Acres</div><div class="job-meta">Brentwood, TN · Budget: $2,000–$4,000 · Posted 1 hour ago</div></div><div class="job-bids">0 bids</div><div class="job-badge badge-open">Open</div></div>
-        <div class="job-row"><div class="job-status-dot dot-complete"></div><div class="job-info"><div class="job-title">Site Prep — Foundation</div><div class="job-meta">Nashville, TN · Completed 3 weeks ago</div></div><div class="job-bids">—</div><div class="job-badge badge-complete">Complete</div></div>
+        <div id="allJobs"></div>
       </div>
     </div>
 
     <div id="section-bids" style="display:none">
-      <div class="greeting"><div class="greeting-text">Bids <span>Received</span></div><div class="greeting-sub">Review and accept bids from operators in your area</div></div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Land Clearing — 12 Acres · 5 Bids</div></div>
-        <div class="bid-card"><div class="bid-top"><div class="bid-operator">🚜 Smith Excavating LLC</div><div class="bid-price">$4,200</div></div><div class="bid-job">4 days estimated · CAT 320 Excavator + D6 Dozer</div><div class="bid-stars">★★★★★ 4.9 (38 reviews)</div><div class="bid-actions"><button class="btn-accept" onclick="acceptBid(this)">✓ Accept Bid</button><button class="btn-decline">Decline</button><button class="btn-view">View Profile</button></div></div>
-        <div class="bid-card"><div class="bid-top"><div class="bid-operator">🏗️ TN Dirt Works</div><div class="bid-price">$3,800</div></div><div class="bid-job">5 days estimated · Komatsu PC200 + D5 Dozer</div><div class="bid-stars">★★★★☆ 4.6 (22 reviews)</div><div class="bid-actions"><button class="btn-accept" onclick="acceptBid(this)">✓ Accept Bid</button><button class="btn-decline">Decline</button><button class="btn-view">View Profile</button></div></div>
-        <div class="bid-card"><div class="bid-top"><div class="bid-operator">⚙️ Ridge Runner Excavating</div><div class="bid-price">$4,800</div></div><div class="bid-job">3 days estimated · Two CAT 336 Excavators</div><div class="bid-stars">★★★★★ 5.0 (61 reviews)</div><div class="bid-actions"><button class="btn-accept" onclick="acceptBid(this)">✓ Accept Bid</button><button class="btn-decline">Decline</button><button class="btn-view">View Profile</button></div></div>
-      </div>
+      <div class="greeting"><div class="greeting-text">Bids <span>Received</span></div><div class="greeting-sub">Review and accept bids from operators</div></div>
+      <div id="bidsByJob"></div>
     </div>
 
     <div id="section-payments" style="display:none">
-      <div class="greeting"><div class="greeting-text">Payments &amp; <span>Escrow</span></div><div class="greeting-sub">All payments are securely held by Stripe until you release them</div></div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Active Escrow</div></div>
-        <div class="payment-row"><div class="payment-info"><div class="payment-job">Pond Excavation — 2 Acres</div><div class="payment-op">Operator: Mike's Dirt Co. · In Progress</div></div><div><div class="payment-amount">$8,500</div><div class="payment-status status-held">🔒 Held in Escrow</div></div><button class="release-btn" onclick="releasePayment(this)">Release Funds</button></div>
-      </div>
-      <div class="card" style="margin-top:1rem">
-        <div class="card-header"><div class="card-title">Payment History</div></div>
-        <div class="payment-row"><div class="payment-info"><div class="payment-job">Site Prep — Foundation</div><div class="payment-op">Operator: Ridge Runner Excavating</div></div><div><div class="payment-amount">$3,200</div><div class="payment-status status-release">✓ Released — 3 weeks ago</div></div></div>
-      </div>
+      <div class="greeting"><div class="greeting-text">Payments &amp; <span>Escrow</span></div><div class="greeting-sub">Payments will be held securely by Stripe until you release them</div></div>
+      <div class="card"><div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">No payments yet</div><div class="empty-sub">When you hire an operator, the job amount will be held in escrow here until the work is done</div></div></div>
     </div>
 
     <div id="section-messages" style="display:none">
@@ -978,11 +839,7 @@
 
     <div id="section-notifications" style="display:none">
       <div class="greeting"><div class="greeting-text">My <span>Notifications</span></div></div>
-      <div class="card">
-        <div class="activity-item"><div class="activity-icon icon-bid">💰</div><div><div class="activity-text"><strong>Smith Excavating LLC</strong> submitted a bid of <span class="hi">$4,200</span></div><div class="activity-time">2 hours ago</div></div></div>
-        <div class="activity-item"><div class="activity-icon icon-message">💬</div><div><div class="activity-text"><strong>Mike's Dirt Co.</strong> sent you a message</div><div class="activity-time">Yesterday 4:32 PM</div></div></div>
-        <div class="activity-item"><div class="activity-icon icon-bid">💰</div><div><div class="activity-text"><strong>TN Dirt Works</strong> submitted a bid of <span class="hi">$3,800</span></div><div class="activity-time">Yesterday 11:10 AM</div></div></div>
-      </div>
+      <div class="card"><div id="notifList"></div></div>
     </div>
 
     <div id="section-settings" style="display:none">
@@ -995,56 +852,224 @@
       <div class="card"><div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No Reviews Yet</div><div class="empty-sub">After completing a job, leave a review for your operator</div></div></div>
     </div>
 
-    <div id="section-postjob" style="display:none">
-      <div class="greeting"><div class="greeting-text">Post a <span>New Job</span></div><div class="greeting-sub">Tell operators what work you need done</div></div>
-      <div class="card"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Job Posting Form — Building Next</div><div class="empty-sub">This is the next page being built in the DirtBidder app</div></div></div>
-    </div>
-
   </div>
 </div>
 
 <script>
+  const API_BASE = 'https://dirtbidder-backend-production.up.railway.app';
+  const TOKEN_KEY = 'dirtbidder_token';
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) window.location.replace('dirtbidder-login.html');
+
+  let jobs = [];
+  let bidsByJob = {}; // jobId -> [bids]
+
+  // ── helpers ──
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function money(n) {
+    if (n == null || n === '') return '';
+    const v = Number(n);
+    return isNaN(v) ? esc(n) : '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+  function ago(ts) {
+    if (!ts) return '';
+    const s = (Date.now() - new Date(ts).getTime()) / 1000;
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + ' min ago';
+    if (s < 86400) { const h = Math.floor(s / 3600); return h + (h === 1 ? ' hour ago' : ' hours ago'); }
+    const d = Math.floor(s / 86400); return d === 1 ? 'yesterday' : d + ' days ago';
+  }
+  function empty(icon, text, sub) {
+    return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-text">${text}</div><div class="empty-sub">${sub}</div></div>`;
+  }
+  async function api(path, opts = {}) {
+    const res = await fetch(API_BASE + path, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, ...(opts.headers || {}) }
+    });
+    if (res.status === 401) { localStorage.removeItem(TOKEN_KEY); window.location.replace('dirtbidder-login.html'); throw new Error('Session expired'); }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  // Job status → label + CSS class
+  function statusInfo(job) {
+    const st = job.status;
+    if (st === 'completed') return { label: 'Complete', cls: 'complete' };
+    if (st === 'in_progress') return { label: 'In Progress', cls: 'progress' };
+    if (st === 'hired') return { label: 'Hired', cls: 'hired' };
+    if (job.pending_bid_count > 0) return { label: 'Bidding', cls: 'bidding' };
+    return { label: st === 'test' ? 'Open (test)' : 'Open', cls: 'open' };
+  }
+  const isActive = j => j.status !== 'completed' && j.status !== 'cancelled';
+
+  function jobRow(job, detailed) {
+    const si = statusInfo(job);
+    const meta = [esc(job.location)];
+    if (detailed && job.budget) meta.push('Budget: ' + money(job.budget));
+    meta.push((si.cls === 'progress' ? 'Hired ' : 'Posted ') + ago(job.created_at));
+    let right = job.bid_count ? job.bid_count + (job.bid_count === 1 ? ' bid' : ' bids') : '0 bids';
+    if (job.hired_operator_name || job.accepted_amount) right = money(job.accepted_amount) || '—';
+    const click = job.pending_bid_count ? `onclick="showSection('bids')"` : '';
+    return `<div class="job-row" ${click}>
+      <div class="job-status-dot dot-${si.cls}"></div>
+      <div class="job-info"><div class="job-title">${esc(job.title)}</div>
+        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div></div>
+      <div class="job-bids">${right}</div>
+      <div class="job-badge badge-${si.cls}">${si.label}</div>
+    </div>`;
+  }
+
+  function bidCard(bid, job, compact) {
+    const pending = bid.status === 'pending';
+    const canAccept = pending && (job.status === 'open' || job.status === 'test');
+    const who = esc(bid.operator_name || 'Operator');
+    const msg = bid.message ? esc(bid.message) : '';
+    let actions = '';
+    if (canAccept) {
+      actions = `<div class="bid-actions">
+        <button class="btn-accept" onclick="acceptBid(${bid.id}, this)">✓ Accept${compact ? '' : ' Bid'}</button>
+        <button class="btn-decline" onclick="declineBid(${bid.id}, this)">Decline</button>
+      </div>`;
+    } else {
+      const label = bid.status === 'accepted' ? '✓ Hired' : bid.status === 'declined' ? 'Declined' : 'Closed';
+      actions = `<div class="bid-actions"><span style="font-size:0.75rem;color:${bid.status === 'accepted' ? 'var(--success)' : 'var(--stone)'}">${label}</span></div>`;
+    }
+    return `<div class="bid-card">
+      <div class="bid-top"><div class="bid-operator">🚜 ${who}</div><div class="bid-price">${money(bid.amount)}</div></div>
+      <div class="bid-job">${compact ? esc(job.title) + ' · ' : ''}${ago(bid.created_at)}${msg ? ' · ' + msg : ''}</div>
+      ${actions}
+    </div>`;
+  }
+
+  // ── render ──
+  function render() {
+    const active = jobs.filter(isActive);
+    const done = jobs.filter(j => j.status === 'completed').length;
+    const inProgress = jobs.filter(j => j.status === 'in_progress').length;
+    const pendingBids = jobs.reduce((n, j) => n + (j.pending_bid_count || 0), 0);
+
+    document.getElementById('statActive').textContent = active.length;
+    document.getElementById('statActiveSub').textContent = inProgress ? inProgress + ' in progress' : (active.length ? 'Waiting on bids' : 'Post your first job');
+    document.getElementById('statBids').textContent = pendingBids;
+    document.getElementById('statBidsSub').textContent = pendingBids ? 'Ready to review' : 'None yet';
+    document.getElementById('statDone').textContent = done;
+
+    document.getElementById('greetSub').textContent = !jobs.length
+      ? "You haven't posted a job yet. Post one and local operators can start bidding."
+      : pendingBids
+        ? `You have ${pendingBids} bid${pendingBids === 1 ? '' : 's'} waiting across your jobs.`
+        : `You have ${active.length} active job${active.length === 1 ? '' : 's'}. We'll show bids here as they come in.`;
+
+    const bJobs = document.getElementById('badgeJobs');
+    bJobs.textContent = active.length; bJobs.style.display = active.length ? '' : 'none';
+    const bBids = document.getElementById('badgeBids');
+    bBids.textContent = pendingBids; bBids.style.display = pendingBids ? '' : 'none';
+    document.getElementById('notifDot').style.display = pendingBids ? '' : 'none';
+
+    const postBtn = `<div style="text-align:center;margin-top:0.75rem"><button class="post-job-btn" onclick="window.location='dirtbidder-post-job.html'">+ Post a Job</button></div>`;
+    document.getElementById('overviewJobs').innerHTML = active.length
+      ? active.slice(0, 4).map(j => jobRow(j, false)).join('')
+      : empty('📋', 'No active jobs', 'Post a job to start getting bids') + postBtn;
+    document.getElementById('allJobs').innerHTML = jobs.length
+      ? jobs.map(j => jobRow(j, true)).join('')
+      : empty('📋', 'No jobs yet', 'Jobs you post will show up here');
+
+    // All bids, newest first
+    const allBids = [];
+    jobs.forEach(j => (bidsByJob[j.id] || []).forEach(b => allBids.push({ b, j })));
+    allBids.sort((x, y) => new Date(y.b.created_at) - new Date(x.b.created_at));
+    const recent = allBids.filter(x => x.b.status === 'pending').slice(0, 3);
+    document.getElementById('overviewBids').innerHTML = recent.length
+      ? recent.map(x => bidCard(x.b, x.j, true)).join('')
+      : empty('💰', 'No new bids', jobs.length ? 'Operators will bid on your jobs here' : 'Post a job to get bids');
+
+    const withBids = jobs.filter(j => (bidsByJob[j.id] || []).length);
+    document.getElementById('bidsByJob').innerHTML = withBids.length
+      ? withBids.map(j => {
+          const list = bidsByJob[j.id];
+          return `<div class="card" style="margin-bottom:1rem">
+            <div class="card-header"><div class="card-title">${esc(j.title)} · ${list.length} Bid${list.length === 1 ? '' : 's'}</div></div>
+            ${list.map(b => bidCard(b, j, false)).join('')}
+          </div>`;
+        }).join('')
+      : `<div class="card">${empty('💰', 'No bids yet', 'When operators bid on your jobs, you can compare and accept them here')}</div>`;
+
+    document.getElementById('notifList').innerHTML = allBids.length
+      ? allBids.slice(0, 15).map(x => `<div class="activity-item"><div class="activity-icon icon-bid">💰</div><div>
+          <div class="activity-text"><strong>${esc(x.b.operator_name || 'An operator')}</strong> bid <span class="hi">${money(x.b.amount)}</span> on ${esc(x.j.title)}</div>
+          <div class="activity-time">${ago(x.b.created_at)}</div></div></div>`).join('')
+      : empty('🔔', 'No notifications yet', 'New bids and job updates will show up here');
+  }
+
+  async function load() {
+    try {
+      const [me, list] = await Promise.all([api('/api/me'), api('/api/jobs')]);
+      if (me.role === 'operator') { window.location.replace('dirtbidder-operator-dashboard.html'); return; }
+      const name = (me.name || me.email || '').trim();
+      const first = name.split(/[\s@]/)[0] || 'there';
+      document.getElementById('userName').textContent = name || 'My Account';
+      document.getElementById('userAvatar').textContent = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
+      document.getElementById('greetName').textContent = first + '.';
+      const h = new Date().getHours();
+      document.getElementById('greetWord').textContent = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+
+      jobs = list;
+      const needBids = jobs.filter(j => j.bid_count > 0);
+      const results = await Promise.all(needBids.map(j => api('/api/jobs/' + j.id + '/bids').catch(() => [])));
+      bidsByJob = {};
+      needBids.forEach((j, i) => { bidsByJob[j.id] = results[i]; });
+      render();
+    } catch (err) {
+      if (err.message === 'Session expired') return;
+      document.getElementById('loadError').style.display = '';
+      document.getElementById('loadErrorText').textContent = err.message + '. Refresh to try again.';
+      document.getElementById('greetSub').textContent = '';
+    }
+  }
+
   function showSection(name) {
-    // Hide all sections
     document.querySelectorAll('[id^="section-"]').forEach(s => s.style.display = 'none');
     document.getElementById('section-' + name).style.display = 'block';
-
-    // Update nav active state
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-
-    // Update topbar title
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', (item.getAttribute('onclick') || '').includes("'" + name + "'"));
+    });
     const titles = {
       overview: 'Dashboard Overview', jobs: 'My Jobs', bids: 'Bids Received',
       payments: 'Payments & Escrow', messages: 'Messages', notifications: 'Notifications',
-      settings: 'Settings', reviews: 'My Reviews', postjob: 'Post a New Job'
+      settings: 'Settings', reviews: 'My Reviews'
     };
     document.getElementById('topbarTitle').textContent = titles[name] || 'Dashboard';
+    window.scrollTo(0, 0);
   }
 
-  function acceptBid(btn) {
-    if (confirm('Accept this bid? Payment will be collected and held in escrow by Stripe until the job is complete.')) {
-      const card = btn.closest('.bid-card') || btn.closest('.bid-card');
-      btn.textContent = '✓ Accepted';
-      btn.style.background = 'rgba(39,174,96,0.3)';
-      btn.disabled = true;
-      const siblings = btn.parentElement.querySelectorAll('button');
-      siblings.forEach(b => { if (b !== btn) b.style.display = 'none'; });
-      alert('Bid accepted! The operator has been notified and payment will be collected. Funds are held securely in escrow until you confirm the job is complete.');
-    }
+  async function acceptBid(id, btn) {
+    if (!confirm('Hire this operator? The other bids on this job will be declined.')) return;
+    btn.disabled = true;
+    try {
+      await api('/api/bids/' + id + '/accept', { method: 'POST' });
+      await load();
+    } catch (err) { alert(err.message); btn.disabled = false; }
   }
 
-  function releasePayment(btn) {
-    if (confirm('Release $8,500 to the operator? Only do this when the job is complete to your satisfaction. This cannot be undone.')) {
-      btn.textContent = '✓ Released';
-      btn.style.background = 'rgba(39,174,96,0.2)';
-      btn.style.color = 'var(--success)';
-      btn.disabled = true;
-      const row = btn.closest('.payment-row');
-      const statusEl = row.querySelector('.payment-status');
-      if (statusEl) { statusEl.textContent = '✓ Released'; statusEl.className = 'payment-status status-release'; }
-      alert('Payment released! The operator will receive funds within 2 business days via Stripe.');
-    }
+  async function declineBid(id, btn) {
+    if (!confirm('Decline this bid?')) return;
+    btn.disabled = true;
+    try {
+      await api('/api/bids/' + id + '/decline', { method: 'POST' });
+      await load();
+    } catch (err) { alert(err.message); btn.disabled = false; }
   }
+
+  function signOut() {
+    localStorage.removeItem(TOKEN_KEY);
+    window.location.href = 'dirtbidder-login.html';
+  }
+
+  if (token) load();
 </script>
 
 </body>
