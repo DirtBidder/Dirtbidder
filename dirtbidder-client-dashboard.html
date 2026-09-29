@@ -716,6 +716,31 @@
     .job-title, .job-card-title, .bid-job-title { white-space: normal; overflow: visible; text-overflow: clip; }
     .job-row { padding: 0.9rem 1rem; gap: 0.75rem; }
   }
+
+  /* DISPUTES */
+  .dispute-btn {
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem;
+    letter-spacing: 0.08em; text-transform: uppercase; background: transparent;
+    color: var(--error); border: 1px solid rgba(231,76,60,0.35); padding: 0.4rem 0.8rem;
+    border-radius: 3px; cursor: pointer; margin-left: 0.5rem; white-space: nowrap;
+  }
+  .dispute-btn:hover { background: rgba(231,76,60,0.1); }
+  .badge-disputed { background: rgba(231,76,60,0.15); color: var(--error); }
+  .dot-disputed { background: var(--error); }
+  .job-note { font-size: 0.75rem; margin-top: 0.35rem; }
+  .db-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,20,16,0.85); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+  .db-modal-overlay.active { display: flex; }
+  .db-modal { background: var(--dig); border: 1px solid rgba(196,168,130,0.15); border-radius: 4px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+  .db-modal-head { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid rgba(196,168,130,0.1); }
+  .db-modal-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--chalk); }
+  .db-modal-body { padding: 1.25rem; }
+  .db-modal-body label { display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dust); margin: 0 0 0.4rem; }
+  .db-modal-body textarea { width: 100%; min-height: 110px; background: var(--clay); border: 1.5px solid rgba(196,168,130,0.18); color: var(--chalk); border-radius: 3px; padding: 0.7rem; font: inherit; font-size: 0.9rem; resize: vertical; }
+  .db-modal-foot { display: flex; gap: 0.75rem; justify-content: flex-end; padding: 1rem 1.25rem; border-top: 1px solid rgba(196,168,130,0.1); }
+  .db-btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.6rem 1.1rem; border-radius: 3px; cursor: pointer; border: 1px solid rgba(196,168,130,0.25); background: transparent; color: var(--dust); }
+  .db-btn.primary { background: var(--error); border-color: var(--error); color: #fff; }
+  .db-thumbs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
+  .db-thumbs img { width: 60px; height: 60px; object-fit: cover; border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -764,6 +789,9 @@
     <div class="nav-item" onclick="showSection('reviews')">
       <span class="nav-icon">⭐</span> My Reviews
     </div>
+    <a class="nav-item" id="adminLink" href="dirtbidder-admin.html" style="display:none;text-decoration:none">
+      <span class="nav-icon">🛡️</span> Admin — Disputes
+    </a>
   </nav>
 
   <div class="sidebar-footer">
@@ -892,6 +920,30 @@
   </div>
 </div>
 
+<!-- REPORT A PROBLEM -->
+<div class="db-modal-overlay" id="disputeModal">
+  <div class="db-modal">
+    <div class="db-modal-head"><div class="db-modal-title">Report a Problem</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeDispute()">✕</button></div>
+    <div class="db-modal-body">
+      <div style="font-size:0.85rem;color:var(--dust);margin-bottom:1rem">Your payment stays <strong style="color:var(--chalk)">frozen in escrow</strong> while DirtBidder reviews this. We'll hear from the operator too, then decide whether to pay them, refund you, or split it.</div>
+      <div id="disputeJobTitle" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:1rem"></div>
+      <label for="disputeReason">What went wrong?</label>
+      <textarea id="disputeReason" placeholder="e.g. Pond was dug 4 ft deep, we agreed on 8 ft. Spoils left on the driveway."></textarea>
+      <div style="margin-top:1rem">
+        <label>Photos (optional, up to 10)</label>
+        <input type="file" id="disputePhotoInput" accept="image/*" multiple style="display:none" onchange="addDisputePhotos(this.files)">
+        <button class="db-btn" onclick="document.getElementById('disputePhotoInput').click()">📷 Add Photos</button>
+        <div class="db-thumbs" id="disputeThumbs"></div>
+      </div>
+      <div id="disputeError" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
+    </div>
+    <div class="db-modal-foot">
+      <button class="db-btn" onclick="closeDispute()">Cancel</button>
+      <button class="db-btn primary" id="disputeSubmit" onclick="submitDispute()">Submit Report</button>
+    </div>
+  </div>
+</div>
+
 <script>
   const API_BASE = 'https://dirtbidder-backend-production.up.railway.app';
   const TOKEN_KEY = 'dirtbidder_token';
@@ -942,6 +994,8 @@
   function statusInfo(job) {
     const st = job.status;
     if (st === 'completed') return { label: 'Complete', cls: 'complete' };
+    if (st === 'cancelled') return { label: 'Refunded', cls: 'complete' };
+    if (st === 'disputed') return { label: 'Under Review', cls: 'disputed' };
     if (st === 'awaiting_release') return { label: 'Done — Release Pay', cls: 'hired' };
     if (st === 'in_progress') return { label: 'In Progress', cls: 'progress' };
     if (st === 'hired') return { label: 'Hired', cls: 'hired' };
@@ -968,12 +1022,25 @@
     if (job.hired_operator_name || job.accepted_amount) right = money(job.accepted_amount) || '—';
     const click = job.pending_bid_count ? `onclick="showSection('bids')"` : '';
     const heldHere = escrows.find(e => e.job_id === job.id && e.status === 'held');
-    const releaseBtn = heldHere && (job.status === 'awaiting_release' || job.status === 'in_progress')
-      ? `<button class="release-btn" style="margin-left:0.5rem" onclick="event.stopPropagation();releasePayment(${job.id})">Release ${money(heldHere.amount)}</button>` : '';
+    const canAct = heldHere && (job.status === 'awaiting_release' || job.status === 'in_progress');
+    const releaseBtn = canAct
+      ? `<button class="release-btn" style="margin-left:0.5rem" onclick="event.stopPropagation();releasePayment(${job.id})">Release ${money(heldHere.amount)}</button>` +
+        `<button class="dispute-btn" onclick="event.stopPropagation();openDispute(${job.id})">Report a Problem</button>` : '';
+    let note = '';
+    if (job.status === 'awaiting_release' && job.completed_at) {
+      const left = 72 * 3600 * 1000 - (Date.now() - new Date(job.completed_at).getTime());
+      note = `<div class="job-note" style="color:var(--amber)">Operator marked this done. ${left > 0 ? 'Release payment or report a problem — auto-releases in ' + timeLeft(left) + '.' : 'Releasing automatically.'}</div>`;
+    } else if (job.status === 'disputed' && job.dispute) {
+      note = `<div class="job-note" style="color:var(--error)">You reported a problem. Payment is frozen while DirtBidder reviews it.</div>` +
+        (job.dispute.operator_response ? `<div class="job-note" style="color:var(--dust)">Operator's side: “${esc(job.dispute.operator_response)}”</div>` : '');
+    } else if (job.dispute && job.dispute.status === 'resolved') {
+      const r = { release: 'Paid to the operator', refund: 'Refunded to you', split: 'Split between you and the operator' }[job.dispute.resolution] || 'Resolved';
+      note = `<div class="job-note" style="color:var(--dust)">Dispute decided: ${r}.${job.dispute.admin_note ? ' “' + esc(job.dispute.admin_note) + '”' : ''}</div>`;
+    }
     return `<div class="job-row" ${click}>
       <div class="job-status-dot dot-${si.cls}"></div>
       <div class="job-info"><div class="job-title">${esc(job.title)}</div>
-        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div>${detailed ? photoStrip(job) : ''}</div>
+        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div>${note}${detailed ? photoStrip(job) : ''}</div>
       <div class="job-bids">${right}</div>
       <div class="job-badge badge-${si.cls}">${si.label}</div>
       ${releaseBtn}
@@ -1022,6 +1089,8 @@
     const payRow = e => {
       const st = e.status === 'held' ? '<div class="payment-status status-held">🔒 Held in Escrow</div>'
         : e.status === 'released' ? '<div class="payment-status status-release">✓ Released</div>'
+        : e.status === 'disputed' ? '<div class="payment-status" style="color:var(--error)">⚠ Frozen — under review</div>'
+        : e.status === 'refunded' ? '<div class="payment-status status-release">↩ Refunded to you</div>'
         : '<div class="payment-status" style="color:var(--error)">Refund pending</div>';
       const btn = e.status === 'held' ? `<button class="release-btn" onclick="releasePayment(${e.job_id})">Release Funds</button>` : '';
       return `<div class="payment-row"><div class="payment-info"><div class="payment-job">${esc(e.job_title)}</div>
@@ -1088,6 +1157,7 @@
       const name = (me.name || me.email || '').trim();
       const first = name.split(/[\s@]/)[0] || 'there';
       document.getElementById('userName').textContent = name || 'My Account';
+      if (me.is_admin) document.getElementById('adminLink').style.display = '';
       document.getElementById('userAvatar').textContent = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
       document.getElementById('greetName').textContent = first + '.';
       const h = new Date().getHours();
@@ -1140,6 +1210,67 @@
       if (r.checkout_url) { window.location.href = r.checkout_url; return; }
       await load();
     } catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
+  function timeLeft(ms) {
+    const h = Math.floor(ms / 3600000), d = Math.floor(h / 24);
+    return d >= 1 ? d + 'd ' + (h % 24) + 'h' : h >= 1 ? h + 'h' : Math.max(1, Math.floor(ms / 60000)) + ' min';
+  }
+
+  // ── Report a problem ──
+  let disputeJobId = null, disputePhotos = [];
+  function openDispute(jobId) {
+    const job = jobs.find(j => j.id === jobId);
+    disputeJobId = jobId; disputePhotos = [];
+    document.getElementById('disputeJobTitle').textContent = job ? job.title : '';
+    document.getElementById('disputeReason').value = '';
+    document.getElementById('disputeThumbs').innerHTML = '';
+    document.getElementById('disputeError').style.display = 'none';
+    document.getElementById('disputeSubmit').disabled = false;
+    document.getElementById('disputeModal').classList.add('active');
+  }
+  function closeDispute() { document.getElementById('disputeModal').classList.remove('active'); }
+  function shrinkPhoto(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = () => {
+        const max = 1600; let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+      img.src = url;
+    });
+  }
+  async function addDisputePhotos(files) {
+    for (const f of Array.from(files || [])) {
+      if (disputePhotos.length >= 10) break;
+      try { disputePhotos.push(await shrinkPhoto(f)); } catch (e) {}
+    }
+    document.getElementById('disputePhotoInput').value = '';
+    document.getElementById('disputeThumbs').innerHTML = disputePhotos.map(src => `<img src="${src}" alt="">`).join('');
+  }
+  async function submitDispute() {
+    const reason = document.getElementById('disputeReason').value.trim();
+    const errEl = document.getElementById('disputeError');
+    if (reason.length < 10) { errEl.textContent = 'Please describe what went wrong.'; errEl.style.display = ''; return; }
+    const btn = document.getElementById('disputeSubmit');
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    try {
+      const d = await api('/api/disputes/jobs/' + disputeJobId, { method: 'POST', body: JSON.stringify({ reason }) });
+      for (let i = 0; i < disputePhotos.length; i++) {
+        btn.textContent = `Uploading photo ${i + 1} of ${disputePhotos.length}...`;
+        await api('/api/disputes/' + d.id + '/photos', { method: 'POST', body: JSON.stringify({ image: disputePhotos[i] }) }).catch(() => {});
+      }
+      closeDispute();
+      await load();
+      alert('Report submitted. Your payment is frozen while DirtBidder reviews it — we\u2019ll reach out by email.');
+    } catch (err) {
+      errEl.textContent = err.message; errEl.style.display = '';
+    }
+    btn.disabled = false; btn.textContent = 'Submit Report';
   }
 
   async function releasePayment(jobId) {

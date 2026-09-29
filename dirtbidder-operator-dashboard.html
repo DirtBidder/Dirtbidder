@@ -1268,9 +1268,39 @@
         <div>${lbl('Payment')}${payInfo(b)}</div>
       </div>
       ${b.job_status === 'in_progress' ? `<button class="bid-btn" onclick="markComplete(${b.job_id})" style="background:var(--success);margin-top:1rem">✓ Mark Job Complete</button>`
-        : b.job_status === 'awaiting_release' ? `<div style="margin-top:1rem;font-size:0.82rem;color:var(--amber)">Marked complete — waiting on the client to release payment</div>` : ''}
+        : b.job_status === 'awaiting_release' ? `<div style="margin-top:1rem;font-size:0.82rem;color:var(--amber)">Marked complete — the client has 72 hours to release payment or report a problem. If they do nothing, it releases to you automatically${b.job_completed_at ? ' (' + autoReleaseIn(b.job_completed_at) + ')' : ''}.</div>`
+        : b.job_status === 'disputed' && b.dispute ? disputeBox(b) : ''}
       ${full && b.job_timeline ? `<div style="margin-top:1rem">${lbl('Timeline')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_timeline)}</div></div>` : ''}
     </div>`;
+  }
+
+  function autoReleaseIn(completedAt) {
+    const ms = 72 * 3600 * 1000 - (Date.now() - new Date(completedAt).getTime());
+    if (ms <= 0) return 'any time now';
+    const h = Math.floor(ms / 3600000), d = Math.floor(h / 24);
+    return 'in ' + (d >= 1 ? d + 'd ' + (h % 24) + 'h' : h >= 1 ? h + 'h' : Math.max(1, Math.floor(ms / 60000)) + ' min');
+  }
+
+  function disputeBox(b) {
+    const d = b.dispute;
+    return `<div style="margin-top:1rem;padding:0.9rem 1rem;border:1px solid rgba(231,76,60,0.35);border-radius:3px;background:rgba(231,76,60,0.06)">
+      <div style="font-size:0.85rem;color:var(--error);font-weight:600;margin-bottom:0.4rem">⚠ The client reported a problem. Your payment is on hold while DirtBidder reviews it.</div>
+      <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.75rem">Client says: “${esc(d.reason)}”</div>
+      ${d.operator_response
+        ? `<div style="font-size:0.85rem;color:var(--chalk)">Your side: “${esc(d.operator_response)}”</div>`
+        : `<textarea id="resp-${d.id}" placeholder="Tell DirtBidder your side — what was agreed, what you did, photos you can email us..." style="width:100%;min-height:90px;background:var(--clay);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.6rem;font:inherit;font-size:0.85rem"></textarea>
+           <button class="bid-btn" style="margin-top:0.5rem" onclick="respondDispute(${d.id}, this)">Send My Side</button>`}
+    </div>`;
+  }
+
+  async function respondDispute(id, btn) {
+    const text = (document.getElementById('resp-' + id) || {}).value || '';
+    if (text.trim().length < 5) { alert('Please write your side first.'); return; }
+    btn.disabled = true;
+    try {
+      await api('/api/disputes/' + id + '/respond', { method: 'POST', body: JSON.stringify({ response: text.trim() }) });
+      await load();
+    } catch (err) { alert(err.message); btn.disabled = false; }
   }
 
   function payInfo(b) {
@@ -1279,6 +1309,8 @@
     const out = '$' + Number(e.operator_payout).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (e.status === 'held') return `<div style="font-size:0.9rem;color:var(--success)">🔒 Funded — you get ${out}</div>`;
     if (e.status === 'released') return `<div style="font-size:0.9rem;color:var(--success)">✓ Released — ${out}</div>`;
+    if (e.status === 'disputed') return `<div style="font-size:0.9rem;color:var(--error)">⚠ On hold — client reported a problem</div>`;
+    if (e.status === 'refunded') return `<div style="font-size:0.9rem;color:var(--stone)">Refunded to the client</div>`;
     return '<div style="font-size:0.9rem;color:var(--stone)">Payment issue — contact support</div>';
   }
 
@@ -1328,7 +1360,7 @@
     const available = jobs.filter(j => !j.my_bid_id);
     const pending = myBids.filter(b => b.status === 'pending');
     const allWon = myBids.filter(b => b.status === 'accepted');
-    const won = allWon.filter(b => b.job_status === 'in_progress' || b.job_status === 'awaiting_release');
+    const won = allWon.filter(b => ['in_progress', 'awaiting_release', 'disputed'].includes(b.job_status));
 
     document.getElementById('statOpen').textContent = jobs.length;
     document.getElementById('statOpenSub').textContent = available.length ? available.length + ' you haven’t bid on' : (jobs.length ? 'You’ve bid on all of them' : 'Check back soon');
