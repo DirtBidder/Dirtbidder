@@ -567,7 +567,7 @@
         </div>
 
         <div class="success-msg" id="resetSuccess">
-          ✓ Reset link sent! Check your email inbox — it may take a minute to arrive.
+          ✓ If that email has a DirtBidder account, a reset link is on its way. Check your inbox (and spam) — the link works for 1 hour.
         </div>
 
         <div class="field" id="resetEmailField">
@@ -715,13 +715,17 @@
     btn.disabled = true;
     spinner.classList.add('active');
 
-    setTimeout(() => {
+    fetch(BACKEND_URL + '/api/password/forgot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    }).catch(() => {}).finally(() => {
       btn.disabled = false;
       spinner.classList.remove('active');
       document.getElementById('resetSuccess').classList.add('visible');
       document.getElementById('resetEmailField').style.display = 'none';
       btn.style.display = 'none';
-    }, 1200);
+    });
   }
 
   // Allow Enter key to submit
