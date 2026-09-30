@@ -786,8 +786,9 @@
     </div>
 
     <div class="nav-label" style="margin-top:0.5rem">Communication</div>
-    <div class="nav-item" onclick="showSection('messages')">
+    <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'">
       <span class="nav-icon">💬</span> Messages
+      <span class="nav-badge" id="badgeMsgs" style="display:none"></span>
     </div>
     <div class="nav-item" onclick="showSection('notifications')">
       <span class="nav-icon">🔔</span> Notifications
@@ -910,7 +911,7 @@
 
     <div id="section-messages" style="display:none">
       <div class="greeting"><div class="greeting-text">My <span>Messages</span></div><div class="greeting-sub">Direct messages with your operators</div></div>
-      <div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages Coming Soon</div><div class="empty-sub">In-app messaging with operators is being built next</div></div></div>
+      <div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages</div><div class="empty-sub"><a href="dirtbidder-messaging.html" style="color:var(--amber)">Open your messages →</a></div></div></div>
     </div>
 
     <div id="section-notifications" style="display:none">
@@ -1140,10 +1141,11 @@
       actions = `<div class="bid-actions">
         <button class="btn-accept" onclick="acceptBid(${bid.id}, this)">✓ Accept${compact ? '' : ' Bid'}</button>
         <button class="btn-decline" onclick="declineBid(${bid.id}, this)">Decline</button>
+        <a href="dirtbidder-messaging.html?job=${job.id}&op=${Number(bid.operator_id) || 0}" onclick="event.stopPropagation()" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;margin-left:auto">💬 Message</a>
       </div>`;
     } else {
       const label = bid.status === 'accepted' ? '✓ Hired' : bid.status === 'declined' ? 'Declined' : 'Closed';
-      actions = `<div class="bid-actions"><span style="font-size:0.75rem;color:${bid.status === 'accepted' ? 'var(--success)' : 'var(--stone)'}">${label}</span></div>`;
+      actions = `<div class="bid-actions"><span style="font-size:0.75rem;color:${bid.status === 'accepted' ? 'var(--success)' : 'var(--stone)'}">${label}</span><a href="dirtbidder-messaging.html?job=${job.id}&op=${Number(bid.operator_id) || 0}" onclick="event.stopPropagation()" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;margin-left:auto">💬 Message</a></div>`;
     }
     return `<div class="bid-card">
       <div class="bid-top"><div><button class="op-link bid-operator" onclick="event.stopPropagation();openOperator(${Number(bid.operator_id) || 0})">🚜 ${who}</button>${repLine(bid.reputation)}</div><div class="bid-price">${money(bid.amount)}</div></div>
@@ -1238,6 +1240,17 @@
           <div class="activity-time">${ago(x.b.created_at)}</div></div></div>`).join('')
       : empty('🔔', 'No notifications yet', 'New bids and job updates will show up here');
   }
+
+
+  // Unread messages badge (checks every minute)
+  async function loadUnread() {
+    try {
+      const r = await api('/api/messages/unread');
+      const b = document.getElementById('badgeMsgs');
+      if (b) { b.textContent = r.unread; b.style.display = r.unread ? '' : 'none'; }
+    } catch (e) { /* badge is optional */ }
+  }
+  loadUnread(); setInterval(() => { if (!document.hidden) loadUnread(); }, 60000);
 
   async function load() {
     try {

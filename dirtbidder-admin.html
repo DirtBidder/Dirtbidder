@@ -237,7 +237,7 @@
 
   // ── Flagged: contact info in bids/posts/profiles, client reports, patterns ──
   let flags = [];
-  const KIND = { bid: 'Bid', job: 'Job post', profile: 'Profile', report: 'Client report', pattern: 'Pattern' };
+  const KIND = { bid: 'Bid', message: 'Message', job: 'Job post', profile: 'Profile', report: 'Client report', pattern: 'Pattern' };
   async function loadFlags() {
     try {
       flags = await api('/api/admin/flags');
@@ -316,7 +316,7 @@
         </div>
         ${b.message ? `<div class="lbl">Operator's message</div><div class="quote">${esc(b.message)}</div>` : ''}
         ${b.operator_suspended || b.operator_open_flags ? `<div style="font-size:0.82rem;margin-bottom:0.6rem">${b.operator_suspended ? '<span style="color:var(--error)">Operator suspended</span>' : ''}${b.operator_suspended && b.operator_open_flags ? ' · ' : ''}${b.operator_open_flags ? `<span style="color:var(--amber)">🚩 ${b.operator_open_flags} open flag${b.operator_open_flags === 1 ? '' : 's'}</span>` : ''}</div>` : ''}
-        <div class="btns"><button class="btn split" onclick="goUser('${esc(b.operator_email)}')">View Operator…</button></div>
+        <div class="btns"><button class="btn split" onclick="goUser('${esc(b.operator_email)}')">View Operator…</button><a class="btn release" style="text-decoration:none" href="dirtbidder-messaging.html?job=${b.job_id}&op=${b.operator_id}" target="_blank">Messages</a></div>
       </div>
     </div>`;
   }

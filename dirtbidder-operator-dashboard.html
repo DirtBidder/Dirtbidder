@@ -912,8 +912,9 @@
     </div>
 
     <div class="nav-label" style="margin-top:0.5rem">Communication</div>
-    <div class="nav-item" onclick="showSection('messages')">
+    <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'">
       <span class="nav-icon">💬</span> Messages
+      <span class="nav-badge" id="badgeMsgs" style="display:none"></span>
     </div>
     <div class="nav-item" onclick="showSection('reviews')">
       <span class="nav-icon">⭐</span> My Reviews
@@ -1123,7 +1124,7 @@
     </div>
 
     <!-- ── OTHER SECTIONS ── -->
-    <div id="section-messages" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Messages</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages Coming Soon</div><div class="empty-sub">For now, once you’re hired the client’s phone number is on your Active Jobs page</div></div></div></div>
+    <div id="section-messages" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Messages</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages</div><div class="empty-sub"><a href="dirtbidder-messaging.html" style="color:var(--amber)">Open your messages →</a></div></div></div></div>
     <div id="section-reviews" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Reviews</span></div><div class="greeting-sub">Clients rate you after each paid job. Good ratings earn you badges that show on every bid.</div></div><div class="card" id="myRepCard"></div></div>
     <div id="section-profile" style="display:none"><div class="greeting"><div class="greeting-text">Edit <span>Profile</span></div><div class="greeting-sub">What clients see when they tap your name on a bid</div></div><div class="card" id="profileCard"></div></div>
     <div id="section-settings" style="display:none"><div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div><div class="card" id="settingsCard"></div></div>
@@ -1250,7 +1251,8 @@
     const label = b.status === 'accepted' ? '✓ Hired' : b.status === 'declined' ? 'Not selected' : 'Pending';
     return `<div class="bid-row"><div class="bid-info"><div class="bid-job-title">${esc(b.job_title)}</div>
       <div class="bid-meta">${esc(b.job_location)}${b.job_location ? ' · ' : ''}Submitted ${ago(b.created_at)}${b.est_days ? ' · ' + b.est_days + ' days est.' : ''}</div></div>
-      <div class="bid-amount">${money(b.amount)}</div><div class="bid-status status-${cls}">${label}</div></div>`;
+      <div class="bid-amount">${money(b.amount)}</div><div class="bid-status status-${cls}">${label}</div>
+      <a href="dirtbidder-messaging.html?job=${b.job_id}" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;white-space:nowrap;margin-left:0.75rem" title="Message the client">💬</a></div>`;
   }
 
   function activeCard(b, full) {
@@ -1261,6 +1263,7 @@
         <div>${lbl('Client')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.client_name || '—')}</div>${b.client_phone ? `<a href="tel:${esc(String(b.client_phone).replace(/[^0-9+]/g, ''))}" style="font-size:0.85rem;color:var(--amber);text-decoration:none">📞 ${esc(b.client_phone)}</a>` : ''}</div>
         <div>${lbl('Location')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_location || '—')}</div></div>
       </div>
+      <a href="dirtbidder-messaging.html?job=${b.job_id}" style="display:inline-block;margin-top:0.6rem;font-size:0.85rem;color:var(--amber);text-decoration:none;font-weight:600">💬 Message ${esc(b.client_name || 'client')}</a>
       ${siteBox(b)}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
         <div>${lbl('Agreed Price')}<div style="font-size:0.9rem;color:var(--amber);font-weight:600">${money(b.amount)}</div></div>
@@ -1498,6 +1501,17 @@
           ${v.comment ? `<div style="color:var(--chalk);margin-top:0.3rem">“${esc(v.comment)}”</div>` : ''}</div>`).join('')
         : '<div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No reviews yet</div><div class="empty-sub">Clients can rate you after a job is paid out</div></div>'}`;
   }
+
+
+  // Unread messages badge (checks every minute)
+  async function loadUnread() {
+    try {
+      const r = await api('/api/messages/unread');
+      const b = document.getElementById('badgeMsgs');
+      if (b) { b.textContent = r.unread; b.style.display = r.unread ? '' : 'none'; }
+    } catch (e) { /* badge is optional */ }
+  }
+  loadUnread(); setInterval(() => { if (!document.hidden) loadUnread(); }, 60000);
 
   async function load() {
     try {
