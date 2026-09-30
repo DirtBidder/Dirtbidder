@@ -69,6 +69,11 @@
     <button class="tab" data-f="held" onclick="setTab(this)">Paid Jobs</button>
     <button class="tab" data-f="flags" onclick="setTab(this)">🚩 Flagged <span id="flagCount"></span></button>
     <button class="tab" data-f="users" onclick="setTab(this)">Users</button>
+    <button class="tab" data-f="bids" onclick="setTab(this)">All Bids</button>
+  </div>
+  <div id="bidSearch" style="display:none;margin-bottom:1rem">
+    <input id="bidQ" type="search" placeholder="Search job, location, operator or client" oninput="searchBids()" style="width:100%;background:var(--dig);border:1.5px solid rgba(196,168,130,0.2);color:var(--chalk);border-radius:3px;padding:0.75rem 0.9rem;font:inherit;font-size:1rem;margin-bottom:0.6rem">
+    <div class="tabs" id="bidStatus" style="flex-wrap:wrap;margin-bottom:0"></div>
   </div>
   <div id="userSearch" style="display:none;margin-bottom:1rem">
     <input id="userQ" type="search" placeholder="Search name, company, email or phone" oninput="searchUsers()" style="width:100%;background:var(--dig);border:1.5px solid rgba(196,168,130,0.2);color:var(--chalk);border-radius:3px;padding:0.75rem 0.9rem;font:inherit;font-size:1rem">
@@ -271,7 +276,61 @@
     catch (err) { alert(err.message); btn.disabled = false; }
   }
 
+  // ── All Bids: every bid on the platform, newest first ──
+  let bids = [], bidCounts = {}, bidStatus = '', bidTimer = null, bidsLoaded = false;
+  const BID_STATUS = { '': 'All', pending: 'Pending', accepted: 'Accepted', declined: 'Declined', withdrawn: 'Withdrawn' };
+  const BID_PILL = { pending: 'split', accepted: 'release', declined: 'done', withdrawn: 'done' };
+  function searchBids() {
+    clearTimeout(bidTimer);
+    bidTimer = setTimeout(loadBids, 300);
+  }
+  function setBidStatus(s) { bidStatus = s; loadBids(); }
+  async function loadBids() {
+    try {
+      const q = document.getElementById('bidQ').value.trim();
+      const data = await api('/api/admin/bids?q=' + encodeURIComponent(q) + '&status=' + encodeURIComponent(bidStatus));
+      bids = data.bids || []; bidCounts = data.counts || {}; bidsLoaded = true;
+      if (tab === 'bids') render();
+    } catch (err) { if (tab === 'bids') document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}</div></div>`; }
+  }
+  function bidStatusChips() {
+    const total = Object.values(bidCounts).reduce((a, b) => a + b, 0);
+    document.getElementById('bidStatus').innerHTML = Object.entries(BID_STATUS).map(([k, label]) =>
+      `<button class="tab${bidStatus === k ? ' active' : ''}" onclick="setBidStatus('${k}')">${label} (${k ? (bidCounts[k] || 0) : total})</button>`).join('');
+  }
+  function bidCard(b) {
+    const pillColor = { split: 'background:rgba(232,137,42,0.15);color:var(--amber)', release: 'background:rgba(39,174,96,0.15);color:var(--success)' }[BID_PILL[b.status]] || '';
+    const vsBudget = b.job_budget ? ` <small>(budget ${money(b.job_budget)})</small>` : '';
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(b.job_title)}</div>
+          <div style="font-size:0.8rem;color:var(--stone)">${esc(b.job_location || '')} · bid ${when(b.created_at)} · job ${esc(String(b.job_status || '').replace('_', ' '))} · ${b.bids_on_job} bid${b.bids_on_job === 1 ? '' : 's'} on job</div></div>
+        <div class="pill done" style="${pillColor}">${esc(BID_STATUS[b.status] || b.status || 'Pending')}</div>
+      </div>
+      <div class="card-body">
+        <div class="grid">
+          <div><div class="lbl">Bid</div><div class="val">${money(b.amount)}${vsBudget}</div></div>
+          <div><div class="lbl">Operator</div><div class="val">${esc(b.operator_company || b.operator_name || '—')}<br><small>${esc(b.operator_email || '')}</small></div></div>
+          <div><div class="lbl">Client</div><div class="val">${esc(b.client_name || '—')}<br><small>${esc(b.client_email || '')}</small></div></div>
+          ${b.est_days || b.equipment ? `<div><div class="lbl">Days / Equipment</div><div class="val">${b.est_days ? esc(b.est_days) + ' days' : '—'}${b.equipment ? '<br><small>' + esc(b.equipment) + '</small>' : ''}</div></div>` : ''}
+        </div>
+        ${b.message ? `<div class="lbl">Operator's message</div><div class="quote">${esc(b.message)}</div>` : ''}
+        ${b.operator_suspended || b.operator_open_flags ? `<div style="font-size:0.82rem;margin-bottom:0.6rem">${b.operator_suspended ? '<span style="color:var(--error)">Operator suspended</span>' : ''}${b.operator_suspended && b.operator_open_flags ? ' · ' : ''}${b.operator_open_flags ? `<span style="color:var(--amber)">🚩 ${b.operator_open_flags} open flag${b.operator_open_flags === 1 ? '' : 's'}</span>` : ''}</div>` : ''}
+        <div class="btns"><button class="btn split" onclick="goUser('${esc(b.operator_email)}')">View Operator…</button></div>
+      </div>
+    </div>`;
+  }
+
   function render() {
+    document.getElementById('bidSearch').style.display = tab === 'bids' ? '' : 'none';
+    if (tab === 'bids') {
+      document.getElementById('userSearch').style.display = 'none';
+      document.getElementById('tabSub').textContent = 'Every bid on DirtBidder, newest first. Spot lowballs, bid-shopping, or operators who need a look.';
+      bidStatusChips();
+      document.getElementById('list').innerHTML = !bidsLoaded ? '<div class="empty">Loading…</div>'
+        : bids.length ? bids.map(bidCard).join('') : '<div class="empty">No bids found.</div>';
+      return;
+    }
     if (tab === 'flags') {
       document.getElementById('userSearch').style.display = 'none';
       document.getElementById('tabSub').textContent = 'Things that look like someone trying to deal outside DirtBidder, plus client reports. Warn, suspend, or mark handled if it’s nothing.';
@@ -301,6 +360,7 @@
     btn.classList.add('active');
     tab = btn.dataset.f;
     render();
+    if (tab === 'bids') loadBids();
   }
 
   async function resolve(id, resolution, btn) {
