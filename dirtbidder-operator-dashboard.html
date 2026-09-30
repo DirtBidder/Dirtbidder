@@ -1116,7 +1116,7 @@
       <div class="greeting"><div class="greeting-text">Equipment <span>Resources</span></div><div class="greeting-sub">Helpful equipment financing & rental resources. DirtBidder is not affiliated with or endorsed by these companies.</div></div>
       <div class="card">
         <div class="card-header"><div class="card-title">Financing</div></div>
-        <div class="partner-card"><div class="partner-logo-box">🏗️</div><div class="partner-info"><div class="partner-name">Cat Financial</div><div class="partner-desc">Finance heavy equipment directly through Cat Financial — visit their site to explore options.</div></div><button class="partner-btn" onclick="openPartner('cat-financial')">Visit Cat Financial →</button>
+        <div class="partner-card"><div class="partner-logo-box">🏗️</div><div class="partner-info"><div class="partner-name">Cat Financial</div><div class="partner-desc">Finance heavy equipment directly through Cat Financial — visit their site to explore options.</div></div><button class="partner-btn" onclick="openPartner('cat-financial')">Visit Cat Financial →</button></div>
       </div>
       <div class="card" style="margin-top:1rem">
         <div class="card-header"><div class="card-title">Equipment Rental</div></div>
@@ -1131,7 +1131,7 @@
     <div id="section-messages" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Messages</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages Coming Soon</div><div class="empty-sub">In-app messaging is being built next in the DirtBidder app</div></div></div></div>
     <div id="section-reviews" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Reviews</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No reviews yet</div><div class="empty-sub">Clients can review you after a job is complete</div></div></div></div>
     <div id="section-profile" style="display:none"><div class="greeting"><div class="greeting-text">Edit <span>Profile</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">Profile Editor Coming Soon</div><div class="empty-sub">Update your bio, service area, and equipment list</div></div></div></div>
-    <div id="section-settings" style="display:none"><div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">⚙️</div><div class="empty-text">Settings Coming Soon</div><div class="empty-sub">Notification preferences, bank account, and billing</div></div></div></div>
+    <div id="section-settings" style="display:none"><div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div><div class="card" id="settingsCard"></div></div>
 
   </div>
 </div>
@@ -1262,8 +1262,11 @@
     return `<div style="padding:1.25rem 1.5rem">
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;color:var(--chalk);margin-bottom:0.75rem">${esc(b.job_title)}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div>${lbl('Client')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.client_name || '—')}</div></div>
+        <div>${lbl('Client')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.client_name || '—')}</div>${b.client_phone ? `<a href="tel:${esc(String(b.client_phone).replace(/[^0-9+]/g, ''))}" style="font-size:0.85rem;color:var(--amber);text-decoration:none">📞 ${esc(b.client_phone)}</a>` : ''}</div>
         <div>${lbl('Location')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_location || '—')}</div></div>
+      </div>
+      ${siteBox(b)}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
         <div>${lbl('Agreed Price')}<div style="font-size:0.9rem;color:var(--amber);font-weight:600">${money(b.amount)}</div></div>
         <div>${lbl('Payment')}${payInfo(b)}</div>
       </div>
@@ -1271,6 +1274,22 @@
         : b.job_status === 'awaiting_release' ? `<div style="margin-top:1rem;font-size:0.82rem;color:var(--amber)">Marked complete — the client has 72 hours to release payment or report a problem. If they do nothing, it releases to you automatically${b.job_completed_at ? ' (' + autoReleaseIn(b.job_completed_at) + ')' : ''}.</div>`
         : b.job_status === 'disputed' && b.dispute ? disputeBox(b) : ''}
       ${full && b.job_timeline ? `<div style="margin-top:1rem">${lbl('Timeline')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_timeline)}</div></div>` : ''}
+    </div>`;
+  }
+
+  // Exact job-site address — only sent to the operator who was hired
+  function siteBox(b) {
+    const a = String(b.job_address || '').trim();
+    const lines = a.split('\n');
+    const street = lines.find(l => !/^Access:/i.test(l)) || '';
+    const access = lines.find(l => /^Access:/i.test(l)) || '';
+    const dest = street || b.job_location || '';
+    const dir = dest ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}" target="_blank" rel="noopener" class="bid-btn" style="display:inline-block;text-decoration:none;margin-top:0.5rem;padding:0.5rem 0.9rem;font-size:0.8rem">🧭 Get Directions</a>` : '';
+    return `<div style="margin-top:1rem;padding:0.8rem 1rem;border:1px solid rgba(232,137,42,0.25);border-radius:3px;background:rgba(232,137,42,0.05)">
+      <div style="font-size:0.72rem;color:var(--stone);text-transform:uppercase;letter-spacing:0.1em;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:0.3rem">Job Site Address</div>
+      <div style="font-size:0.9rem;color:var(--chalk)">${street ? esc(street) : 'The client hasn’t added the exact address yet.'}</div>
+      ${access ? `<div style="font-size:0.85rem;color:var(--dust);margin-top:0.3rem">${esc(access)}</div>` : ''}
+      ${dir}
     </div>`;
   }
 
@@ -1567,5 +1586,6 @@
   document.querySelectorAll('.sidebar .nav-item').forEach(el => el.addEventListener('click', () => toggleMenu(false)));
 </script>
 
+<script src="dirtbidder-settings.js"></script>
 </body>
 </html>

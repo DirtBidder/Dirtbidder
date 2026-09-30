@@ -909,7 +909,7 @@
 
     <div id="section-settings" style="display:none">
       <div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div>
-      <div class="card"><div class="empty-state"><div class="empty-icon">⚙️</div><div class="empty-text">Settings Coming Soon</div><div class="empty-sub">Profile editing, notifications, and billing settings</div></div></div>
+      <div class="card" id="settingsCard"></div>
     </div>
 
     <div id="section-reviews" style="display:none">
@@ -1037,10 +1037,17 @@
       const r = { release: 'Paid to the operator', refund: 'Refunded to you', split: 'Split between you and the operator' }[job.dispute.resolution] || 'Resolved';
       note = `<div class="job-note" style="color:var(--dust)">Dispute decided: ${r}.${job.dispute.admin_note ? ' “' + esc(job.dispute.admin_note) + '”' : ''}</div>`;
     }
+    // Private exact address: only the hired operator ever sees it
+    let addr = '';
+    if (detailed && isActive(job)) {
+      addr = job.site_address
+        ? `<div class="job-note" style="color:var(--dust);white-space:pre-line">🔒 ${esc(job.site_address)} <a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">Edit</a></div>`
+        : `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">+ Add exact job address</a> <span style="color:var(--stone)">(private — only the operator you hire sees it)</span></div>`;
+    }
     return `<div class="job-row" ${click}>
       <div class="job-status-dot dot-${si.cls}"></div>
       <div class="job-info"><div class="job-title">${esc(job.title)}</div>
-        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div>${note}${detailed ? photoStrip(job) : ''}</div>
+        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div>${note}${addr}${detailed ? photoStrip(job) : ''}</div>
       <div class="job-bids">${right}</div>
       <div class="job-badge badge-${si.cls}">${si.label}</div>
       ${releaseBtn}
@@ -1273,6 +1280,17 @@
     btn.disabled = false; btn.textContent = 'Submit Report';
   }
 
+  async function editAddress(jobId) {
+    const job = jobs.find(j => j.id === jobId);
+    const v = prompt('Exact job site address (only the operator you hire will see this):', (job && job.site_address) || '');
+    if (v === null) return;
+    try {
+      const r = await api('/api/jobs/' + jobId + '/address', { method: 'PUT', body: JSON.stringify({ site_address: v }) });
+      if (job) job.site_address = r.site_address;
+      render();
+    } catch (err) { alert(err.message || 'Could not save the address'); }
+  }
+
   async function releasePayment(jobId) {
     const e = escrows.find(x => x.job_id === jobId && x.status === 'held');
     const job = jobs.find(j => j.id === jobId);
@@ -1324,5 +1342,6 @@
   document.querySelectorAll('.sidebar .nav-item').forEach(el => el.addEventListener('click', () => toggleMenu(false)));
 </script>
 
+<script src="dirtbidder-settings.js"></script>
 </body>
 </html>
