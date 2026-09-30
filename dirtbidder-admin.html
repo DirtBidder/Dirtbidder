@@ -58,7 +58,7 @@
 <body>
 <div class="top">
   <a class="logo" href="dirtbidder-client-dashboard.html"><span>Dirt</span>Bidder</a>
-  <a class="back" href="dirtbidder-client-dashboard.html">← Back to dashboard</a>
+  <span><a class="back" href="dirtbidder-hq.html" style="margin-right:1rem">📈 HQ</a><a class="back" href="dirtbidder-client-dashboard.html">← Back to dashboard</a></span>
 </div>
 <div class="wrap">
   <h1>Admin — <span>DirtBidder</span></h1>
@@ -394,7 +394,10 @@
       document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }
   }
-  if (token) load();
+  if (token) load().then(() => {
+    const t = document.querySelector('[data-f="' + location.hash.slice(1) + '"]');
+    if (t) setTab(t);
+  });
 </script>
 </body>
 </html>

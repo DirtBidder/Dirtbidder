@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>DirtBidder — HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #1C1410; --dig: #2A1F17; --clay: #3D2B1F; --amber: #E8892A;
+    --dust: #C4A882; --stone: #8C7B6B; --chalk: #F2EDE6;
+    --error: #E74C3C; --success: #27AE60; --info: #3498DB;
+    --line: rgba(196,168,130,0.1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--chalk); min-height: 100vh; }
+  a { color: inherit; }
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: var(--dig); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+  .logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.4rem; text-decoration: none; }
+  .logo span { color: var(--amber); }
+  .top a.back { color: var(--dust); font-size: 0.85rem; text-decoration: none; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2.1rem; text-transform: uppercase; line-height: 1; }
+  h1 span { color: var(--amber); }
+  .sub { color: var(--stone); font-size: 0.9rem; margin-top: 0.35rem; }
+  .toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--dust); cursor: pointer; user-select: none; }
+  .toggle input { accent-color: var(--amber); width: 16px; height: 16px; }
+  .sec { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--stone); margin: 1.75rem 0 0.7rem; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+  .tile { background: var(--dig); border: 1px solid var(--line); border-radius: 4px; padding: 1rem 1.1rem; text-decoration: none; display: block; }
+  a.tile:hover { border-color: rgba(232,137,42,0.4); }
+  .lbl { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone); }
+  .big { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2rem; line-height: 1.1; margin: 0.25rem 0 0.2rem; }
+  .big.money { color: var(--amber); }
+  .note { font-size: 0.8rem; color: var(--dust); }
+  .note .warn { color: var(--error); font-weight: 600; }
+  .grid2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0.75rem; }
+  .card { background: var(--dig); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .card-head { padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+  .card-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
+  .card-body { padding: 1rem 1.1rem; }
+  /* Weekly trend: three small single-series bar charts (one measure each, one axis each) */
+  .minis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .mini .top-line { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; }
+  .mini .now { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.3rem; }
+  .bars { position: relative; height: 90px; display: flex; align-items: flex-end; gap: 2px; border-bottom: 1px solid rgba(196,168,130,0.25); }
+  .bar { flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end; cursor: default; }
+  .bar i { display: block; width: 100%; background: var(--amber); border-radius: 4px 4px 0 0; min-height: 0; }
+  .bar.zero i { background: rgba(196,168,130,0.18); height: 2px !important; border-radius: 0; }
+  .bar:not(.zero):hover i { background: #F2A657; }
+  .bar .tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--chalk); color: var(--soil); font-size: 0.72rem; font-weight: 600; padding: 0.3rem 0.45rem; border-radius: 3px; white-space: nowrap; z-index: 3; pointer-events: none; }
+  .bar:hover .tip { display: block; }
+  .axis { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--stone); margin-top: 0.3rem; }
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .link { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 4px; text-decoration: none; background: var(--soil); }
+  .link:hover { border-color: rgba(232,137,42,0.45); }
+  .link .ic { font-size: 1.15rem; width: 1.5rem; text-align: center; }
+  .link b { display: block; font-size: 0.9rem; font-weight: 600; }
+  .link small { color: var(--stone); font-size: 0.75rem; }
+  .link.primary { border-color: rgba(232,137,42,0.5); }
+  .feed { list-style: none; }
+  .feed li { display: flex; gap: 0.75rem; padding: 0.65rem 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
+  .feed li:last-child { border-bottom: 0; }
+  .feed .ic { font-size: 1rem; width: 1.4rem; text-align: center; flex: none; }
+  .feed .txt { flex: 1; min-width: 0; font-size: 0.88rem; line-height: 1.35; }
+  .feed .txt small { color: var(--stone); display: block; font-size: 0.75rem; }
+  .feed .amt { color: var(--amber); font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
+  .chat .soon { font-size: 0.88rem; color: var(--dust); line-height: 1.5; }
+  .chat input { width: 100%; margin-top: 0.8rem; background: var(--soil); border: 1.5px solid rgba(196,168,130,0.18); color: var(--stone); border-radius: 20px; padding: 0.65rem 0.95rem; font: inherit; font-size: 0.95rem; }
+  .pill { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 3px; background: rgba(140,123,107,0.18); color: var(--stone); }
+  .empty { color: var(--stone); padding: 1.5rem 0; text-align: center; font-size: 0.9rem; }
+  .err { color: var(--error); padding: 1rem; }
+  @media (max-width: 860px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .minis { grid-template-columns: 1fr; }
+    .links { grid-template-columns: 1fr; }
+    .big { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="logo" href="dirtbidder-hq.html"><span>Dirt</span>Bidder</a>
+  <a class="back" href="dirtbidder-client-dashboard.html">← My dashboard</a>
+</div>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>DirtBidder <span>HQ</span></h1>
+      <div class="sub" id="sub">Loading…</div>
+    </div>
+    <label class="toggle"><input type="checkbox" id="withTest" onchange="load()"> Include test accounts <span id="hiddenNote"></span></label>
+  </div>
+
+  <div id="main"><div class="empty">Loading…</div></div>
+</div>
+
+<script>
+  const API_BASE = 'https://dirtbidder-backend-production.up.railway.app';
+  const token = localStorage.getItem('dirtbidder_token');
+  if (!token) window.location.replace('dirtbidder-login.html');
+
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money = n => '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+  const num = n => Number(n || 0).toLocaleString('en-US');
+  const ago = ts => {
+    const s = (Date.now() - new Date(ts).getTime()) / 1000;
+    if (s < 3600) return Math.max(1, Math.round(s / 60)) + ' min ago';
+    if (s < 86400) return Math.round(s / 3600) + ' hr ago';
+    if (s < 86400 * 7) { const n = Math.round(s / 86400); return n + (n === 1 ? ' day ago' : ' days ago'); }
+    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+  const wk = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  async function api(path) {
+    const res = await fetch(API_BASE + path, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (res.status === 401) { window.location.replace('dirtbidder-login.html'); throw new Error('Session expired'); }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  const LINKS = [
+    { ic: '🌐', t: 'Public website', s: 'What clients & operators see', u: 'index.html', primary: true },
+    { ic: '🛡️', t: 'Admin panel', s: 'Disputes, users, flags, bids', u: 'dirtbidder-admin.html', primary: true },
+    { ic: '📧', t: 'Outlook', s: 'daniel@ & support@', u: 'https://outlook.office.com/mail/' },
+    { ic: '💳', t: 'Stripe', s: 'Payments & payouts', u: 'https://dashboard.stripe.com/' },
+    { ic: '🚂', t: 'Railway', s: 'Backend & database', u: 'https://railway.com/dashboard' },
+    { ic: '▲', t: 'Vercel', s: 'Website hosting', u: 'https://vercel.com/dashboard' },
+    { ic: '✉️', t: 'Resend', s: 'Site emails', u: 'https://resend.com/emails' },
+    { ic: '💻', t: 'GitHub', s: 'Code', u: 'https://github.com/DirtBidder' }
+  ];
+
+  const FEED = {
+    signup: (a) => ['👤', `<b>${esc(a.who)}</b> joined as ${a.detail === 'operator' ? 'an operator' : 'a client'}`],
+    job: (a) => ['📋', `<b>${esc(a.who)}</b> posted <i>${esc(a.detail)}</i>`],
+    bid: (a) => ['💰', `<b>${esc(a.who)}</b> bid on <i>${esc(a.detail)}</i>`],
+    payment: (a) => ['🔒', `<b>${esc(a.who)}</b> paid into escrow for <i>${esc(a.detail)}</i>`],
+    dispute: (a) => ['⚠️', `<b>${esc(a.who)}</b> reported a problem on <i>${esc(a.detail)}</i>`]
+  };
+
+  function tile(label, value, note, opts = {}) {
+    const tag = opts.href ? 'a' : 'div';
+    return `<${tag} class="tile"${opts.href ? ` href="${opts.href}"` : ''}>
+      <div class="lbl">${label}</div>
+      <div class="big${opts.money ? ' money' : ''}">${value}</div>
+      <div class="note">${note}</div>
+    </${tag}>`;
+  }
+
+  // One small bar chart per measure, each on its own scale. Hover a bar for the exact number.
+  function mini(title, rows, key, fmt) {
+    const max = Math.max(...rows.map(r => Number(r[key]) || 0), 1);
+    const last = rows[rows.length - 1] || {};
+    const bars = rows.map(r => {
+      const v = Number(r[key]) || 0;
+      return `<div class="bar${v ? '' : ' zero'}"><i style="height:${v ? Math.max(4, Math.round(v / max * 100)) : 0}%"></i><span class="tip">Week of ${wk(r.week)}: ${fmt(v)}</span></div>`;
+    }).join('');
+    return `<div class="mini">
+      <div class="top-line"><div class="lbl">${title}</div><div><span class="now">${fmt(last[key])}</span> <span class="note">this week</span></div></div>
+      <div class="bars" role="img" aria-label="${esc(title)} per week, last 8 weeks">${bars}</div>
+      <div class="axis"><span>${rows[0] ? wk(rows[0].week) : ''}</span><span>This week</span></div>
+    </div>`;
+  }
+
+  function render(d) {
+    const m = d.money, u = d.users, j = d.jobs, b = d.bids;
+    document.getElementById('sub').textContent = d.with_test ? 'Showing everything, including test accounts.' : 'Real activity only — test accounts left out.';
+    const h = d.hidden_test;
+    document.getElementById('hiddenNote').textContent = !d.with_test && (h.users || h.jobs) ? `(${h.users} users, ${h.jobs} jobs hidden)` : '';
+
+    const needs = [];
+    if (d.open.disputes) needs.push(`<span class="warn">${d.open.disputes} open dispute${d.open.disputes === 1 ? '' : 's'}</span>`);
+    if (d.open.flags) needs.push(`<span class="warn">${d.open.flags} flag${d.open.flags === 1 ? '' : 's'}</span>`);
+
+    document.getElementById('main').innerHTML = `
+      <div class="sec">Money</div>
+      <div class="tiles">
+        ${tile('Fees earned', money(m.fees_earned), m.fees_pending ? money(m.fees_pending) + ' more once held jobs finish' : 'From finished jobs', { money: true })}
+        ${tile('In escrow now', money(m.in_escrow), m.frozen ? `<span class="warn">${m.frozen} frozen in a dispute</span>` : 'Held for jobs in progress', { money: true })}
+        ${tile('Paid to operators', money(m.paid_to_operators), money(m.job_value_done) + ' of finished work')}
+        ${tile('Needs you', needs.length ? needs.length : '✓', needs.length ? needs.join(' · ') : 'No open disputes or flags', { href: 'dirtbidder-admin.html' })}
+      </div>
+
+      <div class="sec">Marketplace</div>
+      <div class="tiles">
+        ${tile('Operators', num(u.operators), `${num(u.clients)} clients · ${num(u.new_7d)} new this week`)}
+        ${tile('Open jobs', num(j.open), `${num(j.in_progress)} in progress · ${num(j.completed)} done`)}
+        ${tile('Bids', num(b.total), `${num(b.pending)} waiting · ${num(b.new_7d)} this week`, { href: 'dirtbidder-admin.html#bids' })}
+        ${tile('Average bid', money(b.avg_bid), j.total ? (b.total / j.total).toFixed(1) + ' bids per job' : 'No jobs yet')}
+      </div>
+
+      <div class="sec">Last 8 weeks</div>
+      <div class="card"><div class="card-body minis">
+        ${mini('Sign-ups', d.weekly, 'signups', num)}
+        ${mini('Jobs posted', d.weekly, 'jobs', num)}
+        ${mini('Paid into escrow', d.weekly, 'paid_in', money)}
+      </div></div>
+
+      <div class="grid2" style="margin-top:0.75rem">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Recent activity</div><span class="pill">Live</span></div>
+          <div class="card-body">
+            ${d.activity.length ? `<ul class="feed">${d.activity.map(a => {
+              const [ic, txt] = (FEED[a.kind] || (() => ['•', esc(a.kind)]))(a);
+              return `<li><span class="ic">${ic}</span><div class="txt">${txt}<small>${ago(a.at)}</small></div>${a.amount != null ? `<span class="amt">${money(a.amount)}</span>` : ''}</li>`;
+            }).join('')}</ul>` : '<div class="empty">Nothing yet. Activity shows up here as people use the site.</div>'}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <div class="card">
+            <div class="card-head"><div class="card-title">Quick links</div></div>
+            <div class="card-body links">
+              ${LINKS.map(l => `<a class="link${l.primary ? ' primary' : ''}" href="${l.u}"${/^https?:/.test(l.u) ? ' target="_blank" rel="noopener"' : ''}><span class="ic">${l.ic}</span><span><b>${l.t}</b><small>${l.s}</small></span></a>`).join('')}
+            </div>
+          </div>
+          <div class="card chat">
+            <div class="card-head"><div class="card-title">Ask Claude</div><span class="pill">Coming soon</span></div>
+            <div class="card-body">
+              <div class="soon">Ask questions about your marketplace in plain English, like <i>"How many bids came in this week?"</i> or <i>"Which operators have flags?"</i> This turns on once an Anthropic API account is connected.</div>
+              <input type="text" placeholder="Ask about your jobs, bids, or users…" disabled>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  async function load() {
+    try {
+      const d = await api('/api/admin/hq' + (document.getElementById('withTest').checked ? '?test=1' : ''));
+      render(d);
+    } catch (err) {
+      document.getElementById('sub').textContent = '';
+      document.getElementById('main').innerHTML = `<div class="card"><div class="err">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
+    }
+  }
+  if (token) { load(); setInterval(() => { if (!document.hidden) load(); }, 60000); }
+</script>
+</body>
+</html>
