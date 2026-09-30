@@ -67,6 +67,10 @@
     <button class="tab active" data-f="open" onclick="setTab(this)">Open Disputes</button>
     <button class="tab" data-f="resolved" onclick="setTab(this)">Resolved</button>
     <button class="tab" data-f="held" onclick="setTab(this)">Paid Jobs</button>
+    <button class="tab" data-f="users" onclick="setTab(this)">Users</button>
+  </div>
+  <div id="userSearch" style="display:none;margin-bottom:1rem">
+    <input id="userQ" type="search" placeholder="Search name, company, email or phone" oninput="searchUsers()" style="width:100%;background:var(--dig);border:1.5px solid rgba(196,168,130,0.2);color:var(--chalk);border-radius:3px;padding:0.75rem 0.9rem;font:inherit;font-size:1rem">
   </div>
   <div id="list"><div class="empty">Loading…</div></div>
 </div>
@@ -157,7 +161,81 @@
     catch (err) { alert(err.message); btn.disabled = false; }
   }
 
+  // ── Users: search, suspend, restore ──
+  let users = [], userTimer = null;
+  function searchUsers() {
+    clearTimeout(userTimer);
+    userTimer = setTimeout(loadUsers, 300);
+  }
+  async function loadUsers() {
+    try {
+      users = await api('/api/admin/users?q=' + encodeURIComponent(document.getElementById('userQ').value.trim()));
+      if (tab === 'users') render();
+    } catch (err) { document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}</div></div>`; }
+  }
+  function userCard(u) {
+    const sus = !!u.suspended_at;
+    const warns = Array.isArray(u.warnings) ? u.warnings : [];
+    const r = u.reputation;
+    const stats = u.role === 'operator'
+      ? `${u.bids_made} bid${u.bids_made === 1 ? '' : 's'}${r ? ` · ${r.jobs} job${r.jobs === 1 ? '' : 's'} done${r.review_count ? ` · ★ ${Number(r.rating).toFixed(1)} (${r.review_count})` : ''}${r.badge ? ' · ' + r.badge.icon + ' ' + esc(r.badge.label) : ''}` : ''}`
+      : `${u.jobs_posted} job${u.jobs_posted === 1 ? '' : 's'} posted`;
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(u.company_name || u.name || '—')}</div>
+          <div style="font-size:0.8rem;color:var(--stone)">${esc(u.role === 'operator' ? 'Operator' : u.role === 'client' ? 'Client' : u.role)}${u.company_name && u.name ? ' · ' + esc(u.name) : ''} · joined ${when(u.created_at)}</div></div>
+        <div class="pill ${sus ? 'open' : 'done'}">${sus ? 'Suspended' : u.is_admin ? 'Admin' : 'Active'}</div>
+      </div>
+      <div class="card-body">
+        <div class="val" style="margin-bottom:0.3rem">${esc(u.email)}${u.phone ? ' · ' + esc(u.phone) : ''}</div>
+        <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.6rem">${stats}${u.disputes ? ` · <span style="color:var(--error)">${u.disputes} dispute${u.disputes === 1 ? '' : 's'}</span>` : ''}${warns.length ? ` · <span style="color:var(--amber)">${warns.length} warning${warns.length === 1 ? '' : 's'}</span>` : ''}${u.money_held ? ` · <span style="color:var(--amber)">${u.money_held} payment${u.money_held === 1 ? '' : 's'} in escrow</span>` : ''}</div>
+        ${sus ? `<div class="lbl">Suspended ${when(u.suspended_at)} — reason</div><div class="quote">${esc(u.suspended_reason || '')}</div>
+          <button class="btn release" onclick="restoreUser(${u.id}, this)">Restore Account</button>`
+        : u.is_admin ? '' : `${warns.length ? `<div class="lbl">${warns.length} warning${warns.length === 1 ? '' : 's'} sent</div>${warns.map(w => `<div class="quote" style="margin-bottom:0.4rem">${esc(w.reason)} <small style="color:var(--stone)">— ${when(w.created_at)}</small></div>`).join('')}` : ''}
+          <div class="lbl">What did they do? (they'll see this in the email)</div>
+          <textarea id="sus-${u.id}" style="width:100%;min-height:70px;background:var(--clay);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.6rem;font:inherit;font-size:0.9rem;margin-bottom:0.5rem" placeholder="e.g. You asked a client to pay you in cash outside DirtBidder."></textarea>
+          <div class="btns">
+            <button class="btn split" onclick="warnUser(${u.id}, this)">Send Warning</button>
+            <button class="btn refund" onclick="suspendUser(${u.id}, this)">Suspend Account</button>
+          </div>`}
+      </div>
+    </div>`;
+  }
+  async function warnUser(id, btn) {
+    const u = users.find(x => x.id === id);
+    const reason = document.getElementById('sus-' + id).value.trim();
+    if (reason.length < 5) { alert('Write what they did wrong first — they will see it.'); return; }
+    if (!confirm(`Email ${u.email} a warning?\n\n"${reason}"\n\nTheir account stays active.`)) return;
+    btn.disabled = true;
+    try { await api('/api/admin/users/' + id + '/warn', { method: 'POST', body: JSON.stringify({ reason }) }); await loadUsers(); }
+    catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
+  async function suspendUser(id, btn) {
+    const u = users.find(x => x.id === id);
+    const reason = document.getElementById('sus-' + id).value.trim();
+    if (!reason) { alert('Write a short reason first.'); return; }
+    let msg = `Suspend ${u.company_name || u.name || u.email}?\n\nThey'll get an email with your reason, be signed out, and can't sign in. Their open jobs come down and their pending bids are pulled.`;
+    if (u.money_held) msg += `\n\nThey have ${u.money_held} payment(s) in escrow. Those are NOT touched — handle them on the Paid Jobs or Disputes tab.`;
+    if (!confirm(msg + '\n\nYou can restore them later.')) return;
+    btn.disabled = true;
+    try { await api('/api/admin/users/' + id + '/suspend', { method: 'POST', body: JSON.stringify({ reason }) }); await loadUsers(); }
+    catch (err) { alert(err.message); btn.disabled = false; }
+  }
+  async function restoreUser(id, btn) {
+    if (!confirm('Restore this account? They can sign in again. Jobs and bids that were taken down stay down.')) return;
+    btn.disabled = true;
+    try { await api('/api/admin/users/' + id + '/restore', { method: 'POST' }); await loadUsers(); }
+    catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
   function render() {
+    document.getElementById('userSearch').style.display = tab === 'users' ? '' : 'none';
+    if (tab === 'users') {
+      document.getElementById('tabSub').textContent = 'Everyone on DirtBidder. Suspend anyone breaking the rules — they’re signed out and blocked, but their records are kept.';
+      document.getElementById('list').innerHTML = users.length ? users.map(userCard).join('') : '<div class="empty">No users found.</div>';
+      return;
+    }
     document.getElementById('tabSub').textContent = tab === 'held'
       ? 'Jobs that are paid and in escrow, with no dispute. Cancel one here if both sides agreed to call it off.'
       : 'Clients who reported a problem. Their payment is frozen until you decide.';
@@ -202,6 +280,7 @@
     try {
       [disputes, escrows] = await Promise.all([api('/api/disputes/admin/all'), api('/api/disputes/admin/escrows')]);
       render();
+      loadUsers();
     } catch (err) {
       document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }
