@@ -42,7 +42,21 @@
   .card-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
   .card-body { padding: 1rem 1.1rem; }
   /* Weekly trend: three small single-series bar charts (one measure each, one axis each) */
-  .minis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .minis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .todo-add { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; }
+  .todo-add input { flex: 1; min-width: 0; background: var(--soil); border: 1.5px solid rgba(196,168,130,0.18); color: var(--chalk); border-radius: 3px; padding: 0.55rem 0.7rem; font: inherit; font-size: 0.95rem; }
+  .todo-add input:focus { outline: none; border-color: var(--amber); }
+  .btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.5rem 0.85rem; border-radius: 3px; cursor: pointer; border: 1px solid rgba(232,137,42,0.5); background: transparent; color: var(--amber); white-space: nowrap; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .todo { list-style: none; }
+  .todo li { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; line-height: 1.35; }
+  .todo li:last-child { border-bottom: 0; }
+  .todo input[type=checkbox] { accent-color: var(--success); width: 18px; height: 18px; flex: none; margin-top: 1px; cursor: pointer; }
+  .todo .t { flex: 1; min-width: 0; }
+  .todo li.done .t { color: var(--stone); text-decoration: line-through; }
+  .todo .x { background: none; border: 0; color: var(--stone); font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 0 0.2rem; opacity: 0.6; }
+  .todo .x:hover { opacity: 1; color: var(--error); }
+  .head-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
   .mini .top-line { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; }
   .mini .now { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.3rem; }
   .bars { position: relative; height: 90px; display: flex; align-items: flex-end; gap: 2px; border-bottom: 1px solid rgba(196,168,130,0.25); }
@@ -74,6 +88,7 @@
   .err { color: var(--error); padding: 1rem; }
   @media (max-width: 860px) {
     .tiles { grid-template-columns: repeat(2, 1fr); }
+    .minis { grid-template-columns: repeat(2, 1fr); }
     .grid2 { grid-template-columns: 1fr; }
   }
   @media (max-width: 520px) {
@@ -94,7 +109,10 @@
       <h1>DirtBidder <span>HQ</span></h1>
       <div class="sub" id="sub">Loading…</div>
     </div>
-    <label class="toggle"><input type="checkbox" id="withTest" onchange="load()"> Include test accounts <span id="hiddenNote"></span></label>
+    <div class="head-actions">
+      <label class="toggle"><input type="checkbox" id="withTest" onchange="load()"> Include test accounts <span id="hiddenNote"></span></label>
+      <button class="btn" id="reportBtn" onclick="reportNow()">📧 Email me today's report</button>
+    </div>
   </div>
 
   <div id="main"><div class="empty">Loading…</div></div>
@@ -108,6 +126,7 @@
   const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = n => '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
   const num = n => Number(n || 0).toLocaleString('en-US');
+  const short = n => { n = Number(n || 0); return n >= 1e6 ? '$' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n >= 1e3 ? '$' + Math.round(n / 1e3) + 'K' : '$' + Math.round(n); };
   const ago = ts => {
     const s = (Date.now() - new Date(ts).getTime()) / 1000;
     if (s < 3600) return Math.max(1, Math.round(s / 60)) + ' min ago';
@@ -117,8 +136,8 @@
   };
   const wk = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-  async function api(path) {
-    const res = await fetch(API_BASE + path, { headers: { 'Authorization': 'Bearer ' + token } });
+  async function api(path, opts = {}) {
+    const res = await fetch(API_BASE + path, { ...opts, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } });
     if (res.status === 401) { window.location.replace('dirtbidder-login.html'); throw new Error('Session expired'); }
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Request failed');
@@ -169,7 +188,7 @@
   }
 
   function render(d) {
-    const m = d.money, u = d.users, j = d.jobs, b = d.bids;
+    const m = d.money, u = d.users, j = d.jobs, b = d.bids, v = d.visitors || { today: 0, last_7d: 0, views_7d: 0, top_referrers: [] };
     document.getElementById('sub').textContent = d.with_test ? 'Showing everything, including test accounts.' : 'Real activity only — test accounts left out.';
     const h = d.hidden_test;
     document.getElementById('hiddenNote').textContent = !d.with_test && (h.users || h.jobs) ? `(${h.users} users, ${h.jobs} jobs hidden)` : '';
@@ -187,6 +206,14 @@
         ${tile('Needs you', needs.length ? needs.length : '✓', needs.length ? needs.join(' · ') : 'No open disputes or flags', { href: 'dirtbidder-admin.html' })}
       </div>
 
+      <div class="sec">Website</div>
+      <div class="tiles">
+        ${tile('Visitors today', num(v.today), 'People on dirtbidder.com today')}
+        ${tile('Visitors, 7 days', num(v.last_7d), num(v.views_7d) + ' pages viewed')}
+        ${tile('Top source', v.top_referrers.length ? esc(v.top_referrers[0].site.replace(/^www\./, '')) : '—', v.top_referrers.length ? v.top_referrers.slice(0, 3).map(r => esc(r.site.replace(/^www\./, '')) + ' ' + r.n).join(' · ') + ' (30 days)' : 'Where visitors came from')}
+        ${tile('Sign-up rate', v.last_7d ? Math.round(u.new_7d / v.last_7d * 100) + '%' : '—', v.last_7d ? `${num(u.new_7d)} sign-ups from ${num(v.last_7d)} visitors this week` : 'Sign-ups ÷ visitors, this week')}
+      </div>
+
       <div class="sec">Marketplace</div>
       <div class="tiles">
         ${tile('Operators', num(u.operators), `${num(u.clients)} clients · ${num(u.new_7d)} new this week`)}
@@ -197,9 +224,10 @@
 
       <div class="sec">Last 8 weeks</div>
       <div class="card"><div class="card-body minis">
+        ${mini('Visitors', d.weekly, 'visitors', num)}
         ${mini('Sign-ups', d.weekly, 'signups', num)}
         ${mini('Jobs posted', d.weekly, 'jobs', num)}
-        ${mini('Paid into escrow', d.weekly, 'paid_in', money)}
+        ${mini('Paid into escrow', d.weekly, 'paid_in', short)}
       </div></div>
 
       <div class="grid2" style="margin-top:0.75rem">
@@ -213,6 +241,13 @@
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <div class="card">
+            <div class="card-head"><div class="card-title">To-do</div><span class="pill" id="todoCount"></span></div>
+            <div class="card-body">
+              <form class="todo-add" onsubmit="addTask(event)"><input id="newTask" maxlength="300" placeholder="Add a to-do…" autocomplete="off"><button class="btn" type="submit">Add</button></form>
+              <ul class="todo" id="todo"></ul>
+            </div>
+          </div>
           <div class="card">
             <div class="card-head"><div class="card-title">Quick links</div></div>
             <div class="card-body links">
@@ -228,18 +263,53 @@
           </div>
         </div>
       </div>`;
+    renderTasks();
+  }
+
+  // ── To-do list ──
+  let tasks = [];
+  function renderTasks() {
+    const el = document.getElementById('todo'); if (!el) return;
+    const open = tasks.filter(t => !t.done_at), done = tasks.filter(t => t.done_at);
+    document.getElementById('todoCount').textContent = open.length ? open.length + ' left' : 'All done';
+    const row = t => `<li class="${t.done_at ? 'done' : ''}"><input type="checkbox" ${t.done_at ? 'checked' : ''} onchange="toggleTask(${t.id})" aria-label="Done"><span class="t">${esc(t.title)}</span><button class="x" onclick="deleteTask(${t.id})" aria-label="Delete" title="Delete">×</button></li>`;
+    el.innerHTML = (open.map(row).join('') + done.slice(0, 5).map(row).join('')) || '<li><span class="t" style="color:var(--stone)">Nothing on the list.</span></li>';
+  }
+  async function addTask(e) {
+    e.preventDefault();
+    const input = document.getElementById('newTask'), title = input.value.trim();
+    if (!title) return;
+    try { const t = await api('/api/admin/tasks', { method: 'POST', body: JSON.stringify({ title }) }); tasks.splice(tasks.filter(x => !x.done_at).length, 0, t); input.value = ''; renderTasks(); }
+    catch (err) { alert(err.message); }
+  }
+  async function toggleTask(id) {
+    try { const t = await api('/api/admin/tasks/' + id + '/toggle', { method: 'POST' }); tasks = tasks.filter(x => x.id !== id); t.done_at ? tasks.push(t) : tasks.unshift(t); renderTasks(); }
+    catch (err) { alert(err.message); }
+  }
+  async function deleteTask(id) {
+    const t = tasks.find(x => x.id === id);
+    if (!confirm('Delete "' + t.title + '"?')) return;
+    try { await api('/api/admin/tasks/' + id + '/delete', { method: 'POST' }); tasks = tasks.filter(x => x.id !== id); renderTasks(); }
+    catch (err) { alert(err.message); }
+  }
+  async function reportNow() {
+    const btn = document.getElementById('reportBtn'); btn.disabled = true;
+    try { await api('/api/admin/hq/report-now', { method: 'POST' }); btn.textContent = '✓ Sent — check your email'; }
+    catch (err) { alert(err.message); btn.disabled = false; }
   }
 
   async function load() {
     try {
       const d = await api('/api/admin/hq' + (document.getElementById('withTest').checked ? '?test=1' : ''));
+      tasks = d.tasks || [];
+      try { localStorage.setItem('dirtbidder_admin', '1'); } catch (e) {}
       render(d);
     } catch (err) {
       document.getElementById('sub').textContent = '';
       document.getElementById('main').innerHTML = `<div class="card"><div class="err">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }
   }
-  if (token) { load(); setInterval(() => { if (!document.hidden) load(); }, 60000); }
+  if (token) { load(); setInterval(() => { const a = document.activeElement; if (!document.hidden && !(a && a.id === 'newTask')) load(); }, 60000); }
 </script>
 </body>
 </html>

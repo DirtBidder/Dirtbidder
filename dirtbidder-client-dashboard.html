@@ -1266,7 +1266,7 @@
       const name = (me.name || me.email || '').trim();
       const first = name.split(/[\s@]/)[0] || 'there';
       document.getElementById('userName').textContent = name || 'My Account';
-      if (me.is_admin) { document.getElementById('adminLink').style.display = ''; document.getElementById('hqLink').style.display = ''; }
+      if (me.is_admin) { document.getElementById('adminLink').style.display = ''; document.getElementById('hqLink').style.display = ''; try { localStorage.setItem('dirtbidder_admin', '1'); } catch (e) {} }
       document.getElementById('userAvatar').textContent = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
       document.getElementById('greetName').textContent = first + '.';
       const h = new Date().getHours();

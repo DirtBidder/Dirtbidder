@@ -95,5 +95,8 @@
   <h2>Changes and contact</h2>
   <p>If we change this policy, we'll post the new version here with a new date. Questions or requests: <a href="mailto:support@dirtbidder.com">support@dirtbidder.com</a> · DirtBidder LLC, Gilmore City, Iowa.</p>
 </main>
+<script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
+try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
+</script>
 </body>
 </html>
