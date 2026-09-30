@@ -951,6 +951,34 @@
   </div>
 </div>
 
+<!-- REPORT OPERATOR -->
+<div class="db-modal-overlay" id="reportModal">
+  <div class="db-modal">
+    <div class="db-modal-head"><div class="db-modal-title">Report Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeReport()">✕</button></div>
+    <div class="db-modal-body">
+      <div id="reportWho" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
+      <label for="reportReason">What happened?</label>
+      <select id="reportReason" style="width:100%;background:var(--clay);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.65rem;font:inherit;margin-bottom:1rem">
+        <option value="off_platform">Asked me to pay or deal outside DirtBidder</option>
+        <option value="contact">Contacted me outside DirtBidder before I hired them</option>
+        <option value="no_show">Didn’t show up or stopped responding</option>
+        <option value="rude">Rude, threatening or unprofessional</option>
+        <option value="fake">Fake bid or fake business</option>
+        <option value="other">Something else</option>
+      </select>
+      <label for="reportDetails">Details (optional)</label>
+      <textarea id="reportDetails" placeholder="e.g. He called and said he'd knock 10% off if I paid cash."></textarea>
+      <div style="font-size:0.78rem;color:var(--stone);margin-top:0.5rem">Only DirtBidder sees this. The operator isn’t told who reported them.</div>
+      <div id="reportError" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
+      <div id="reportDone" style="display:none;color:var(--success);font-size:0.9rem;margin-top:0.75rem">✓ Thanks — we’ll look into it.</div>
+    </div>
+    <div class="db-modal-foot">
+      <button class="db-btn" onclick="closeReport()">Close</button>
+      <button class="db-btn primary" id="reportSubmit" onclick="submitReport()">Send Report</button>
+    </div>
+  </div>
+</div>
+
 <!-- OPERATOR PROFILE -->
 <div class="db-modal-overlay" id="opModal">
   <div class="db-modal">
@@ -1122,6 +1150,7 @@
       <div class="bid-job">${[compact ? esc(job.title) : '', bid.est_days ? bid.est_days + ' day' + (bid.est_days == 1 ? '' : 's') + ' est.' : '', bid.equipment ? esc(bid.equipment) : '', ago(bid.created_at)].filter(Boolean).join(' · ')}</div>
       ${msg && !compact ? `<div class="bid-job" style="color:var(--dust);margin-top:0.35rem">“${msg}”</div>` : ''}
       ${actions}
+      ${compact ? '' : `<div style="text-align:right;margin-top:0.35rem"><a href="#" style="font-size:0.72rem;color:var(--stone)" onclick="event.preventDefault();event.stopPropagation();openReport(${Number(bid.operator_id) || 0}, ${job.id}, '${esc(bid.operator_name || 'Operator').replace(/'/g, '&#39;')}')">🚩 Report</a></div>`}
     </div>`;
   }
 
@@ -1351,6 +1380,30 @@
     const row = (k, v) => v ? `<div style="font-size:0.85rem;color:var(--dust);margin-top:0.5rem"><span style="color:var(--stone)">${k}:</span> <span style="color:var(--chalk)">${esc(v)}</span></div>` : '';
     return (a.bio ? `<div style="font-size:0.88rem;color:var(--chalk);margin-top:0.75rem">${esc(a.bio)}</div>` : '') +
       row('Equipment', eq) + row('Experience', a.years) + row('Travels', a.service_radius);
+  }
+
+  let reportTarget = null;
+  function openReport(operatorId, jobId, name) {
+    if (!operatorId) return;
+    reportTarget = { operatorId, jobId };
+    document.getElementById('reportWho').textContent = name;
+    document.getElementById('reportDetails').value = '';
+    document.getElementById('reportError').style.display = 'none';
+    document.getElementById('reportDone').style.display = 'none';
+    document.getElementById('reportSubmit').style.display = '';
+    document.getElementById('reportModal').classList.add('active');
+  }
+  function closeReport() { document.getElementById('reportModal').classList.remove('active'); }
+  async function submitReport() {
+    const btn = document.getElementById('reportSubmit'), errEl = document.getElementById('reportError');
+    btn.disabled = true; errEl.style.display = 'none';
+    try {
+      await api('/api/reports', { method: 'POST', body: JSON.stringify({ operator_id: reportTarget.operatorId, job_id: reportTarget.jobId,
+        reason: document.getElementById('reportReason').value, details: document.getElementById('reportDetails').value }) });
+      document.getElementById('reportDone').style.display = 'block';
+      btn.style.display = 'none';
+    } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
+    btn.disabled = false;
   }
 
   async function openOperator(id) {

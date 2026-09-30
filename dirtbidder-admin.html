@@ -67,6 +67,7 @@
     <button class="tab active" data-f="open" onclick="setTab(this)">Open Disputes</button>
     <button class="tab" data-f="resolved" onclick="setTab(this)">Resolved</button>
     <button class="tab" data-f="held" onclick="setTab(this)">Paid Jobs</button>
+    <button class="tab" data-f="flags" onclick="setTab(this)">🚩 Flagged <span id="flagCount"></span></button>
     <button class="tab" data-f="users" onclick="setTab(this)">Users</button>
   </div>
   <div id="userSearch" style="display:none;margin-bottom:1rem">
@@ -229,7 +230,54 @@
     catch (err) { alert(err.message); btn.disabled = false; }
   }
 
+  // ── Flagged: contact info in bids/posts/profiles, client reports, patterns ──
+  let flags = [];
+  const KIND = { bid: 'Bid', job: 'Job post', profile: 'Profile', report: 'Client report', pattern: 'Pattern' };
+  async function loadFlags() {
+    try {
+      flags = await api('/api/admin/flags');
+      document.getElementById('flagCount').textContent = flags.length ? '(' + flags.length + ')' : '';
+      if (tab === 'flags') render();
+    } catch (err) { /* shown on tab open */ }
+  }
+  function flagCard(f) {
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(f.company_name || f.name || f.email)}</div>
+          <div style="font-size:0.8rem;color:var(--stone)">${esc(f.role === 'operator' ? 'Operator' : 'Client')} · ${esc(f.email)} · ${when(f.created_at)}</div></div>
+        <div class="pill open">${KIND[f.kind] || f.kind}</div>
+      </div>
+      <div class="card-body">
+        <div class="val" style="margin-bottom:0.5rem">${esc(f.reason)}</div>
+        ${f.job_title ? `<div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.4rem">Job: ${esc(f.job_title)}</div>` : ''}
+        ${f.reporter_email ? `<div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.4rem">Reported by ${esc(f.reporter_name || '')} (${esc(f.reporter_email)})</div>` : ''}
+        ${f.details ? `<div class="lbl">${f.kind === 'report' ? 'What they said' : 'What they actually wrote (hidden from the other side)'}</div><div class="quote" style="white-space:pre-line">${esc(f.details)}</div>` : ''}
+        <div style="font-size:0.82rem;color:var(--dust);margin:0.4rem 0 0.6rem">${f.total_flags} flag${f.total_flags === 1 ? '' : 's'} total · ${f.warnings} warning${f.warnings === 1 ? '' : 's'}${f.suspended_at ? ' · <span style="color:var(--error)">suspended</span>' : ''}</div>
+        <div class="btns">
+          <button class="btn split" onclick="goUser('${esc(f.email)}')">Warn or Suspend…</button>
+          <button class="btn release" onclick="flagDone(${f.id}, this)">Mark Handled</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  function goUser(email) {
+    document.getElementById('userQ').value = email;
+    setTab(document.querySelector('[data-f=users]'));
+    loadUsers();
+  }
+  async function flagDone(id, btn) {
+    btn.disabled = true;
+    try { await api('/api/admin/flags/' + id + '/done', { method: 'POST' }); await loadFlags(); }
+    catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
   function render() {
+    if (tab === 'flags') {
+      document.getElementById('userSearch').style.display = 'none';
+      document.getElementById('tabSub').textContent = 'Things that look like someone trying to deal outside DirtBidder, plus client reports. Warn, suspend, or mark handled if it’s nothing.';
+      document.getElementById('list').innerHTML = flags.length ? flags.map(flagCard).join('') : '<div class="empty">Nothing flagged. 👍</div>';
+      return;
+    }
     document.getElementById('userSearch').style.display = tab === 'users' ? '' : 'none';
     if (tab === 'users') {
       document.getElementById('tabSub').textContent = 'Everyone on DirtBidder. Suspend anyone breaking the rules — they’re signed out and blocked, but their records are kept.';
@@ -281,6 +329,7 @@
       [disputes, escrows] = await Promise.all([api('/api/disputes/admin/all'), api('/api/disputes/admin/escrows')]);
       render();
       loadUsers();
+      loadFlags();
     } catch (err) {
       document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }
