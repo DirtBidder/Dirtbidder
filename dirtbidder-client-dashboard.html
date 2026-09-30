@@ -862,7 +862,7 @@
         <div class="stat-card">
           <div class="stat-label">Held in Escrow</div>
           <div class="stat-value">$<span id="statEscrow">0</span></div>
-          <div class="stat-change neutral" id="statEscrowSub">Escrow coming soon</div>
+          <div class="stat-change neutral" id="statEscrowSub">Loading…</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Jobs Completed</div>
@@ -1168,9 +1168,13 @@
     document.getElementById('statBids').textContent = pendingBids;
     document.getElementById('statBidsSub').textContent = pendingBids ? 'Ready to review' : 'None yet';
     document.getElementById('statDone').textContent = done;
-    const held = escrows.filter(e => e.status === 'held');
+    // Frozen (disputed) money is still in escrow, so it counts toward the total
+    const held = escrows.filter(e => e.status === 'held' || e.status === 'disputed');
+    const frozen = held.filter(e => e.status === 'disputed').length;
     document.getElementById('statEscrow').textContent = Number(held.reduce((n, e) => n + Number(e.amount), 0)).toLocaleString('en-US', { maximumFractionDigits: 0 });
-    document.getElementById('statEscrowSub').textContent = held.length ? held.length + ' job' + (held.length === 1 ? '' : 's') + ' funded' : (paymentsOn ? 'Nothing held' : 'Escrow coming soon');
+    document.getElementById('statEscrowSub').textContent = held.length
+      ? held.length + ' job' + (held.length === 1 ? '' : 's') + ' funded' + (frozen ? ' · ' + frozen + ' frozen' : '')
+      : (paymentsOn ? 'Nothing held' : 'Checking…');
 
     const payRow = e => {
       const st = e.status === 'held' ? '<div class="payment-status status-held">🔒 Held in Escrow</div>'
