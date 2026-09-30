@@ -752,6 +752,7 @@
                 <option>Fine Grading</option>
                 <option>Excavation</option>
                 <option>Trenching</option>
+                <option>Field Tile</option>
                 <option>Pond Digging</option>
                 <option>Road Building</option>
                 <option>Foundation Prep</option>
@@ -845,6 +846,12 @@
                 </label>
                 <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
                   <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Water Truck
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Chain Trencher
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust);cursor:pointer">
+                  <input type="checkbox" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--amber)" /> Tile Plow
                 </label>
               </div>
             </div>
@@ -1027,9 +1034,8 @@
       };
     } else {
       const equipmentBoxes = document.querySelectorAll('#operatorProfile .field-group > .field:nth-of-type(4) input[type="checkbox"]');
-      const equipmentLabels = ['Excavator','Bulldozer','Dump Truck','Skid Steer','Motor Grader','Compactor','Frontend Loader','Impact Hammer','Water Truck'];
       const equipment = [];
-      equipmentBoxes.forEach((box, i) => { if (box.checked) equipment.push(equipmentLabels[i]); });
+      equipmentBoxes.forEach(box => { if (box.checked) equipment.push(box.parentElement.textContent.trim()); });
 
       return {
         companyName: document.getElementById('companyName').value,
