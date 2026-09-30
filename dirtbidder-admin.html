@@ -61,11 +61,12 @@
   <a class="back" href="dirtbidder-client-dashboard.html">← Back to dashboard</a>
 </div>
 <div class="wrap">
-  <h1>Admin — <span>Disputes</span></h1>
-  <div class="sub">Clients who reported a problem. Their payment is frozen until you decide.</div>
-  <div class="tabs">
-    <button class="tab active" data-f="open" onclick="setTab(this)">Open</button>
+  <h1>Admin — <span>DirtBidder</span></h1>
+  <div class="sub" id="tabSub">Clients who reported a problem. Their payment is frozen until you decide.</div>
+  <div class="tabs" style="flex-wrap:wrap">
+    <button class="tab active" data-f="open" onclick="setTab(this)">Open Disputes</button>
     <button class="tab" data-f="resolved" onclick="setTab(this)">Resolved</button>
+    <button class="tab" data-f="held" onclick="setTab(this)">Paid Jobs</button>
   </div>
   <div id="list"><div class="empty">Loading…</div></div>
 </div>
@@ -128,7 +129,42 @@
     </div>`;
   }
 
+  let escrows = [];
+  function heldCard(e) {
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(e.title)}</div><div style="font-size:0.8rem;color:var(--stone)">Paid ${when(e.created_at)} · ${esc(e.job_status.replace('_', ' '))}</div></div>
+        <div class="pill open">Held</div>
+      </div>
+      <div class="card-body">
+        <div class="grid">
+          <div><div class="lbl">Client</div><div class="val">${esc(e.client_name || '—')}<br><small>${esc(e.client_email || '')}</small></div></div>
+          <div><div class="lbl">Operator</div><div class="val">${esc(e.operator_name || '—')}<br><small>${esc(e.operator_email || '')}</small></div></div>
+          <div><div class="lbl">Job amount</div><div class="val">${money(e.amount)}</div></div>
+          <div><div class="lbl">Client paid</div><div class="val">${money(e.client_total)}</div></div>
+        </div>
+        <div style="font-size:0.82rem;color:var(--stone);margin:0.5rem 0 0.75rem">Only use this when <strong style="color:var(--chalk)">both sides agreed</strong> to cancel before work started. If they disagree, the client should use Report a Problem instead.</div>
+        <button class="btn refund" onclick="cancelHeld(${e.id}, this)">Cancel Job &amp; Refund ${money(e.client_total)}</button>
+      </div>
+    </div>`;
+  }
+
+  async function cancelHeld(id, btn) {
+    const e = escrows.find(x => x.id === id);
+    if (!confirm(`Cancel "${e.title}" and refund the client ${money(e.client_total)} (fee included)? The operator gets nothing.\n\nThis can’t be undone.`)) return;
+    btn.disabled = true;
+    try { await api('/api/disputes/admin/escrows/' + id + '/cancel', { method: 'POST' }); await load(); }
+    catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
   function render() {
+    document.getElementById('tabSub').textContent = tab === 'held'
+      ? 'Jobs that are paid and in escrow, with no dispute. Cancel one here if both sides agreed to call it off.'
+      : 'Clients who reported a problem. Their payment is frozen until you decide.';
+    if (tab === 'held') {
+      document.getElementById('list').innerHTML = escrows.length ? escrows.map(heldCard).join('') : '<div class="empty">No paid jobs in escrow right now.</div>';
+      return;
+    }
     const list = disputes.filter(d => tab === 'open' ? d.status === 'open' : d.status !== 'open');
     document.getElementById('list').innerHTML = list.length ? list.map(card).join('')
       : `<div class="empty">${tab === 'open' ? 'No open disputes. 👍' : 'No resolved disputes yet.'}</div>`;
@@ -164,7 +200,7 @@
 
   async function load() {
     try {
-      disputes = await api('/api/disputes/admin/all');
+      [disputes, escrows] = await Promise.all([api('/api/disputes/admin/all'), api('/api/disputes/admin/escrows')]);
       render();
     } catch (err) {
       document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;

@@ -1034,6 +1034,7 @@
     const st = job.status;
     if (st === 'completed') return { label: 'Complete', cls: 'complete' };
     if (st === 'cancelled') return { label: 'Refunded', cls: 'complete' };
+    if (st === 'closed') return { label: 'Closed', cls: 'complete' };
     if (st === 'disputed') return { label: 'Under Review', cls: 'disputed' };
     if (st === 'awaiting_release') return { label: 'Done — Release Pay', cls: 'hired' };
     if (st === 'in_progress') return { label: 'In Progress', cls: 'progress' };
@@ -1041,7 +1042,7 @@
     if (job.pending_bid_count > 0) return { label: 'Bidding', cls: 'bidding' };
     return { label: st === 'test' ? 'Open (test)' : 'Open', cls: 'open' };
   }
-  const isActive = j => j.status !== 'completed' && j.status !== 'cancelled';
+  const isActive = j => j.status !== 'completed' && j.status !== 'cancelled' && j.status !== 'closed';
 
   // Job photo thumbnails (tap opens full size)
   function photoStrip(job) {
@@ -1082,6 +1083,9 @@
       addr = job.site_address
         ? `<div class="job-note" style="color:var(--dust);white-space:pre-line">🔒 ${esc(job.site_address)} <a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">Edit</a></div>`
         : `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">+ Add exact job address</a> <span style="color:var(--stone)">(private — only the operator you hire sees it)</span></div>`;
+    }
+    if (detailed && (job.status === 'open' || job.status === 'test')) {
+      addr += `<button class="rate-btn" style="border-color:var(--stone);color:var(--stone)" onclick="event.stopPropagation();closeJob(${job.id})">Close Job</button>`;
     }
     if (job.status === 'completed' && job.hired_operator_id) {
       addr += job.my_review
@@ -1391,6 +1395,13 @@
       closeReview(); render();
     } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
     btn.disabled = false;
+  }
+
+  async function closeJob(jobId) {
+    const job = jobs.find(j => j.id === jobId);
+    if (!confirm(`Close "${job ? job.title : 'this job'}"? It comes down right away and any bids on it are declined. This is free.`)) return;
+    try { await api('/api/jobs/' + jobId + '/close', { method: 'POST' }); if (job) job.status = 'closed'; await load(); }
+    catch (err) { alert(err.message); }
   }
 
   async function editAddress(jobId) {
