@@ -728,6 +728,17 @@
   .badge-disputed { background: rgba(231,76,60,0.15); color: var(--error); }
   .dot-disputed { background: var(--error); }
   .job-note { font-size: 0.75rem; margin-top: 0.35rem; }
+  .rep-line { font-size: 0.75rem; color: var(--dust); margin-top: 0.2rem; display: flex; flex-wrap: wrap; gap: 0.35rem 0.6rem; align-items: center; }
+  .rep-badge { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.45rem; border-radius: 2px; background: rgba(232,137,42,0.12); color: var(--amber); }
+  .rep-badge.verified { background: rgba(39,174,96,0.12); color: var(--success); }
+  .op-link { background: none; border: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+  .op-link:hover { color: var(--amber); }
+  .star-pick { display: flex; gap: 0.4rem; margin: 0.25rem 0 1rem; }
+  .star-pick button { background: none; border: none; font-size: 2.1rem; line-height: 1; cursor: pointer; color: rgba(196,168,130,0.3); padding: 0.1rem; }
+  .star-pick button.on { color: var(--amber); }
+  .rate-btn { background: none; border: 1.5px solid var(--amber); color: var(--amber); border-radius: 3px; padding: 0.35rem 0.75rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; margin-top: 0.4rem; }
+  .review-item { padding: 0.8rem 0; border-top: 1px solid rgba(196,168,130,0.08); font-size: 0.85rem; color: var(--dust); }
+  .review-item .rv-stars { color: var(--amber); letter-spacing: 0.05em; }
   .db-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,20,16,0.85); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
   .db-modal-overlay.active { display: flex; }
   .db-modal { background: var(--dig); border: 1px solid rgba(196,168,130,0.15); border-radius: 4px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
@@ -914,9 +925,37 @@
 
     <div id="section-reviews" style="display:none">
       <div class="greeting"><div class="greeting-text">My <span>Reviews</span></div></div>
-      <div class="card"><div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No Reviews Yet</div><div class="empty-sub">After completing a job, leave a review for your operator</div></div></div>
+      <div class="card" id="myReviewsList"></div>
     </div>
 
+  </div>
+</div>
+
+<!-- RATE OPERATOR -->
+<div class="db-modal-overlay" id="reviewModal">
+  <div class="db-modal">
+    <div class="db-modal-head"><div class="db-modal-title">Rate Your Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeReview()">✕</button></div>
+    <div class="db-modal-body">
+      <div id="reviewWho" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
+      <label>How did they do?</label>
+      <div class="star-pick" id="starPick"></div>
+      <label for="reviewComment">Comment (optional)</label>
+      <textarea id="reviewComment" placeholder="e.g. Showed up on time, left the site clean, great work."></textarea>
+      <div style="font-size:0.78rem;color:var(--stone);margin-top:0.5rem">Other clients will see your rating and comment with your first name.</div>
+      <div id="reviewError" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
+    </div>
+    <div class="db-modal-foot">
+      <button class="db-btn" onclick="closeReview()">Cancel</button>
+      <button class="db-btn primary" id="reviewSubmit" onclick="submitReview()">Post Rating</button>
+    </div>
+  </div>
+</div>
+
+<!-- OPERATOR PROFILE -->
+<div class="db-modal-overlay" id="opModal">
+  <div class="db-modal">
+    <div class="db-modal-head"><div class="db-modal-title" id="opName">Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="document.getElementById('opModal').classList.remove('active')">✕</button></div>
+    <div class="db-modal-body" id="opBody"></div>
   </div>
 </div>
 
@@ -1044,6 +1083,11 @@
         ? `<div class="job-note" style="color:var(--dust);white-space:pre-line">🔒 ${esc(job.site_address)} <a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">Edit</a></div>`
         : `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">+ Add exact job address</a> <span style="color:var(--stone)">(private — only the operator you hire sees it)</span></div>`;
     }
+    if (job.status === 'completed' && job.hired_operator_id) {
+      addr += job.my_review
+        ? `<div class="job-note" style="color:var(--dust)">You rated ${esc(job.hired_operator_name || 'the operator')} <span style="color:var(--amber)">${stars(job.my_review.rating)}</span></div>`
+        : `<button class="rate-btn" onclick="event.stopPropagation();openReview(${job.id})">⭐ Rate Operator</button>`;
+    }
     return `<div class="job-row" ${click}>
       <div class="job-status-dot dot-${si.cls}"></div>
       <div class="job-info"><div class="job-title">${esc(job.title)}</div>
@@ -1070,7 +1114,7 @@
       actions = `<div class="bid-actions"><span style="font-size:0.75rem;color:${bid.status === 'accepted' ? 'var(--success)' : 'var(--stone)'}">${label}</span></div>`;
     }
     return `<div class="bid-card">
-      <div class="bid-top"><div class="bid-operator">🚜 ${who}</div><div class="bid-price">${money(bid.amount)}</div></div>
+      <div class="bid-top"><div><button class="op-link bid-operator" onclick="event.stopPropagation();openOperator(${Number(bid.operator_id) || 0})">🚜 ${who}</button>${repLine(bid.reputation)}</div><div class="bid-price">${money(bid.amount)}</div></div>
       <div class="bid-job">${[compact ? esc(job.title) : '', bid.est_days ? bid.est_days + ' day' + (bid.est_days == 1 ? '' : 's') + ' est.' : '', bid.equipment ? esc(bid.equipment) : '', ago(bid.created_at)].filter(Boolean).join(' · ')}</div>
       ${msg && !compact ? `<div class="bid-job" style="color:var(--dust);margin-top:0.35rem">“${msg}”</div>` : ''}
       ${actions}
@@ -1149,6 +1193,11 @@
           </div>`;
         }).join('')
       : `<div class="card">${empty('💰', 'No bids yet', 'When operators bid on your jobs, you can compare and accept them here')}</div>`;
+
+    const doneJobs = jobs.filter(j => j.status === 'completed' && j.hired_operator_id);
+    document.getElementById('myReviewsList').innerHTML = doneJobs.length
+      ? doneJobs.map(j => jobRow(j, false)).join('')
+      : empty('⭐', 'No reviews yet', 'After a job is paid out, you can rate your operator here');
 
     document.getElementById('notifList').innerHTML = allBids.length
       ? allBids.slice(0, 15).map(x => `<div class="activity-item"><div class="activity-icon icon-bid">💰</div><div>
@@ -1278,6 +1327,61 @@
       errEl.textContent = err.message; errEl.style.display = '';
     }
     btn.disabled = false; btn.textContent = 'Submit Report';
+  }
+
+  // ── Ratings & badges ──
+  const stars = n => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
+  function repLine(r) {
+    if (!r) return '';
+    const bits = [];
+    bits.push(r.review_count ? `<span style="color:var(--amber)">★ ${Number(r.rating).toFixed(1)}</span> <span>(${r.review_count} review${r.review_count === 1 ? '' : 's'})</span>` : '<span>New on DirtBidder</span>');
+    if (r.jobs) bits.push(`<span>${r.jobs} job${r.jobs === 1 ? '' : 's'} done</span>`);
+    if (r.badge) bits.push(`<span class="rep-badge">${r.badge.icon} ${esc(r.badge.label)}</span>`);
+    if (r.verified) bits.push('<span class="rep-badge verified">✓ Verified</span>');
+    return `<div class="rep-line">${bits.join('')}</div>`;
+  }
+
+  async function openOperator(id) {
+    if (!id) return;
+    const m = document.getElementById('opModal'), body = document.getElementById('opBody');
+    document.getElementById('opName').textContent = 'Loading…';
+    body.innerHTML = '';
+    m.classList.add('active');
+    try {
+      const p = await api('/api/reviews/operator/' + id);
+      document.getElementById('opName').textContent = p.name || 'Operator';
+      body.innerHTML = repLine(p) +
+        `<div style="font-size:0.78rem;color:var(--stone);margin:0.6rem 0 0.4rem">On DirtBidder since ${new Date(p.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>` +
+        (p.reviews.length ? p.reviews.map(v => `<div class="review-item"><span class="rv-stars">${stars(v.rating)}</span> · ${esc(v.reviewer || 'Client')} · ${esc(v.job_title)}${v.comment ? `<div style="color:var(--chalk);margin-top:0.3rem">“${esc(v.comment)}”</div>` : ''}</div>`).join('')
+          : '<div style="font-size:0.85rem;color:var(--stone);padding:0.5rem 0">No reviews yet.</div>');
+    } catch (err) { body.innerHTML = `<div style="color:var(--error)">${esc(err.message)}</div>`; }
+  }
+
+  let reviewJobId = null, reviewRating = 0;
+  function paintStars() {
+    document.getElementById('starPick').innerHTML = [1, 2, 3, 4, 5].map(n =>
+      `<button type="button" class="${n <= reviewRating ? 'on' : ''}" aria-label="${n} star${n === 1 ? '' : 's'}" onclick="reviewRating=${n};paintStars()">★</button>`).join('');
+  }
+  function openReview(jobId) {
+    const job = jobs.find(j => j.id === jobId); if (!job) return;
+    reviewJobId = jobId; reviewRating = 0;
+    document.getElementById('reviewWho').textContent = (job.hired_operator_name || 'Operator') + ' · ' + job.title;
+    document.getElementById('reviewComment').value = '';
+    document.getElementById('reviewError').style.display = 'none';
+    paintStars();
+    document.getElementById('reviewModal').classList.add('active');
+  }
+  function closeReview() { document.getElementById('reviewModal').classList.remove('active'); }
+  async function submitReview() {
+    const errEl = document.getElementById('reviewError');
+    if (!reviewRating) { errEl.textContent = 'Tap a star to pick a rating.'; errEl.style.display = 'block'; return; }
+    const btn = document.getElementById('reviewSubmit'); btn.disabled = true;
+    try {
+      const r = await api('/api/reviews/jobs/' + reviewJobId, { method: 'POST', body: JSON.stringify({ rating: reviewRating, comment: document.getElementById('reviewComment').value }) });
+      const job = jobs.find(j => j.id === reviewJobId); if (job) job.my_review = { rating: r.rating, comment: r.comment };
+      closeReview(); render();
+    } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
+    btn.disabled = false;
   }
 
   async function editAddress(jobId) {

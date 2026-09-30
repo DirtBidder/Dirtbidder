@@ -1129,7 +1129,7 @@
 
     <!-- ── OTHER SECTIONS ── -->
     <div id="section-messages" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Messages</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages Coming Soon</div><div class="empty-sub">In-app messaging is being built next in the DirtBidder app</div></div></div></div>
-    <div id="section-reviews" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Reviews</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No reviews yet</div><div class="empty-sub">Clients can review you after a job is complete</div></div></div></div>
+    <div id="section-reviews" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Reviews</span></div><div class="greeting-sub">Clients rate you after each paid job. Good ratings earn you badges that show on every bid.</div></div><div class="card" id="myRepCard"></div></div>
     <div id="section-profile" style="display:none"><div class="greeting"><div class="greeting-text">Edit <span>Profile</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">Profile Editor Coming Soon</div><div class="empty-sub">Update your bio, service area, and equipment list</div></div></div></div>
     <div id="section-settings" style="display:none"><div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div><div class="card" id="settingsCard"></div></div>
 
@@ -1434,6 +1434,30 @@
       : `<div class="card">${empty('🚜', 'No active jobs', 'Jobs you’re hired for will show up here')}</div>`;
   }
 
+  // ── My rating, badge and reviews ──
+  function renderRep(p) {
+    const box = document.getElementById('myRepCard'); if (!box) return;
+    if (!p) { box.innerHTML = '<div style="padding:1.25rem 1.5rem;color:var(--stone)">Couldn’t load your reviews. Refresh to try again.</div>'; return; }
+    const st = n => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
+    const pill = (t, green) => `<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:2px;background:${green ? 'rgba(39,174,96,0.12)' : 'rgba(232,137,42,0.12)'};color:${green ? 'var(--success)' : 'var(--amber)'}">${t}</span>`;
+    const levels = [['🥉', 'Proven', '5 completed jobs'], ['🥈', 'Pro Operator', '15 jobs · 4.5★ or better'], ['🥇', 'Top Operator', '40 jobs · 4.8★ or better · no lost disputes']];
+    box.innerHTML = `<div style="padding:1.25rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08)">
+        <div style="display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center">
+          <div><div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2.2rem;color:var(--amber);line-height:1">${p.review_count ? Number(p.rating).toFixed(1) : '—'}</div>
+            <div style="font-size:0.8rem;color:var(--dust)">${p.review_count ? st(p.rating) + ' · ' + p.review_count + ' review' + (p.review_count === 1 ? '' : 's') : 'No ratings yet'}</div></div>
+          <div><div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2.2rem;color:var(--chalk);line-height:1">${p.jobs}</div><div style="font-size:0.8rem;color:var(--dust)">jobs completed</div></div>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap">${p.badge ? pill(p.badge.icon + ' ' + esc(p.badge.label)) : ''}${p.verified ? pill('✓ Verified', true) : ''}</div>
+        </div>
+        ${p.next_badge ? `<div style="margin-top:1rem;font-size:0.85rem;color:var(--dust)">Next badge: <strong style="color:var(--chalk)">${p.next_badge.icon} ${esc(p.next_badge.label)}</strong> — you need ${p.next_badge.need.map(esc).join(' and ')}.</div>` : ''}
+        ${p.verified ? '' : '<div style="margin-top:0.5rem;font-size:0.8rem;color:var(--stone)">Set up payouts (Earnings) to get the ✓ Verified badge.</div>'}
+        <div style="margin-top:1rem;display:grid;gap:0.3rem">${levels.map(l => `<div style="font-size:0.78rem;color:${p.badge && p.badge.label === l[1] ? 'var(--amber)' : 'var(--stone)'}">${l[0]} <strong>${l[1]}</strong> — ${l[2]}</div>`).join('')}</div>
+      </div>
+      ${p.reviews.length ? p.reviews.map(v => `<div style="padding:0.9rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);font-size:0.85rem;color:var(--dust)">
+          <span style="color:var(--amber)">${st(v.rating)}</span> · ${esc(v.reviewer || 'Client')} · ${esc(v.job_title)} · ${ago(v.created_at)}
+          ${v.comment ? `<div style="color:var(--chalk);margin-top:0.3rem">“${esc(v.comment)}”</div>` : ''}</div>`).join('')
+        : '<div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No reviews yet</div><div class="empty-sub">Clients can rate you after a job is paid out</div></div>'}`;
+  }
+
   async function load() {
     try {
       const [me, list, bids] = await Promise.all([api('/api/me'), api('/api/jobs'), api('/api/bids/mine')]);
@@ -1447,6 +1471,7 @@
       payout = await api('/api/connect/status').catch(() => null);
       escrows = await api('/api/payments/mine').catch(() => []);
       render();
+      api('/api/reviews/me').then(renderRep).catch(() => renderRep(null));
     } catch (err) {
       if (err.message === 'Session expired') return;
       document.getElementById('loadError').style.display = '';
