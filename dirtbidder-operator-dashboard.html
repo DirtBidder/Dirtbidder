@@ -1102,13 +1102,8 @@
 
     <!-- ── EQUIPMENT ── -->
     <div id="section-equipment" style="display:none">
-      <div class="greeting"><div class="greeting-text">My <span>Equipment</span></div><div class="greeting-sub">Machines listed on your operator profile</div></div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Equipment List</div><button class="bid-btn">+ Add Machine</button></div>
-        <div class="earnings-row"><div class="earnings-info"><div class="earnings-job">CAT 320 Excavator</div><div class="earnings-client">2019 · Mid-size · Owned</div></div><span style="font-size:0.72rem;background:rgba(39,174,96,0.12);color:var(--success);padding:0.25rem 0.6rem;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">Active</span></div>
-        <div class="earnings-row"><div class="earnings-info"><div class="earnings-job">CAT D6 Bulldozer</div><div class="earnings-client">2021 · Large · Owned</div></div><span style="font-size:0.72rem;background:rgba(39,174,96,0.12);color:var(--success);padding:0.25rem 0.6rem;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">Active</span></div>
-        <div class="earnings-row"><div class="earnings-info"><div class="earnings-job">Ford F-750 Dump Truck</div><div class="earnings-client">2020 · 14-yard · Owned</div></div><span style="font-size:0.72rem;background:rgba(39,174,96,0.12);color:var(--success);padding:0.25rem 0.6rem;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">Active</span></div>
-      </div>
+      <div class="greeting"><div class="greeting-text">My <span>Equipment</span></div><div class="greeting-sub">Clients see this on your profile when they tap your name on a bid</div></div>
+      <div class="card" id="equipCard"></div>
     </div>
 
     <!-- ── PARTNERS ── -->
@@ -1128,9 +1123,9 @@
     </div>
 
     <!-- ── OTHER SECTIONS ── -->
-    <div id="section-messages" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Messages</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages Coming Soon</div><div class="empty-sub">In-app messaging is being built next in the DirtBidder app</div></div></div></div>
+    <div id="section-messages" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Messages</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages Coming Soon</div><div class="empty-sub">For now, once you’re hired the client’s phone number is on your Active Jobs page</div></div></div></div>
     <div id="section-reviews" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Reviews</span></div><div class="greeting-sub">Clients rate you after each paid job. Good ratings earn you badges that show on every bid.</div></div><div class="card" id="myRepCard"></div></div>
-    <div id="section-profile" style="display:none"><div class="greeting"><div class="greeting-text">Edit <span>Profile</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">Profile Editor Coming Soon</div><div class="empty-sub">Update your bio, service area, and equipment list</div></div></div></div>
+    <div id="section-profile" style="display:none"><div class="greeting"><div class="greeting-text">Edit <span>Profile</span></div><div class="greeting-sub">What clients see when they tap your name on a bid</div></div><div class="card" id="profileCard"></div></div>
     <div id="section-settings" style="display:none"><div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div><div class="card" id="settingsCard"></div></div>
 
   </div>
@@ -1434,6 +1429,51 @@
       : `<div class="card">${empty('🚜', 'No active jobs', 'Jobs you’re hired for will show up here')}</div>`;
   }
 
+  // ── Equipment & profile editors (saved to your operator profile) ──
+  const EQUIP = ['Excavator', 'Mini Excavator', 'Bulldozer', 'Skid Steer', 'Compact Track Loader', 'Dump Truck', 'Motor Grader', 'Compactor', 'Frontend Loader', 'Backhoe', 'Trencher', 'Impact Hammer', 'Water Truck', 'Lowboy / Trailer'];
+  let myProfile = {};
+  const fieldCss = 'width:100%;max-width:420px;background:var(--clay);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.7rem 0.8rem;font:inherit;font-size:1rem;margin-bottom:0.9rem;box-sizing:border-box';
+  const lblCss = "display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--dust);margin-bottom:0.35rem";
+  function opt(list, cur) { return '<option value="">Select...</option>' + list.map(o => `<option${o === cur ? ' selected' : ''}>${esc(o)}</option>`).join(''); }
+  function renderProfileEditors() {
+    const p = myProfile || {};
+    const have = new Set(p.equipment || []);
+    const extra = (p.equipment || []).filter(e => !EQUIP.includes(e));
+    document.getElementById('equipCard').innerHTML = `<div style="padding:1.25rem 1.5rem">
+      <div style="${lblCss}">Machines you run</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:0.5rem;margin-bottom:1rem">
+        ${EQUIP.concat(extra).map(e => `<label style="display:flex;gap:0.5rem;align-items:center;font-size:0.9rem;color:var(--chalk);padding:0.55rem 0.7rem;border:1px solid rgba(196,168,130,0.15);border-radius:3px;cursor:pointer"><input type="checkbox" class="eqBox" value="${esc(e)}" ${have.has(e) ? 'checked' : ''} style="accent-color:var(--amber);width:18px;height:18px">${esc(e)}</label>`).join('')}
+      </div>
+      <label style="${lblCss}" for="eqOther">Makes, models & anything else</label>
+      <input id="eqOther" style="${fieldCss}" value="${esc(p.equipmentOther || '')}" placeholder="e.g. CAT 320, John Deere 333G, 2 tri-axle dump trucks">
+      <button class="bid-btn" onclick="saveProfile('equip', this)">Save Equipment</button>
+      <span id="equipMsg" style="margin-left:0.75rem;font-size:0.85rem"></span>
+    </div>`;
+    document.getElementById('profileCard').innerHTML = `<div style="padding:1.25rem 1.5rem">
+      <label style="${lblCss}" for="pfBio">About your company</label>
+      <textarea id="pfBio" style="${fieldCss};min-height:100px" placeholder="e.g. Family-owned excavating in Humboldt County since 2008. Ponds, basements, driveways, tiling.">${esc(p.bio || '')}</textarea>
+      <label style="${lblCss}" for="pfZip">Home base ZIP</label>
+      <input id="pfZip" style="${fieldCss};max-width:160px" maxlength="5" value="${esc(p.zip || '')}">
+      <label style="${lblCss}" for="pfRadius">How far you'll travel</label>
+      <select id="pfRadius" style="${fieldCss}">${opt(['Up to 25 miles', 'Up to 50 miles', 'Up to 100 miles', 'Statewide', 'Multi-state'], p.serviceRadius)}</select>
+      <label style="${lblCss}" for="pfYears">Years in business</label>
+      <select id="pfYears" style="${fieldCss}">${opt(['Less than 1 year', '1–3 years', '3–5 years', '5–10 years', '10–20 years', '20+ years'], p.yearsExp)}</select>
+      <div><button class="bid-btn" onclick="saveProfile('profile', this)">Save Profile</button>
+      <span id="profileMsg" style="margin-left:0.75rem;font-size:0.85rem"></span></div>
+      <div style="font-size:0.8rem;color:var(--stone);margin-top:1rem">Name, company name, phone and password are under Settings.</div>
+    </div>`;
+  }
+  async function saveProfile(which, btn) {
+    const body = which === 'equip'
+      ? { equipment: [...document.querySelectorAll('.eqBox:checked')].map(b => b.value), equipmentOther: document.getElementById('eqOther').value }
+      : { bio: document.getElementById('pfBio').value, zip: document.getElementById('pfZip').value, serviceRadius: document.getElementById('pfRadius').value, yearsExp: document.getElementById('pfYears').value };
+    const msg = document.getElementById(which === 'equip' ? 'equipMsg' : 'profileMsg');
+    btn.disabled = true;
+    try { myProfile = await api('/api/me/profile', { method: 'PUT', body: JSON.stringify(body) }); msg.style.color = 'var(--success)'; msg.textContent = '✓ Saved'; }
+    catch (err) { msg.style.color = 'var(--error)'; msg.textContent = err.message; }
+    btn.disabled = false;
+  }
+
   // ── My rating, badge and reviews ──
   function renderRep(p) {
     const box = document.getElementById('myRepCard'); if (!box) return;
@@ -1468,6 +1508,8 @@
       document.getElementById('greetName').textContent = (name.split(/[\s@]/)[0] || 'there') + '.';
       jobs = list;
       myBids = bids;
+      myProfile = me.profile || {};
+      renderProfileEditors();
       payout = await api('/api/connect/status').catch(() => null);
       escrows = await api('/api/payments/mine').catch(() => []);
       render();

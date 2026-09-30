@@ -1341,6 +1341,14 @@
     return `<div class="rep-line">${bits.join('')}</div>`;
   }
 
+  function aboutOp(a) {
+    if (!a) return '';
+    const eq = (a.equipment || []).join(', ') + (a.equipment_other ? ((a.equipment || []).length ? ' · ' : '') + a.equipment_other : '');
+    const row = (k, v) => v ? `<div style="font-size:0.85rem;color:var(--dust);margin-top:0.5rem"><span style="color:var(--stone)">${k}:</span> <span style="color:var(--chalk)">${esc(v)}</span></div>` : '';
+    return (a.bio ? `<div style="font-size:0.88rem;color:var(--chalk);margin-top:0.75rem">${esc(a.bio)}</div>` : '') +
+      row('Equipment', eq) + row('Experience', a.years) + row('Travels', a.service_radius);
+  }
+
   async function openOperator(id) {
     if (!id) return;
     const m = document.getElementById('opModal'), body = document.getElementById('opBody');
@@ -1351,6 +1359,7 @@
       const p = await api('/api/reviews/operator/' + id);
       document.getElementById('opName').textContent = p.name || 'Operator';
       body.innerHTML = repLine(p) +
+        aboutOp(p.about) +
         `<div style="font-size:0.78rem;color:var(--stone);margin:0.6rem 0 0.4rem">On DirtBidder since ${new Date(p.member_since).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>` +
         (p.reviews.length ? p.reviews.map(v => `<div class="review-item"><span class="rv-stars">${stars(v.rating)}</span> · ${esc(v.reviewer || 'Client')} · ${esc(v.job_title)}${v.comment ? `<div style="color:var(--chalk);margin-top:0.3rem">“${esc(v.comment)}”</div>` : ''}</div>`).join('')
           : '<div style="font-size:0.85rem;color:var(--stone);padding:0.5rem 0">No reviews yet.</div>');
