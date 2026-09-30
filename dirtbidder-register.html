@@ -719,7 +719,7 @@
         <div class="checkbox-row">
           <input type="checkbox" id="terms" />
           <label class="checkbox-label" for="terms">
-            I agree to DirtBidder's <a href="#">Terms of Service</a> and <a href="#">Payment & Escrow Policy</a>
+            I agree to DirtBidder's <a href="dirtbidder-terms.html" target="_blank" rel="noopener">Terms of Service</a> (including the payment &amp; escrow rules) and <a href="dirtbidder-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
           </label>
         </div>
 
@@ -959,7 +959,7 @@
         return;
       }
       if (!document.getElementById('terms').checked) {
-        alert('Please agree to the Terms of Service and Payment & Escrow Policy to continue.');
+        alert('Please agree to the Terms of Service and Privacy Policy to continue.');
         return;
       }
     }
@@ -1059,7 +1059,8 @@
           name: firstName + ' ' + lastName,
           phone: phone,
           role: currentRole,
-          profile: profile
+          profile: profile,
+          accepted_terms: document.getElementById('terms').checked
         })
       });
 
