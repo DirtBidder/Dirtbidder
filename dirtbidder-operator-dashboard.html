@@ -1313,7 +1313,8 @@
         <div>${lbl('Location')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_location || '—')}</div></div>
       </div>
       <a href="dirtbidder-messaging.html?job=${b.job_id}" style="display:inline-block;margin-top:0.6rem;font-size:0.85rem;color:var(--amber);text-decoration:none;font-weight:600">💬 Message ${esc(b.client_name || 'client')}</a>
-      ${siteBox(b)}
+      ${b.job_status === 'funding' ? `<div style="margin-top:1rem;padding:0.8rem 1rem;border:1px solid rgba(232,137,42,0.45);border-radius:3px;background:rgba(232,137,42,0.07);font-size:0.88rem;color:var(--chalk)">
+        <strong style="color:var(--amber)">⏳ You've been picked — payment clearing</strong><br>The client paid by bank transfer, which takes about 4 business days to clear. <strong>Don't start work yet.</strong> The job address and the client's phone show up here as soon as it clears, and we'll email you.</div>` : siteBox(b)}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
         <div>${lbl('Agreed Price')}<div style="font-size:0.9rem;color:var(--amber);font-weight:600">${money(b.amount)}</div>${coExtra(b.job_id) ? `<div style="font-size:0.8rem;color:var(--dust)">+ ${money(coExtra(b.job_id))} in change orders = <strong style="color:var(--chalk)">${money(Number(b.amount) + coExtra(b.job_id))}</strong></div>` : ''}</div>
         <div>${lbl('Payment')}${payInfo(b)}</div>
@@ -1377,6 +1378,8 @@
     if (!e) return '<div style="font-size:0.9rem;color:var(--stone)">Not funded through escrow</div>';
     const same = all.filter(x => x.status === e.status);
     const out = '$' + same.reduce((n, x) => n + Number(x.operator_payout), 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (e.status === 'processing') return `<div style="font-size:0.9rem;color:var(--amber)">⏳ Bank payment clearing — don't start yet</div>`;
+    if (e.status === 'failed') return `<div style="font-size:0.9rem;color:var(--error)">✕ Client's payment failed</div>`;
     if (e.status === 'held') return `<div style="font-size:0.9rem;color:var(--success)">🔒 Funded — you get ${out}</div>`;
     if (e.status === 'released') return `<div style="font-size:0.9rem;color:var(--success)">✓ Released — ${out}</div>`;
     if (e.status === 'disputed') return `<div style="font-size:0.9rem;color:var(--error)">⚠ On hold — client reported a problem</div>`;
@@ -1399,7 +1402,7 @@
     const list = (coByJob[b.job_id] || {}).change_orders || [];
     const open = list.find(c => c.status === 'pending' || c.status === 'paying');
     const rows = list.slice().reverse().map(c => {
-      const st = { pending: ['⏳ Waiting on client', 'var(--amber)'], paying: ['⏳ Client is paying', 'var(--amber)'], paid: ['✓ Approved & paid into escrow', 'var(--success)'], approved: ['✓ Approved', 'var(--success)'], declined: ['✕ Declined', 'var(--error)'], withdrawn: ['Withdrawn', 'var(--stone)'] }[c.status] || [c.status, 'var(--stone)'];
+      const st = { pending: ['⏳ Waiting on client', 'var(--amber)'], paying: ['⏳ Client is paying', 'var(--amber)'], paid: ['✓ Approved & paid into escrow', 'var(--success)'], processing: ['⏳ Approved — bank payment clearing', 'var(--amber)'], approved: ['✓ Approved', 'var(--success)'], declined: ['✕ Declined', 'var(--error)'], withdrawn: ['Withdrawn', 'var(--stone)'] }[c.status] || [c.status, 'var(--stone)'];
       return `<div style="padding:0.6rem 0;border-top:1px solid rgba(196,168,130,0.1)">
         <div style="display:flex;justify-content:space-between;gap:0.75rem"><strong style="color:var(--chalk)">+ ${money(c.amount)}</strong><span style="font-size:0.8rem;color:${st[1]}">${st[0]}</span></div>
         <div style="font-size:0.83rem;color:var(--dust);margin-top:0.2rem">${esc(c.reason)}</div>
@@ -1530,7 +1533,7 @@
     const available = jobs.filter(j => !j.my_bid_id);
     const pending = myBids.filter(b => b.status === 'pending');
     const allWon = myBids.filter(b => b.status === 'accepted');
-    const won = allWon.filter(b => ['in_progress', 'awaiting_release', 'disputed'].includes(b.job_status));
+    const won = allWon.filter(b => ['funding', 'in_progress', 'awaiting_release', 'disputed'].includes(b.job_status));
 
     document.getElementById('statOpen').textContent = jobs.length;
     document.getElementById('statOpenSub').textContent = available.length ? available.length + ' you haven’t bid on' : (jobs.length ? 'You’ve bid on all of them' : 'Check back soon');

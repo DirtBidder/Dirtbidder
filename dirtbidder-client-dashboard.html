@@ -1073,6 +1073,7 @@
     if (st === 'disputed') return { label: 'Under Review', cls: 'disputed' };
     if (st === 'awaiting_release') return { label: 'Done — Release Pay', cls: 'hired' };
     if (st === 'in_progress') return { label: 'In Progress', cls: 'progress' };
+    if (st === 'funding') return { label: 'Payment Clearing', cls: 'hired' };
     if (st === 'hired') return { label: 'Hired', cls: 'hired' };
     if (job.pending_bid_count > 0) return { label: 'Bidding', cls: 'bidding' };
     return { label: st === 'test' ? 'Open (test)' : 'Open', cls: 'open' };
@@ -1112,7 +1113,7 @@
         <div style="font-weight:700;color:var(--amber);font-size:0.9rem">${who} is asking for ${money(open.amount)} more</div>
         <div style="font-size:0.85rem;color:var(--chalk);margin-top:0.3rem">“${esc(String(open.reason).trim().replace(/^["“'”]+|["“'”]+$/g, ''))}”</div>
         ${coPhotos(open)}
-        <div style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem">If you approve, you pay ${money2(open.client_total)} (${money2(open.amount)} + ${money2(open.client_fee)} fee). It's held in escrow with the rest of the job and only released when you say the job is done.</div>
+        <div style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem">If you approve, you pay ${money2(open.client_total)} (${money2(open.amount)} + ${money2(open.client_fee)} fee). It's held in escrow with the rest of the job and only released when you say the job is done.${Number(open.amount) > 10000 ? ' Over $10,000 is paid from your bank account.' : ' Pay by bank account or card.'}</div>
         <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap">
           <button class="btn-accept" onclick="approveCo(${open.id}, this)">✓ Approve &amp; Pay</button>
           <button class="btn-decline" onclick="declineCo(${open.id}, this)">Decline</button>
@@ -1128,7 +1129,7 @@
       const done = list.filter(c => c.status !== 'pending' && c.status !== 'paying');
       if (done.length) {
         html += `<div style="margin-top:0.5rem;font-size:0.8rem;color:var(--dust)">Change orders: ` + done.map(c => {
-          const st = { paid: '✓ paid', approved: '✓ approved', declined: 'declined', withdrawn: 'withdrawn' }[c.status] || c.status;
+          const st = { paid: '✓ paid', approved: '✓ approved', declined: 'declined', withdrawn: 'withdrawn', processing: '⏳ bank payment clearing' }[c.status] || c.status;
           return `<span title="${esc(c.reason)}" style="margin-right:0.6rem;${coPaid(c) ? 'color:var(--success)' : ''}">+${money(c.amount)} ${st}</span>`;
         }).join('') + `</div>`;
       }
@@ -1169,7 +1170,9 @@
       ? `<button class="release-btn" style="margin-left:0.5rem" onclick="event.stopPropagation();releasePayment(${job.id})">Release ${money(heldTotal)}</button>` +
         `<button class="dispute-btn" onclick="event.stopPropagation();openDispute(${job.id})">Report a Problem</button>` : '';
     let note = '';
-    if (job.status === 'awaiting_release' && job.completed_at) {
+    if (job.status === 'funding') {
+      note = `<div class="job-note" style="color:var(--amber)">⏳ Your bank payment is clearing (about 4 business days). The operator has been told to wait. We'll email you both when it clears.</div>`;
+    } else if (job.status === 'awaiting_release' && job.completed_at) {
       const left = 72 * 3600 * 1000 - (Date.now() - new Date(job.completed_at).getTime());
       note = `<div class="job-note" style="color:var(--amber)">Operator marked this done. ${left > 0 ? 'Release payment or report a problem — auto-releases in ' + timeLeft(left) + '.' : 'Releasing automatically.'}</div>`;
     } else if (job.status === 'disputed' && job.dispute) {
@@ -1233,7 +1236,7 @@
   function render() {
     const active = jobs.filter(isActive);
     const done = jobs.filter(j => j.status === 'completed').length;
-    const inProgress = jobs.filter(j => j.status === 'in_progress' || j.status === 'awaiting_release').length;
+    const inProgress = jobs.filter(j => ['funding', 'in_progress', 'awaiting_release'].includes(j.status)).length;
     const pendingBids = jobs.reduce((n, j) => n + (j.pending_bid_count || 0), 0);
 
     document.getElementById('statActive').textContent = active.length;
@@ -1245,16 +1248,19 @@
     const held = escrows.filter(e => e.status === 'held' || e.status === 'disputed');
     const frozen = new Set(held.filter(e => e.status === 'disputed').map(e => e.job_id)).size;
     const fundedJobs = new Set(held.map(e => e.job_id)).size;
+    const clearing = escrows.filter(e => e.status === 'processing').reduce((n, e) => n + Number(e.amount), 0);
     document.getElementById('statEscrow').textContent = Number(held.reduce((n, e) => n + Number(e.amount), 0)).toLocaleString('en-US', { maximumFractionDigits: 0 });
     document.getElementById('statEscrowSub').textContent = held.length
       ? fundedJobs + ' job' + (fundedJobs === 1 ? '' : 's') + ' funded' + (frozen ? ' · ' + frozen + ' frozen' : '')
-      : (paymentsOn ? 'Nothing held' : 'Checking…');
+      : clearing ? money(clearing) + ' bank payment clearing' : (paymentsOn ? 'Nothing held' : 'Checking…');
 
     const payRow = e => {
       const st = e.status === 'held' ? '<div class="payment-status status-held">🔒 Held in Escrow</div>'
         : e.status === 'released' ? '<div class="payment-status status-release">✓ Released</div>'
         : e.status === 'disputed' ? '<div class="payment-status" style="color:var(--error)">⚠ Frozen — under review</div>'
         : e.status === 'refunded' ? '<div class="payment-status status-release">↩ Refunded to you</div>'
+        : e.status === 'processing' ? '<div class="payment-status" style="color:var(--amber)">⏳ Bank payment clearing</div>'
+        : e.status === 'failed' ? '<div class="payment-status" style="color:var(--error)">✕ Bank payment failed</div>'
         : '<div class="payment-status" style="color:var(--error)">Refund pending</div>';
       const btn = e.status === 'held' ? `<button class="release-btn" onclick="releasePayment(${e.job_id})">Release Funds</button>` : '';
       return `<div class="payment-row"><div class="payment-info"><div class="payment-job">${esc(e.job_title)}${e.change_order_id ? ' · change order' : ''}</div>
@@ -1397,7 +1403,9 @@
       return;
     }
     const msg = paymentsOn
-      ? `Hire this operator?\n\nYou'll pay ${money2(amt + fee)} now (${money2(amt)} job + ${money2(fee)} DirtBidder fee). It's held in escrow and only released to the operator when you say the job is done.\n\nThe other bids on this job will be declined.`
+      ? `Hire this operator?\n\nYou'll pay ${money2(amt + fee)} (${money2(amt)} job + ${money2(fee)} DirtBidder fee). It's held in escrow and only released to the operator when you say the job is done.\n\n` +
+        (amt > 10000 ? 'Jobs over $10,000 are paid from your bank account (no card limits). It takes about 4 business days to clear.' : 'Pay by bank account (recommended, about 4 business days to clear) or by card (instant).') +
+        `\n\nThe other bids on this job will be declined.`
       : 'Hire this operator? The other bids on this job will be declined.';
     if (!confirm(msg)) return;
     btn.disabled = true;
@@ -1601,15 +1609,19 @@
     if (coCancelled) { alert('Payment cancelled. The change request is still waiting. You can approve or decline it any time.'); return; }
     if (coSid) {
       try {
-        await api('/api/changes/confirm', { method: 'POST', body: JSON.stringify({ session_id: coSid }) });
-        alert('Change order paid and held in escrow. Your operator has been told to go ahead.');
+        const r = await api('/api/changes/confirm', { method: 'POST', body: JSON.stringify({ session_id: coSid }) });
+        alert(r.status === 'processing'
+          ? "Bank payment started for the change order. It takes about 4 business days to clear. We'll tell your operator to go ahead once it does."
+          : 'Change order paid and held in escrow. Your operator has been told to go ahead.');
       } catch (err) { alert(err.message); }
       return;
     }
     if (cancelled) { alert('Payment cancelled. The operator was not hired. You can accept the bid again any time.'); return; }
     try {
-      await api('/api/payments/confirm', { method: 'POST', body: JSON.stringify({ session_id: sid }) });
-      alert('Payment received and held in escrow. Your operator is hired!');
+      const r = await api('/api/payments/confirm', { method: 'POST', body: JSON.stringify({ session_id: sid }) });
+      alert(r.status === 'processing'
+        ? "Bank payment started! It takes about 4 business days to clear.\n\nYour operator has been told they're picked, and to wait until it clears. We'll email you both when it does."
+        : 'Payment received and held in escrow. Your operator is hired!');
     } catch (err) { alert(err.message); }
   }
 
