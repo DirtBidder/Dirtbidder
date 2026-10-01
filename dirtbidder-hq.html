@@ -197,6 +197,7 @@
     const needs = [];
     if (d.open.disputes) needs.push(`<span class="warn">${d.open.disputes} open dispute${d.open.disputes === 1 ? '' : 's'}</span>`);
     if (d.open.flags) needs.push(`<span class="warn">${d.open.flags} flag${d.open.flags === 1 ? '' : 's'}</span>`);
+    if (d.open.waiting_to_pay) needs.push(`<span class="warn">${d.open.waiting_to_pay} waiting to pay</span>`);
 
     document.getElementById('main').innerHTML = `
       <div class="sec">Money</div>

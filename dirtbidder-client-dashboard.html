@@ -1024,7 +1024,7 @@
   let jobs = [];
   let bidsByJob = {}; // jobId -> [bids]
   let escrows = [];   // payments held / released
-  let paymentsOn = false;
+  let paymentsOn = false, paymentsLive = false;
 
   // DirtBidder fee for one side: 5% first $10K, 3% to $100K, 2% to $500K, 1% above (bracket style)
   function dbFeePerSide(a){a=Number(a)||0;const t=[[10000,.05],[100000,.03],[500000,.02],[Infinity,.01]];let f=0,lo=0;for(const[hi,r]of t){if(a>lo)f+=(Math.min(a,hi)-lo)*r;lo=hi;}return Math.round(f*100)/100;}
@@ -1275,6 +1275,7 @@
       jobs = list;
       const [pStatus, pList] = await Promise.all([api('/api/payments/status').catch(() => ({})), api('/api/payments/mine').catch(() => [])]);
       paymentsOn = !!pStatus.enabled;
+      paymentsLive = !!pStatus.live;
       escrows = pList;
       const needBids = jobs.filter(j => j.bid_count > 0);
       const results = await Promise.all(needBids.map(j => api('/api/jobs/' + j.id + '/bids').catch(() => [])));
@@ -1309,6 +1310,14 @@
     Object.values(bidsByJob).forEach(l => l.forEach(b => { if (b.id === id) bid = b; }));
     const amt = bid ? Number(bid.amount) : 0;
     const fee = dbFeePerSide(amt);
+    const job = bid ? jobs.find(j => j.id === bid.job_id) : null;
+    if (!paymentsLive && !(job && job.status === 'test')) {
+      // Payments aren't live yet: save their choice (server adds them to the waitlist) and explain
+      btn.disabled = true;
+      try { await api('/api/bids/' + id + '/accept', { method: 'POST' }); await load(); }
+      catch (err) { alert('💳 ' + err.message); btn.disabled = false; }
+      return;
+    }
     const msg = paymentsOn
       ? `Hire this operator?\n\nYou'll pay ${money2(amt + fee)} now (${money2(amt)} job + ${money2(fee)} DirtBidder fee). It's held in escrow and only released to the operator when you say the job is done.\n\nThe other bids on this job will be declined.`
       : 'Hire this operator? The other bids on this job will be declined.';
