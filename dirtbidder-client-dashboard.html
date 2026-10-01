@@ -1110,7 +1110,7 @@
     if (open && job.status !== 'disputed') {
       html += `<div onclick="event.stopPropagation()" style="margin:0 1.5rem 1rem;padding:0.8rem 1rem;border:1px solid rgba(232,137,42,0.45);border-radius:3px;background:rgba(232,137,42,0.07)">
         <div style="font-weight:700;color:var(--amber);font-size:0.9rem">${who} is asking for ${money(open.amount)} more</div>
-        <div style="font-size:0.85rem;color:var(--chalk);margin-top:0.3rem">“${esc(open.reason)}”</div>
+        <div style="font-size:0.85rem;color:var(--chalk);margin-top:0.3rem">“${esc(String(open.reason).trim().replace(/^["“'”]+|["“'”]+$/g, ''))}”</div>
         ${coPhotos(open)}
         <div style="font-size:0.78rem;color:var(--dust);margin-top:0.4rem">If you approve, you pay ${money2(open.client_total)} (${money2(open.amount)} + ${money2(open.client_fee)} fee). It's held in escrow with the rest of the job and only released when you say the job is done.</div>
         <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap">
