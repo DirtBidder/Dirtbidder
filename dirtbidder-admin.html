@@ -112,7 +112,7 @@
         <div class="grid">
           <div><div class="lbl">Client</div><div class="val">${esc(d.client_name || '—')}<br><small>${esc(d.client_email || '')}</small></div></div>
           <div><div class="lbl">Operator</div><div class="val">${esc(d.operator_name || '—')}<br><small>${esc(d.operator_email || '')}</small></div></div>
-          <div><div class="lbl">Job amount</div><div class="val">${money(d.escrow_amount)}</div></div>
+          <div><div class="lbl">Job amount</div><div class="val">${money(d.escrow_amount)}${d.change_orders ? ` <small>(incl. ${d.change_orders} change order${d.change_orders === 1 ? "" : "s"})</small>` : ""}</div></div>
           <div><div class="lbl">Client paid</div><div class="val">${money(d.client_total)} <small>(incl. ${money(d.client_fee)} fee)</small></div></div>
         </div>
         <div class="lbl">Client says</div>

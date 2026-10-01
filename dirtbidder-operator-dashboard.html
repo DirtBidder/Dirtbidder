@@ -1172,6 +1172,37 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="coModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Request More for This Job</div>
+      <button class="modal-close" onclick="closeCoModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-job-title" id="coJobTitle"></div>
+      <div style="font-size:0.82rem;color:var(--dust);margin-bottom:1rem">Hit rock, more tile than planned, extra loads? Ask the client for more here. They approve it and pay the extra into escrow before you do the added work. It's released to you with the rest of the job.</div>
+      <div id="coError" style="display:none;color:var(--error);font-size:0.8rem;margin-bottom:0.75rem"></div>
+      <div class="modal-field">
+        <label class="modal-label">Extra Amount ($)</label>
+        <input class="modal-input" type="number" min="1" placeholder="e.g. 2500" id="coAmount" oninput="coPreview()" />
+        <div id="coFeeLine" style="font-size:0.78rem;color:var(--stone);margin-top:0.35rem"></div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">What Changed and Why</label>
+        <textarea class="modal-input" id="coReason" placeholder="e.g. Hit a ledge of limestone at 4 ft on the north end. Needs a breaker hammer, about 2 extra days."></textarea>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Photos (optional, up to 6)</label>
+        <input type="file" id="coPhotos" accept="image/*" multiple style="font-size:0.8rem;color:var(--dust)" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCoModal()">Cancel</button>
+      <button class="btn-submit" id="coSubmitBtn" onclick="submitCo()">Send to Client →</button>
+    </div>
+  </div>
+</div>
+
 <script>
   const API_BASE = 'https://dirtbidder-backend-production.up.railway.app';
   const TOKEN_KEY = 'dirtbidder_token';
@@ -1183,6 +1214,7 @@
   let myBids = [];   // this operator's bids
   let escrows = [];  // payments on jobs I was hired for
   let payout = null; // payout account status
+  let coByJob = {};  // change orders on jobs I'm hired for
   let currentJobId = null;
   let currentFilter = '';
 
@@ -1267,9 +1299,10 @@
       <a href="dirtbidder-messaging.html?job=${b.job_id}" style="display:inline-block;margin-top:0.6rem;font-size:0.85rem;color:var(--amber);text-decoration:none;font-weight:600">💬 Message ${esc(b.client_name || 'client')}</a>
       ${siteBox(b)}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
-        <div>${lbl('Agreed Price')}<div style="font-size:0.9rem;color:var(--amber);font-weight:600">${money(b.amount)}</div></div>
+        <div>${lbl('Agreed Price')}<div style="font-size:0.9rem;color:var(--amber);font-weight:600">${money(b.amount)}</div>${coExtra(b.job_id) ? `<div style="font-size:0.8rem;color:var(--dust)">+ ${money(coExtra(b.job_id))} in change orders = <strong style="color:var(--chalk)">${money(Number(b.amount) + coExtra(b.job_id))}</strong></div>` : ''}</div>
         <div>${lbl('Payment')}${payInfo(b)}</div>
       </div>
+      ${changeBox(b)}
       ${b.job_status === 'in_progress' ? `<button class="bid-btn" onclick="markComplete(${b.job_id})" style="background:var(--success);margin-top:1rem">✓ Mark Job Complete</button>`
         : b.job_status === 'awaiting_release' ? `<div style="margin-top:1rem;font-size:0.82rem;color:var(--amber)">Marked complete — the client has 72 hours to release payment or report a problem. If they do nothing, it releases to you automatically${b.job_completed_at ? ' (' + autoReleaseIn(b.job_completed_at) + ')' : ''}.</div>`
         : b.job_status === 'disputed' && b.dispute ? disputeBox(b) : ''}
@@ -1323,15 +1356,117 @@
   }
 
   function payInfo(b) {
-    const e = escrows.find(x => x.job_id === b.job_id);
+    const all = escrows.filter(x => x.job_id === b.job_id);
+    const e = all.find(x => !x.change_order_id) || all[0];
     if (!e) return '<div style="font-size:0.9rem;color:var(--stone)">Not funded through escrow</div>';
-    const out = '$' + Number(e.operator_payout).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const same = all.filter(x => x.status === e.status);
+    const out = '$' + same.reduce((n, x) => n + Number(x.operator_payout), 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (e.status === 'held') return `<div style="font-size:0.9rem;color:var(--success)">🔒 Funded — you get ${out}</div>`;
     if (e.status === 'released') return `<div style="font-size:0.9rem;color:var(--success)">✓ Released — ${out}</div>`;
     if (e.status === 'disputed') return `<div style="font-size:0.9rem;color:var(--error)">⚠ On hold — client reported a problem</div>`;
     if (e.status === 'refunded') return `<div style="font-size:0.9rem;color:var(--stone)">Refunded to the client</div>`;
     return '<div style="font-size:0.9rem;color:var(--stone)">Payment issue — contact support</div>';
   }
+
+  // ── Change orders ──
+  const coPaid = c => c.status === 'paid' || c.status === 'approved';
+  function coExtra(jobId) {
+    return ((coByJob[jobId] || {}).change_orders || []).filter(coPaid).reduce((n, c) => n + Number(c.amount), 0);
+  }
+  function coFee(a){a=Number(a)||0;const t=[[10000,.05],[100000,.03],[500000,.02],[Infinity,.01]];let f=0,lo=0;for(const[hi,r]of t){if(a>lo)f+=(Math.min(a,hi)-lo)*r;lo=hi;}return Math.round(f*100)/100;}
+  const money2 = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function coPhotos(c) {
+    const p = Array.isArray(c.photos) ? c.photos : [];
+    return p.length ? `<div style="display:flex;gap:0.35rem;margin-top:0.4rem">${p.map(t => `<a href="${API_BASE}/api/photos/${encodeURIComponent(t)}" target="_blank" rel="noopener"><img src="${API_BASE}/api/photos/${encodeURIComponent(t)}" alt="Photo" loading="lazy" style="width:48px;height:48px;object-fit:cover;border-radius:3px;display:block"></a>`).join('')}</div>` : '';
+  }
+  function changeBox(b) {
+    const list = (coByJob[b.job_id] || {}).change_orders || [];
+    const open = list.find(c => c.status === 'pending' || c.status === 'paying');
+    const rows = list.slice().reverse().map(c => {
+      const st = { pending: ['⏳ Waiting on client', 'var(--amber)'], paying: ['⏳ Client is paying', 'var(--amber)'], paid: ['✓ Approved & paid into escrow', 'var(--success)'], approved: ['✓ Approved', 'var(--success)'], declined: ['✕ Declined', 'var(--error)'], withdrawn: ['Withdrawn', 'var(--stone)'] }[c.status] || [c.status, 'var(--stone)'];
+      return `<div style="padding:0.6rem 0;border-top:1px solid rgba(196,168,130,0.1)">
+        <div style="display:flex;justify-content:space-between;gap:0.75rem"><strong style="color:var(--chalk)">+ ${money(c.amount)}</strong><span style="font-size:0.8rem;color:${st[1]}">${st[0]}</span></div>
+        <div style="font-size:0.83rem;color:var(--dust);margin-top:0.2rem">${esc(c.reason)}</div>
+        <div style="font-size:0.75rem;color:var(--stone);margin-top:0.2rem">You get ${money2(c.operator_payout)} after the ${money2(c.operator_fee)} fee</div>
+        ${c.client_note ? `<div style="font-size:0.8rem;color:var(--dust);margin-top:0.2rem">Client: “${esc(c.client_note)}”</div>` : ''}
+        ${coPhotos(c)}
+        ${c.status === 'pending' ? `<button class="bid-btn" style="margin-top:0.4rem;padding:0.35rem 0.8rem;font-size:0.75rem;background:transparent;border:1px solid var(--stone);color:var(--stone)" onclick="withdrawCo(${c.id})">Withdraw</button>` : ''}
+      </div>`;
+    }).join('');
+    const canAsk = b.job_status === 'in_progress' && !open;
+    if (!rows && !canAsk) return '';
+    return `<div style="margin-top:1rem;padding:0.8rem 1rem;border:1px solid rgba(196,168,130,0.15);border-radius:3px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem">
+        <div style="font-size:0.72rem;color:var(--stone);text-transform:uppercase;letter-spacing:0.1em;font-family:'Barlow Condensed',sans-serif;font-weight:700">Change Orders</div>
+        ${canAsk ? `<button class="bid-btn" style="padding:0.4rem 0.9rem;font-size:0.78rem" onclick="openCoModal(${b.job_id})">+ Request More</button>` : ''}
+      </div>
+      ${rows || '<div style="font-size:0.8rem;color:var(--stone);margin-top:0.4rem">Job running bigger than the bid? Request more and the client approves it before you do the extra work.</div>'}
+    </div>`;
+  }
+  let coJobId = null;
+  function openCoModal(jobId) {
+    const b = myBids.find(x => x.job_id === jobId);
+    coJobId = jobId;
+    document.getElementById('coJobTitle').textContent = b ? b.job_title : '';
+    ['coAmount', 'coReason', 'coPhotos'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('coError').style.display = 'none';
+    document.getElementById('coSubmitBtn').disabled = false;
+    coPreview();
+    document.getElementById('coModal').classList.add('active');
+  }
+  function closeCoModal() { document.getElementById('coModal').classList.remove('active'); }
+  function coPreview() {
+    const a = Number(document.getElementById('coAmount').value) || 0;
+    const info = coByJob[coJobId] || {};
+    const base = Number(info.committed) || 0;
+    const fee = a > 0 ? Math.round((coFee(base + a) - coFee(base)) * 100) / 100 : 0;
+    document.getElementById('coFeeLine').textContent = a > 0 ? `You'd get ${money2(a - fee)} after the ${money2(fee)} DirtBidder fee. The client pays ${money2(a + fee)}.` : '';
+  }
+  function shrinkPhoto(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const max = 1600;
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+      img.src = url;
+    });
+  }
+  async function submitCo() {
+    const amount = Number(document.getElementById('coAmount').value);
+    const reason = document.getElementById('coReason').value.trim();
+    const errEl = document.getElementById('coError');
+    const fail = m => { errEl.textContent = m; errEl.style.display = ''; };
+    if (!(amount >= 1)) return fail('Enter the extra amount in dollars.');
+    if (reason.length < 10) return fail('Explain what changed and why (a sentence or two).');
+    const files = Array.from(document.getElementById('coPhotos').files || []).slice(0, 6);
+    const btn = document.getElementById('coSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const co = await api('/api/changes/jobs/' + coJobId, { method: 'POST', body: JSON.stringify({ amount, reason }) });
+      let bad = 0;
+      for (const f of files) {
+        try { await api('/api/changes/' + co.id + '/photos', { method: 'POST', body: JSON.stringify({ image: await shrinkPhoto(f) }) }); } catch (e) { bad++; }
+      }
+      closeCoModal();
+      await load();
+      alert('Sent! The client has been emailed to approve it.' + (bad ? ` (${bad} photo${bad === 1 ? '' : 's'} couldn't be added.)` : '') + "\n\nWait until they approve before doing the extra work.");
+    } catch (err) { fail(err.message); }
+    btn.disabled = false; btn.textContent = 'Send to Client →';
+  }
+  async function withdrawCo(id) {
+    if (!confirm('Withdraw this change request?')) return;
+    try { await api('/api/changes/' + id + '/cancel', { method: 'POST' }); await load(); } catch (err) { alert(err.message); }
+  }
+  document.getElementById('coModal').addEventListener('click', function (e) { if (e.target === this) closeCoModal(); });
 
   function renderPayout() {
     const banner = document.getElementById('payoutBanner');
@@ -1388,7 +1523,7 @@
     const released = escrows.filter(e => e.status === 'released');
     const fmt2 = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.getElementById('earningsList').innerHTML = released.length
-      ? released.map(e => `<div class="earnings-row"><div class="earnings-info"><div class="earnings-job">${esc(e.job_title)}</div>
+      ? released.map(e => `<div class="earnings-row"><div class="earnings-info"><div class="earnings-job">${esc(e.job_title)}${e.change_order_id ? " · change order" : ""}</div>
           <div class="earnings-client">${fmt2(e.amount)} job − ${fmt2(e.operator_fee)} DirtBidder fee · released ${ago(e.released_at)}</div>
           <div class="earnings-client" style="color:${e.paid_out ? 'var(--success)' : 'var(--amber)'}">${e.paid_out ? '✓ Sent to your bank' : '⏳ Waiting on your payout setup'}</div></div>
           <div class="earnings-amount">${fmt2(e.operator_payout)}</div></div>`).join('')
@@ -1528,6 +1663,10 @@
       renderProfileEditors();
       payout = await api('/api/connect/status').catch(() => null);
       escrows = await api('/api/payments/mine').catch(() => []);
+      const hired = myBids.filter(b => b.status === 'accepted' && ['in_progress', 'awaiting_release', 'disputed', 'completed'].includes(b.job_status));
+      const cos = await Promise.all(hired.map(b => api('/api/changes/jobs/' + b.job_id).catch(() => null)));
+      coByJob = {};
+      hired.forEach((b, i) => { if (cos[i]) coByJob[b.job_id] = cos[i]; });
       render();
       api('/api/reviews/me').then(renderRep).catch(() => renderRep(null));
     } catch (err) {
