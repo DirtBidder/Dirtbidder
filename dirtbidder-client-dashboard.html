@@ -1608,6 +1608,13 @@
     const coCancelled = q.get('co') === 'cancelled';
     if (!sid && !cancelled && !coSid && !coCancelled) return;
     history.replaceState(null, '', location.pathname);
+    // Came back without paying: was it Stripe's bank limit?
+    if ((cancelled || coCancelled) && q.get('e')) {
+      try {
+        const r = await api('/api/payments/abandoned', { method: 'POST', body: JSON.stringify({ escrow_id: q.get('e') }) });
+        if (r.limit) { alert('🏦 ' + r.message); return; }
+      } catch (e) { /* fall through to the normal message */ }
+    }
     if (coCancelled) { alert('Payment cancelled. The change request is still waiting. You can approve or decline it any time.'); return; }
     if (coSid) {
       try {
