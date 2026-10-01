@@ -1670,6 +1670,8 @@
 
   async function load() {
     try {
+      // Payments first: this also checks bank payments that are clearing, so job statuses below are up to date
+      const esc0 = await api('/api/payments/mine').catch(() => null);
       const [me, list, bids] = await Promise.all([api('/api/me'), api('/api/jobs'), api('/api/bids/mine')]);
       if (me.role !== 'operator') { window.location.replace('dirtbidder-client-dashboard.html'); return; }
       const name = (me.name || me.email || '').trim();
@@ -1681,7 +1683,7 @@
       myProfile = me.profile || {};
       renderProfileEditors();
       payout = await api('/api/connect/status').catch(() => null);
-      escrows = await api('/api/payments/mine').catch(() => []);
+      escrows = esc0 || await api('/api/payments/mine').catch(() => []);
       const hired = myBids.filter(b => b.status === 'accepted' && ['in_progress', 'awaiting_release', 'disputed', 'completed'].includes(b.job_status));
       const cos = await Promise.all(hired.map(b => api('/api/changes/jobs/' + b.job_id).catch(() => null)));
       coByJob = {};

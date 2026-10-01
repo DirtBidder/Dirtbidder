@@ -1341,6 +1341,8 @@
 
   async function load() {
     try {
+      // Payments first: this also checks bank payments that are clearing, so the job list below is up to date
+      const pList0 = await api('/api/payments/mine').catch(() => null);
       const [me, list] = await Promise.all([api('/api/me'), api('/api/jobs')]);
       if (me.role === 'operator') { window.location.replace('dirtbidder-operator-dashboard.html'); return; }
       const name = (me.name || me.email || '').trim();
@@ -1353,7 +1355,7 @@
       document.getElementById('greetWord').textContent = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
 
       jobs = list;
-      const [pStatus, pList] = await Promise.all([api('/api/payments/status').catch(() => ({})), api('/api/payments/mine').catch(() => [])]);
+      const [pStatus, pList] = await Promise.all([api('/api/payments/status').catch(() => ({})), pList0 ? Promise.resolve(pList0) : api('/api/payments/mine').catch(() => [])]);
       paymentsOn = !!pStatus.enabled;
       paymentsLive = !!pStatus.live;
       escrows = pList;
