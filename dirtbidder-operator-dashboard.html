@@ -1146,6 +1146,7 @@
       <span><strong style="color:var(--chalk)">Sealed Bid System</strong> — Your bid amount is completely private. Other operators cannot see what you bid. Submit your best price with confidence.</span>
     </div>
     <div class="modal-job-title" id="modalJobTitle"></div>
+    <div id="modalJobDesc" style="display:none;font-size:0.82rem;color:var(--dust);white-space:pre-line;max-height:180px;overflow-y:auto;margin:-0.75rem 0 1.1rem;padding:0.6rem 0.8rem;border:1px solid rgba(196,168,130,0.12);border-radius:3px"></div>
       <div id="bidError" style="display:none;color:var(--error);font-size:0.8rem;margin-bottom:0.75rem"></div>
       <div class="modal-field">
         <label class="modal-label">Your Bid Price ($)</label>
@@ -1271,7 +1272,7 @@
       : `<button class="bid-btn" onclick="event.stopPropagation();openBidModal(${job.id})">Submit Bid</button>`;
     return `<div class="job-card" ${job.my_bid_id ? '' : `onclick="openBidModal(${job.id})"`}>
       <div class="job-card-top"><div class="job-card-title">${esc(job.title)}</div><div class="job-budget">${job.budget ? money(job.budget) : ''}</div></div>
-      ${job.description ? `<div class="job-card-meta" style="margin-bottom:0.4rem;color:var(--dust)">${esc(job.description.length > 160 ? job.description.slice(0, 160) + '…' : job.description)}</div>` : ''}
+      ${job.description ? descBlock(job) : ''}
       ${photoStrip(job)}
       <div class="job-tags">${tags.join('')}</div>
       <div class="job-card-meta">${meta.join(' · ')}</div>
@@ -1286,6 +1287,20 @@
       <div class="bid-meta">${esc(b.job_location)}${b.job_location ? ' · ' : ''}Submitted ${ago(b.created_at)}${b.est_days ? ' · ' + b.est_days + ' days est.' : ''}</div></div>
       <div class="bid-amount">${money(b.amount)}</div><div class="bid-status status-${cls}">${label}</div>
       <a href="dirtbidder-messaging.html?job=${b.job_id}" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;white-space:nowrap;margin-left:0.75rem" title="Message the client">💬</a></div>`;
+  }
+
+  // Job description: short version with "Show more" when it's long
+  function descBlock(job) {
+    const d = String(job.description);
+    const style = 'margin-bottom:0.4rem;color:var(--dust);white-space:pre-line';
+    if (d.length <= 160) return `<div class="job-card-meta" style="${style}">${esc(d)}</div>`;
+    return `<div class="job-card-meta" style="${style}"><span class="desc-short">${esc(d.slice(0, 160))}… </span><span class="desc-full" style="display:none">${esc(d)} </span><a href="#" style="color:var(--amber);font-weight:600;white-space:nowrap" onclick="event.preventDefault();event.stopPropagation();toggleDesc(this)">Show more</a></div>`;
+  }
+  function toggleDesc(a) {
+    const box = a.parentElement, full = box.querySelector('.desc-full'), open = full.style.display === 'none';
+    full.style.display = open ? '' : 'none';
+    box.querySelector('.desc-short').style.display = open ? 'none' : '';
+    a.textContent = open ? 'Show less' : 'Show more';
   }
 
   function activeCard(b, full) {
@@ -1704,6 +1719,9 @@
     if (!job || job.my_bid_id) return;
     currentJobId = jobId;
     document.getElementById('modalJobTitle').textContent = job.title + (job.budget ? ' · Budget: ' + money(job.budget) : '');
+    const md = document.getElementById('modalJobDesc');
+    md.textContent = job.description || '';
+    md.style.display = job.description ? '' : 'none';
     ['bidPrice', 'bidDays', 'bidEquipment', 'bidNotes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('bidError').style.display = 'none';
     document.getElementById('bidSubmitBtn').disabled = false;
