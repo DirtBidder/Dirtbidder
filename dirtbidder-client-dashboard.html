@@ -1631,7 +1631,12 @@
     document.getElementById('pinModal').classList.add('active');
     if (!pinMap) {
       pinMap = L.map('pinMap').setView([42.03, -93.6], 7); // Iowa
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(pinMap);
+      // Satellite view first (USGS imagery with roads and place names), with a street map as the other choice.
+      // USGS tiles stop at zoom 16, so closer zooms stretch them a little rather than going blank.
+      const sat = L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 19, attribution: 'Imagery: U.S. Geological Survey' });
+      const street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' });
+      sat.addTo(pinMap);
+      L.control.layers({ 'Satellite': sat, 'Street map': street }, null, { collapsed: false }).addTo(pinMap);
       pinMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng));
     }
     if (pinMarker) { pinMap.removeLayer(pinMarker); pinMarker = null; }
