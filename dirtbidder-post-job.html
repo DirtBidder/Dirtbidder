@@ -997,7 +997,7 @@
           <div class="preview-grid">
             <div>
               <div class="preview-item-label">Budget</div>
-              <div class="preview-item-value" id="previewBudget">$3,000 – $6,000</div>
+              <div class="preview-item-value" id="previewBudget">Not set</div>
             </div>
             <div>
               <div class="preview-item-label">Timeline</div>
@@ -1270,9 +1270,11 @@
       ? photos.map(src => `<img src="${src}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:3px">`).join('')
       : '<span style="font-size:0.78rem;color:var(--stone)">No photos added</span>';
 
-    if (budgetMin && budgetMax) {
-      document.getElementById('previewBudget').textContent = '$' + Number(budgetMin).toLocaleString() + ' – $' + Number(budgetMax).toLocaleString();
-    }
+    // Show exactly what was entered (one box, both, or nothing) — never the example numbers
+    const one = budgetMin || budgetMax;
+    document.getElementById('previewBudget').textContent = budgetMin && budgetMax
+      ? '$' + Number(budgetMin).toLocaleString() + ' – $' + Number(budgetMax).toLocaleString()
+      : one ? '$' + Number(one).toLocaleString() : 'Not set';
   }
 
   async function publishJob() {
