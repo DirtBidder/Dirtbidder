@@ -84,6 +84,13 @@
   .chat .soon { font-size: 0.88rem; color: var(--dust); line-height: 1.5; }
   .chat input { width: 100%; margin-top: 0.8rem; background: var(--soil); border: 1.5px solid rgba(196,168,130,0.18); color: var(--stone); border-radius: 20px; padding: 0.65rem 0.95rem; font: inherit; font-size: 0.95rem; }
   .pill { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 3px; background: rgba(140,123,107,0.18); color: var(--stone); }
+  .wait { list-style: none; margin-bottom: 0.75rem; }
+  .wait li { padding: 0.5rem 0; border-bottom: 1px solid var(--line); font-size: 0.9rem; line-height: 1.35; }
+  .wait li:last-child { border-bottom: 0; }
+  .wait small { color: var(--stone); display: block; font-size: 0.78rem; }
+  .wait .ok { color: var(--success); }
+  .btn.solid { background: var(--amber); color: #1C1410; width: 100%; padding: 0.7rem 0.85rem; font-size: 0.85rem; white-space: normal; line-height: 1.25; }
+  .wait-note { font-size: 0.8rem; color: var(--stone); margin-top: 0.5rem; line-height: 1.4; }
   .empty { color: var(--stone); padding: 1.5rem 0; text-align: center; font-size: 0.9rem; }
   .err { color: var(--error); padding: 1rem; }
   @media (max-width: 860px) {
@@ -243,6 +250,7 @@
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <div class="card" id="waitCard" hidden></div>
           <div class="card">
             <div class="card-head"><div class="card-title">To-do</div><span class="pill" id="todoCount"></span></div>
             <div class="card-body">
@@ -266,6 +274,49 @@
         </div>
       </div>`;
     renderTasks();
+    renderWait();
+  }
+
+  // ── Waiting to hire: clients who tried to hire before payments were live ──
+  let wait = null, waitMsg = '';
+  function renderWait() {
+    const el = document.getElementById('waitCard'); if (!el) return;
+    // Show it while someone is waiting, and for two weeks after the last email went out
+    const recent = wait && wait.rows.some(r => !r.notified_at || Date.now() - new Date(r.notified_at) < 14 * 864e5);
+    if (!recent) { el.hidden = true; return; }
+    el.hidden = false;
+    // One line per client, with the jobs they tried to hire on
+    const people = [];
+    wait.rows.forEach(r => {
+      let p = people.find(x => x.user_id === r.user_id);
+      if (!p) people.push(p = { user_id: r.user_id, name: r.name, email: r.email, jobs: [], waiting: false, emailed: null });
+      p.jobs.push(r);
+      if (!r.notified_at) p.waiting = true; else if (!p.emailed || r.notified_at > p.emailed) p.emailed = r.notified_at;
+    });
+    const n = people.filter(p => p.waiting).length;
+    el.innerHTML = `
+      <div class="card-head"><div class="card-title">Waiting to hire</div><span class="pill">${n ? n + ' waiting' : 'All emailed'}</span></div>
+      <div class="card-body">
+        <ul class="wait">${people.map(p => `<li><b>${esc(p.name || p.email)}</b> <span style="color:var(--stone)">${esc(p.email)}</span>
+          ${p.jobs.map(j => `<small>${esc(j.title)} · ${esc(j.operator || 'operator')} · ${money(j.amount)}${j.can_hire ? '' : ' · bid no longer open'}</small>`).join('')}
+          <small class="${p.waiting ? '' : 'ok'}">${p.waiting ? 'Tried to hire ' + ago(p.jobs[0].created_at) + ' · not emailed yet' : '✓ Emailed ' + ago(p.emailed)}</small></li>`).join('')}</ul>
+        ${n ? `<button class="btn solid" id="waitBtn" onclick="notifyWait(${n})" ${wait.live ? '' : 'disabled'}>Email ${n === 1 ? 'this client' : 'all ' + n + ' clients'}: you can hire now</button>
+          <div class="wait-note">${wait.live ? 'Sends each one a single email saying payments are open, with a button to their bids.' : 'This turns on once live payments are on.'}</div>` : ''}
+        ${waitMsg ? `<div class="wait-note" style="color:var(--chalk)">${esc(waitMsg)}</div>` : ''}
+      </div>`;
+  }
+  async function loadWait() {
+    try { wait = await api('/api/admin/waitlist'); } catch (e) { wait = null; }
+    renderWait();
+  }
+  async function notifyWait(n) {
+    if (!confirm('Email ' + (n === 1 ? '1 client' : n + ' clients') + ' that payments are open and they can hire now?')) return;
+    const btn = document.getElementById('waitBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const r = await api('/api/admin/waitlist/notify', { method: 'POST' });
+      waitMsg = '✓ Emailed ' + r.sent + (r.sent === 1 ? ' client.' : ' clients.') + (r.failed ? ' ' + r.failed + ' didn’t go through. Tap the button to try again.' : '');
+    } catch (err) { waitMsg = err.message; }
+    await loadWait();
   }
 
   // ── To-do list ──
@@ -306,6 +357,7 @@
       tasks = d.tasks || [];
       try { localStorage.setItem('dirtbidder_admin', '1'); } catch (e) {}
       render(d);
+      loadWait();
     } catch (err) {
       document.getElementById('sub').textContent = '';
       document.getElementById('main').innerHTML = `<div class="card"><div class="err">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
