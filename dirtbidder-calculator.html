@@ -152,10 +152,10 @@
 <aside class="sidebar">
   <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
   <div class="sidebar-user">
-    <div class="avatar">JM</div>
+    <div class="avatar" id="calcAvatar">🧮</div>
     <div>
-      <div class="user-name">Jake Miller</div>
-      <div class="user-role">Operator</div>
+      <div class="user-name" id="calcName">Bid Calculators</div>
+      <div class="user-role" id="calcRole">Free for operators</div>
     </div>
   </div>
   <nav class="nav-section">
@@ -173,7 +173,7 @@
     <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
   </nav>
   <div class="sidebar-footer">
-    <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button>
+    <button class="signout-btn" id="calcBack" onclick="window.location='dirtbidder-operator-dashboard.html'">← Back to Dashboard</button>
   </div>
 </aside>
 
@@ -764,6 +764,24 @@
 </div>
 
 <script>
+  // Show who's signed in (the calculators work without an account too)
+  (async () => {
+    const t = localStorage.getItem('dirtbidder_token');
+    if (!t) { const b = document.getElementById('calcBack'); b.textContent = 'Sign In'; b.onclick = () => { window.location = 'dirtbidder-login.html'; }; return; }
+    try {
+      const r = await fetch('https://dirtbidder-backend-production.up.railway.app/api/me', { headers: { Authorization: 'Bearer ' + t } });
+      if (!r.ok) return;
+      const me = await r.json();
+      const name = (me.company_name || me.name || me.email || '').trim();
+      if (name) {
+        document.getElementById('calcName').textContent = name;
+        document.getElementById('calcAvatar').textContent = (me.name || name).split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        document.getElementById('calcRole').textContent = me.role === 'operator' ? 'Operator' : 'Client';
+        if (me.role !== 'operator') document.getElementById('calcBack').onclick = () => { window.location = 'dirtbidder-client-dashboard.html'; };
+      }
+    } catch (e) { /* name is optional */ }
+  })();
+
   // DirtBidder fee for one side: 5% first $10K, 3% to $100K, 2% to $500K, 1% above (bracket style)
   function dbFeePerSide(a){a=Number(a)||0;const t=[[10000,.05],[100000,.03],[500000,.02],[Infinity,.01]];let f=0,lo=0;for(const[hi,r]of t){if(a>lo)f+=(Math.min(a,hi)-lo)*r;lo=hi;}return f;}
 
