@@ -593,6 +593,8 @@
     .p-label { display: none; }
   }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 </head>
 <body>
 
@@ -964,6 +966,17 @@
       </div>
 
       <div class="form-card">
+        <div class="form-card-title">📍 Drop a GPS Pin (optional)</div>
+        <div class="field-hint" style="margin-bottom:0.75rem">No street address out in the field? Put a pin right on the job site. <strong style="color:var(--chalk)">It stays private</strong> — only the operator you hire and pay sees it, and they get directions straight to it.</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem">
+          <button type="button" class="btn-back" style="padding:0.55rem 0.9rem;font-size:0.8rem" onclick="pinHere(this)">📱 Use My Current Location</button>
+          <button type="button" class="btn-back" id="pinClearBtn" style="padding:0.55rem 0.9rem;font-size:0.8rem;display:none" onclick="clearPin()">Remove Pin</button>
+        </div>
+        <div id="pinMap" style="height:300px;border-radius:3px;border:1px solid rgba(196,168,130,0.15);background:#2a211b"></div>
+        <div class="field-hint" id="pinStatus" style="margin-top:0.6rem">Tap the map where the work is. Pinch or scroll to zoom in.</div>
+      </div>
+
+      <div class="form-card">
         <div class="form-card-title">Photo Tips</div>
         <div style="display:flex;flex-direction:column;gap:0.6rem">
           <div style="display:flex;gap:0.6rem;align-items:flex-start;font-size:0.83rem;color:var(--dust)"><span style="color:var(--amber)">▸</span> Take photos from multiple angles — walk the whole property</div>
@@ -1023,6 +1036,7 @@
           <div class="preview-desc" id="previewDesc"></div>
           <div class="preview-tags" id="previewTags"></div>
           <div id="previewPhotos" style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.75rem"></div>
+          <div id="previewPin" style="font-size:0.78rem;color:var(--stone);margin-top:0.6rem"></div>
         </div>
       </div>
 
@@ -1078,9 +1092,47 @@
   let photos = []; // resized JPEG data URLs, uploaded after the job is created
   const MAX_PHOTOS = 10;
 
+  // ── GPS pin (Leaflet + OpenStreetMap) ──
+  let pinMap = null, pinMarker = null, pin = null; // pin = { lat, lng }
+  function initPinMap() {
+    const el = document.getElementById('pinMap');
+    if (!window.L) { el.innerHTML = '<div style="padding:1rem;font-size:0.8rem;color:var(--stone)">The map couldn’t load. You can still post the job and add a pin later from My Jobs.</div>'; return; }
+    if (!pinMap) {
+      pinMap = L.map(el).setView([42.03, -93.6], 7); // Iowa
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(pinMap);
+      pinMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng));
+    }
+    setTimeout(() => pinMap.invalidateSize(), 60); // the map was hidden until this step opened
+  }
+  function setPin(lat, lng, zoomTo) {
+    pin = { lat: Math.round(lat * 1e6) / 1e6, lng: Math.round(lng * 1e6) / 1e6 };
+    if (pinMap) {
+      if (!pinMarker) { pinMarker = L.marker([pin.lat, pin.lng], { draggable: true }).addTo(pinMap); pinMarker.on('dragend', () => { const p = pinMarker.getLatLng(); setPin(p.lat, p.lng); }); }
+      else pinMarker.setLatLng([pin.lat, pin.lng]);
+      if (zoomTo) pinMap.setView([pin.lat, pin.lng], 16);
+    }
+    document.getElementById('pinStatus').innerHTML = '<span style="color:var(--success)">✓ Pin set</span> at ' + pin.lat.toFixed(5) + ', ' + pin.lng.toFixed(5) + '. Tap somewhere else or drag the pin to move it.';
+    document.getElementById('pinClearBtn').style.display = '';
+  }
+  function clearPin() {
+    pin = null;
+    if (pinMarker && pinMap) { pinMap.removeLayer(pinMarker); pinMarker = null; }
+    document.getElementById('pinStatus').textContent = 'Tap the map where the work is. Pinch or scroll to zoom in.';
+    document.getElementById('pinClearBtn').style.display = 'none';
+  }
+  function pinHere(btn) {
+    if (!navigator.geolocation) { alert('This device can’t share its location. Tap the map instead.'); return; }
+    const label = btn.textContent; btn.disabled = true; btn.textContent = 'Finding you…';
+    navigator.geolocation.getCurrentPosition(
+      pos => { btn.disabled = false; btn.textContent = label; setPin(pos.coords.latitude, pos.coords.longitude, true); },
+      () => { btn.disabled = false; btn.textContent = label; alert('Couldn’t get your location. Allow location for this site, or just tap the map where the job is.'); },
+      { enableHighAccuracy: true, timeout: 15000 });
+  }
+
   function goToStep(step) {
     document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
     document.getElementById('step' + step).classList.add('active');
+    if (step === 4) initPinMap();
 
     for (let i = 1; i <= 5; i++) {
       const ps = document.getElementById('ps' + i);
@@ -1270,6 +1322,7 @@
       ? photos.map(src => `<img src="${src}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:3px">`).join('')
       : '<span style="font-size:0.78rem;color:var(--stone)">No photos added</span>';
 
+    document.getElementById('previewPin').textContent = pin ? '📍 GPS pin set (private — only your hired operator sees it)' : '📍 No GPS pin';
     // Show exactly what was entered (one box, both, or nothing) — never the example numbers
     const one = budgetMin || budgetMax;
     document.getElementById('previewBudget').textContent = budgetMin && budgetMax
@@ -1307,7 +1360,9 @@
       acreage: document.getElementById('acreage').value,
       timeline: document.getElementById('startTimeline').value,
       budget: budget,
-      site_address: buildSiteAddress()
+      site_address: buildSiteAddress(),
+      site_lat: pin ? pin.lat : null,
+      site_lng: pin ? pin.lng : null
     };
 
     const publishBtn = document.querySelector('.btn-publish');

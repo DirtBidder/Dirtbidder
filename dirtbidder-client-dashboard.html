@@ -755,6 +755,8 @@
   .db-thumbs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
   .db-thumbs img { width: 60px; height: 60px; object-fit: cover; border-radius: 3px; }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 </head>
 <body>
 
@@ -993,6 +995,25 @@
   </div>
 </div>
 
+<!-- GPS PIN -->
+<div class="db-modal-overlay" id="pinModal">
+  <div class="db-modal">
+    <div class="db-modal-head"><div class="db-modal-title">📍 Job Site GPS Pin</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closePin()">✕</button></div>
+    <div class="db-modal-body">
+      <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.75rem">Tap the map right where the work is. It stays <strong style="color:var(--chalk)">private</strong> — only the operator you hire and pay sees it.</div>
+      <div id="pinJobTitle" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
+      <button class="db-btn" onclick="pinHere(this)" style="margin-bottom:0.6rem">📱 Use My Current Location</button>
+      <div id="pinMap" style="height:300px;border-radius:3px;border:1px solid rgba(196,168,130,0.15);background:#2a211b"></div>
+      <div id="pinStatus" style="font-size:0.8rem;color:var(--stone);margin-top:0.5rem"></div>
+      <div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap">
+        <button class="btn-accept" id="pinSaveBtn" onclick="savePin()">Save Pin</button>
+        <button class="btn-decline" id="pinRemoveBtn" onclick="savePin(true)">Remove Pin</button>
+        <button class="btn-decline" onclick="closePin()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- REPORT A PROBLEM -->
 <div class="db-modal-overlay" id="disputeModal">
   <div class="db-modal">
@@ -1188,6 +1209,12 @@
       addr = job.site_address
         ? `<div class="job-note" style="color:var(--dust);white-space:pre-line">🔒 ${esc(job.site_address)} <a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">Edit</a></div>`
         : `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editAddress(${job.id})">+ Add exact job address</a> <span style="color:var(--stone)">(private — only the operator you hire sees it)</span></div>`;
+    }
+    if (detailed && isActive(job)) {
+      const hasPin = job.site_lat != null && job.site_lng != null;
+      addr += hasPin
+        ? `<div class="job-note" style="color:var(--dust)">📍 GPS pin set <a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();openPin(${job.id})">Move</a></div>`
+        : `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();openPin(${job.id})">+ Drop a GPS pin on the job site</a> <span style="color:var(--stone)">(private)</span></div>`;
     }
     if (detailed && (job.status === 'open' || job.status === 'test')) {
       addr += `<button class="rate-btn" style="border-color:var(--stone);color:var(--stone)" onclick="event.stopPropagation();closeJob(${job.id})">Close Job</button>`;
@@ -1583,6 +1610,55 @@
       if (job) job.site_address = r.site_address;
       render();
     } catch (err) { alert(err.message || 'Could not save the address'); }
+  }
+
+  // ── GPS pin for a job site ──
+  let pinMap = null, pinMarker = null, pin = null, pinJobId = null;
+  const PIN_HINT = 'Tap the map where the work is. Pinch or scroll to zoom in.';
+  function setPin(lat, lng, zoomTo) {
+    pin = { lat: Math.round(lat * 1e6) / 1e6, lng: Math.round(lng * 1e6) / 1e6 };
+    if (!pinMarker) { pinMarker = L.marker([pin.lat, pin.lng], { draggable: true }).addTo(pinMap); pinMarker.on('dragend', () => { const p = pinMarker.getLatLng(); setPin(p.lat, p.lng); }); }
+    else pinMarker.setLatLng([pin.lat, pin.lng]);
+    if (zoomTo) pinMap.setView([pin.lat, pin.lng], 16);
+    document.getElementById('pinStatus').innerHTML = '<span style="color:var(--success)">✓ Pin</span> at ' + pin.lat.toFixed(5) + ', ' + pin.lng.toFixed(5) + '. Tap or drag to move it, then Save.';
+  }
+  function openPin(jobId) {
+    const job = jobs.find(j => j.id === jobId);
+    if (!window.L) { alert('The map couldn’t load. Check your connection and refresh.'); return; }
+    pinJobId = jobId; pin = null;
+    document.getElementById('pinJobTitle').textContent = job ? job.title : '';
+    document.getElementById('pinStatus').textContent = PIN_HINT;
+    document.getElementById('pinModal').classList.add('active');
+    if (!pinMap) {
+      pinMap = L.map('pinMap').setView([42.03, -93.6], 7); // Iowa
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(pinMap);
+      pinMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng));
+    }
+    if (pinMarker) { pinMap.removeLayer(pinMarker); pinMarker = null; }
+    const has = job && job.site_lat != null && job.site_lng != null;
+    document.getElementById('pinRemoveBtn').style.display = has ? '' : 'none';
+    setTimeout(() => {
+      pinMap.invalidateSize();
+      if (has) setPin(Number(job.site_lat), Number(job.site_lng), true); else pinMap.setView([42.03, -93.6], 7);
+    }, 80);
+  }
+  function closePin() { document.getElementById('pinModal').classList.remove('active'); }
+  function pinHere(btn) {
+    if (!navigator.geolocation) { alert('This device can’t share its location. Tap the map instead.'); return; }
+    const label = btn.textContent; btn.disabled = true; btn.textContent = 'Finding you…';
+    navigator.geolocation.getCurrentPosition(
+      pos => { btn.disabled = false; btn.textContent = label; setPin(pos.coords.latitude, pos.coords.longitude, true); },
+      () => { btn.disabled = false; btn.textContent = label; alert('Couldn’t get your location. Allow location for this site, or just tap the map where the job is.'); },
+      { enableHighAccuracy: true, timeout: 15000 });
+  }
+  async function savePin(remove) {
+    if (!remove && !pin) { alert('Tap the map to place the pin first.'); return; }
+    try {
+      const r = await api('/api/jobs/' + pinJobId + '/pin', { method: 'PUT', body: JSON.stringify(remove ? { lat: null } : pin) });
+      const job = jobs.find(j => j.id === pinJobId);
+      if (job) { job.site_lat = r.site_lat; job.site_lng = r.site_lng; }
+      closePin(); render();
+    } catch (err) { alert(err.message || 'Could not save the pin'); }
   }
 
   async function releasePayment(jobId) {

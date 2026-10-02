@@ -1337,11 +1337,15 @@
     const lines = a.split('\n');
     const street = lines.find(l => !/^Access:/i.test(l)) || '';
     const access = lines.find(l => /^Access:/i.test(l)) || '';
-    const dest = street || b.job_location || '';
-    const dir = dest ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}" target="_blank" rel="noopener" class="bid-btn" style="display:inline-block;text-decoration:none;margin-top:0.5rem;padding:0.5rem 0.9rem;font-size:0.8rem">🧭 Get Directions</a>` : '';
+    const hasPin = b.job_lat != null && b.job_lng != null;
+    const pinText = hasPin ? Number(b.job_lat).toFixed(5) + ', ' + Number(b.job_lng).toFixed(5) : '';
+    // The client's GPS pin beats the street address for directions (fields often have no address)
+    const dest = hasPin ? Number(b.job_lat) + ',' + Number(b.job_lng) : (street || b.job_location || '');
+    const dir = dest ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}" target="_blank" rel="noopener" class="bid-btn" style="display:inline-block;text-decoration:none;margin-top:0.5rem;padding:0.5rem 0.9rem;font-size:0.8rem">🧭 Get Directions${hasPin ? ' to the Pin' : ''}</a>` : '';
     return `<div style="margin-top:1rem;padding:0.8rem 1rem;border:1px solid rgba(232,137,42,0.25);border-radius:3px;background:rgba(232,137,42,0.05)">
       <div style="font-size:0.72rem;color:var(--stone);text-transform:uppercase;letter-spacing:0.1em;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:0.3rem">Job Site Address</div>
-      <div style="font-size:0.9rem;color:var(--chalk)">${street ? esc(street) : 'The client hasn’t added the exact address yet.'}</div>
+      <div style="font-size:0.9rem;color:var(--chalk)">${street ? esc(street) : hasPin ? 'No street address — use the client’s GPS pin.' : 'The client hasn’t added the exact address yet.'}</div>
+      ${hasPin ? `<div style="font-size:0.85rem;color:var(--success);margin-top:0.3rem">📍 GPS pin on the job site: ${pinText}</div>` : ''}
       ${access ? `<div style="font-size:0.85rem;color:var(--dust);margin-top:0.3rem">${esc(access)}</div>` : ''}
       ${dir}
     </div>`;
