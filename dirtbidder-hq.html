@@ -117,7 +117,7 @@
       <div class="sub" id="sub">Loading…</div>
     </div>
     <div class="head-actions">
-      <label class="toggle"><input type="checkbox" id="withTest" onchange="load()"> Include test accounts <span id="hiddenNote"></span></label>
+      <label class="toggle"><input type="checkbox" id="withTest" onchange="load()"> Include test accounts and my own <span id="hiddenNote"></span></label>
       <button class="btn" id="reportBtn" onclick="reportNow()">📧 Email me today's report</button>
     </div>
   </div>
@@ -197,7 +197,7 @@
 
   function render(d) {
     const m = d.money, u = d.users, j = d.jobs, b = d.bids, v = d.visitors || { today: 0, last_7d: 0, views_7d: 0, top_referrers: [] };
-    document.getElementById('sub').textContent = d.with_test ? 'Showing everything, including test accounts.' : 'Real activity only — test accounts left out.';
+    document.getElementById('sub').textContent = d.with_test ? 'Showing everything, including test accounts and your own.' : 'Real activity only — test accounts and your own accounts left out.';
     const h = d.hidden_test;
     document.getElementById('hiddenNote').textContent = !d.with_test && (h.users || h.jobs) ? `(${h.users} users, ${h.jobs} jobs hidden)` : '';
 

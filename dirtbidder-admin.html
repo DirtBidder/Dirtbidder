@@ -195,6 +195,9 @@
       <div class="card-body">
         <div class="val" style="margin-bottom:0.3rem">${esc(u.email)}${u.phone ? ' · ' + esc(u.phone) : ''}</div>
         <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.6rem">${stats}${u.disputes ? ` · <span style="color:var(--error)">${u.disputes} dispute${u.disputes === 1 ? '' : 's'}</span>` : ''}${warns.length ? ` · <span style="color:var(--amber)">${warns.length} warning${warns.length === 1 ? '' : 's'}</span>` : ''}${u.money_held ? ` · <span style="color:var(--amber)">${u.money_held} payment${u.money_held === 1 ? '' : 's'} in escrow</span>` : ''}</div>
+        <div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.7rem">${/\+(test|op)\d*@/i.test(u.email || '') ? 'Test account — left out of the HQ numbers.'
+          : `${u.internal ? '🏠 Your own account — left out of the HQ numbers.' : 'Counted in the HQ numbers.'}
+          <a href="#" style="color:var(--amber)" onclick="event.preventDefault();setInternal(${u.id}, ${!u.internal})">${u.internal ? 'Count it' : 'This one is mine — don’t count it'}</a>`}</div>
         ${sus ? `<div class="lbl">Suspended ${when(u.suspended_at)} — reason</div><div class="quote">${esc(u.suspended_reason || '')}</div>
           <button class="btn release" onclick="restoreUser(${u.id}, this)">Restore Account</button>`
         : u.is_admin ? '' : `${warns.length ? `<div class="lbl">${warns.length} warning${warns.length === 1 ? '' : 's'} sent</div>${warns.map(w => `<div class="quote" style="margin-bottom:0.4rem">${esc(w.reason)} <small style="color:var(--stone)">— ${when(w.created_at)}</small></div>`).join('')}` : ''}
@@ -206,6 +209,11 @@
           </div>`}
       </div>
     </div>`;
+  }
+  // Your own accounts can be left out of the HQ numbers. Nothing else about the account changes.
+  async function setInternal(id, internal) {
+    try { await api('/api/admin/users/' + id + '/internal', { method: 'POST', body: JSON.stringify({ internal }) }); await loadUsers(); }
+    catch (err) { alert(err.message); }
   }
   async function warnUser(id, btn) {
     const u = users.find(x => x.id === id);
