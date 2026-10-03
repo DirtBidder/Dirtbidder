@@ -25,6 +25,8 @@
     #settingsCard button{background:var(--amber);color:var(--soil);border:none;border-radius:3px;padding:0.7rem 1.3rem;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.9rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer}
     #settingsCard button:disabled{opacity:0.6}
     #settingsCard .st-msg{font-size:0.85rem;margin-top:0.6rem;min-height:1.1em}
+    #settingsCard label.st-check{font-family:inherit;font-weight:500;display:flex;align-items:center;gap:0.6rem;cursor:pointer;font-size:0.95rem;color:var(--chalk);text-transform:none;letter-spacing:0;margin:0}
+    #settingsCard label.st-check input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--amber)}
     #settingsCard .st-hint{font-size:0.8rem;color:var(--stone);margin:-0.6rem 0 0.9rem}`;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
@@ -48,6 +50,12 @@
         <button id="stSave">Save Changes</button>
         <div class="st-msg" id="stInfoMsg"></div>
       </div>
+      ${isOp ? `<div class="st-sec">
+        <div class="st-h">Email Alerts</div>
+        <label class="st-check" for="stAlerts"><input id="stAlerts" type="checkbox" ${me.profile && me.profile.jobAlerts === false ? '' : 'checked'}><span>Email me when a new job is posted</span></label>
+        <div class="st-hint" style="margin-top:0.5rem">You’ll always get emails about your own bids, jobs and payments.</div>
+        <div class="st-msg" id="stAlertMsg"></div>
+      </div>` : ''}
       <div class="st-sec">
         <div class="st-h">Change Password</div>
         <label for="stCur">Current password</label><input id="stCur" type="password" autocomplete="current-password">
@@ -69,6 +77,16 @@
         document.querySelectorAll('.user-name, #userName, #sidebarName').forEach(el => { el.textContent = u.company_name || u.name; });
       } catch (err) { msg('stInfoMsg', err.message); }
       btn.disabled = false;
+    };
+
+    const alerts = document.getElementById('stAlerts');
+    if (alerts) alerts.onchange = async () => {
+      alerts.disabled = true;
+      try {
+        await call('/api/me/profile', { method: 'PUT', body: JSON.stringify({ jobAlerts: alerts.checked }) });
+        msg('stAlertMsg', alerts.checked ? '✓ New-job emails are on' : '✓ New-job emails are off', true);
+      } catch (err) { alerts.checked = !alerts.checked; msg('stAlertMsg', err.message); }
+      alerts.disabled = false;
     };
 
     document.getElementById('stPw').onclick = async (e) => {

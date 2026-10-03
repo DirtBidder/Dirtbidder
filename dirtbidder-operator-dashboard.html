@@ -1838,6 +1838,8 @@
     document.getElementById('sidebarBackdrop').classList.toggle('open', isOpen);
   }
   document.querySelectorAll('.sidebar .nav-item').forEach(el => el.addEventListener('click', () => toggleMenu(false)));
+  // Links from emails can open a section directly, e.g. ...operator-dashboard.html#browse
+  (() => { const n = location.hash.slice(1); if (/^[a-z]+$/.test(n) && document.getElementById('section-' + n)) showSection(n); })();
 </script>
 
 <script src="dirtbidder-settings.js"></script>
