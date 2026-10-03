@@ -1253,6 +1253,8 @@
     return `<div class="bid-card">
       <div class="bid-top"><div><button class="op-link bid-operator" onclick="event.stopPropagation();openOperator(${Number(bid.operator_id) || 0})">🚜 ${who}</button>${repLine(bid.reputation)}</div><div class="bid-price">${money(bid.amount)}</div></div>
       <div class="bid-job">${[compact ? esc(job.title) : '', bid.est_days ? bid.est_days + ' day' + (bid.est_days == 1 ? '' : 's') + ' est.' : '', bid.equipment ? esc(bid.equipment) : '', ago(bid.created_at)].filter(Boolean).join(' · ')}</div>
+      ${bid.prev_amount != null && Number(bid.prev_amount) !== Number(bid.amount) ? `<div class="bid-job" style="color:var(--amber)">Updated ${ago(bid.updated_at)} · was ${money(bid.prev_amount)}</div>` : ''}
+      ${bid.location_shared && canAccept ? `<div class="bid-job" style="color:var(--dust)">📍 You shared the job location with them</div>` : ''}
       ${msg && !compact ? `<div class="bid-job" style="color:var(--dust);margin-top:0.35rem">“${msg}”</div>` : ''}
       ${actions}
       ${compact ? '' : `<div style="text-align:right;margin-top:0.35rem"><a href="#" style="font-size:0.72rem;color:var(--stone)" onclick="event.preventDefault();event.stopPropagation();openReport(${Number(bid.operator_id) || 0}, ${job.id}, '${esc(bid.operator_name || 'Operator').replace(/'/g, '&#39;')}')">🚩 Report</a></div>`}

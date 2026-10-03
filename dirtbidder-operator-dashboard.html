@@ -1151,6 +1151,7 @@
     </div>
     <div class="modal-job-title" id="modalJobTitle"></div>
     <div id="modalJobDesc" style="display:none;font-size:0.82rem;color:var(--dust);white-space:pre-line;max-height:180px;overflow-y:auto;margin:-0.75rem 0 1.1rem;padding:0.6rem 0.8rem;border:1px solid rgba(196,168,130,0.12);border-radius:3px"></div>
+      <div id="bidAskWrap" style="font-size:0.8rem;color:var(--dust);margin:-0.4rem 0 1rem">Need to know more before you price it? <a id="bidAsk" href="dirtbidder-messaging.html" style="color:var(--amber);font-weight:600;text-decoration:none">💬 Ask the client a question first</a>. You can also change your bid any time before the client accepts it.</div>
       <div id="bidError" style="display:none;color:var(--error);font-size:0.8rem;margin-bottom:0.75rem"></div>
       <div class="modal-field">
         <label class="modal-label">Your Bid Price ($)</label>
@@ -1276,8 +1277,10 @@
     const meta = ['Posted ' + ago(job.created_at)];
     if (job.timeline) meta.push(esc(job.timeline));
     const count = job.bid_count ? `🔒 ${job.bid_count} sealed bid${job.bid_count === 1 ? '' : 's'}` : '🔒 0 bids — be first!';
+    const pendingBid = job.my_bid_id && job.my_bid_status === 'pending';
+    const ask = `<a href="dirtbidder-messaging.html?job=${job.id}" onclick="event.stopPropagation()" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;white-space:nowrap">💬 ${job.my_bid_id ? 'Message client' : 'Ask a question'}</a>`;
     const action = job.my_bid_id
-      ? `<span class="bid-status status-${job.my_bid_status === 'accepted' ? 'accepted' : job.my_bid_status === 'declined' ? 'declined' : 'pending'}">You bid ${money(job.my_bid_amount)}</span>`
+      ? `<span class="bid-status status-${job.my_bid_status === 'accepted' ? 'accepted' : job.my_bid_status === 'declined' ? 'declined' : 'pending'}">You bid ${money(job.my_bid_amount)}</span>${pendingBid ? `<button class="bid-btn" onclick="event.stopPropagation();openBidModal(${job.id}, true)">Update Bid</button>` : ''}`
       : `<button class="bid-btn" onclick="event.stopPropagation();openBidModal(${job.id})">Submit Bid</button>`;
     return `<div class="job-card" ${job.my_bid_id ? '' : `onclick="openBidModal(${job.id})"`}>
       <div class="job-card-top"><div class="job-card-title">${esc(job.title)}</div><div class="job-budget">${job.budget ? money(job.budget) : ''}</div></div>
@@ -1285,8 +1288,21 @@
       ${photoStrip(job)}
       <div class="job-tags">${tags.join('')}</div>
       <div class="job-card-meta">${meta.join(' · ')}</div>
-      <div class="job-card-footer"><div class="bid-count">${count}</div>${action}</div>
+      ${sharedSite(job)}
+      <div class="job-card-footer"><div class="bid-count">${count}</div><div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;justify-content:flex-end">${ask}${action}</div></div>
     </div>`;
+  }
+
+  // The client chose to show this operator where the job is before hiring, so they can look at the site
+  function sharedSite(job) {
+    const hasPin = job.shared_lat != null && job.shared_lng != null;
+    const street = String(job.shared_address || '').split('\n').find(l => !/^Access:/i.test(l)) || '';
+    if (!hasPin && !street) return '';
+    const dest = hasPin ? Number(job.shared_lat) + ',' + Number(job.shared_lng) : street;
+    return `<div onclick="event.stopPropagation()" style="margin:0.6rem 0;padding:0.65rem 0.85rem;border:1px solid rgba(232,137,42,0.3);border-radius:3px;background:rgba(232,137,42,0.06);font-size:0.85rem;color:var(--chalk)">
+      <strong style="color:var(--amber)">📍 The client shared the location with you</strong><br>${street ? esc(street) : 'No street address — use the GPS pin.'}
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}" target="_blank" rel="noopener" style="color:var(--amber);font-weight:600;white-space:nowrap;margin-left:0.4rem">🧭 Get Directions${hasPin ? ' to the Pin' : ''}</a>
+      <div style="font-size:0.78rem;color:var(--stone);margin-top:0.25rem">Go take a look, then ${job.my_bid_id ? 'update your bid if you need to' : 'bid'}.</div></div>`;
   }
 
   function bidRow(b) {
@@ -1294,7 +1310,8 @@
     const label = b.status === 'accepted' ? '✓ Hired' : b.status === 'declined' ? 'Not selected' : 'Pending';
     return `<div class="bid-row"><div class="bid-info"><div class="bid-job-title">${esc(b.job_title)}</div>
       <div class="bid-meta">${esc(b.job_location)}${b.job_location ? ' · ' : ''}Submitted ${ago(b.created_at)}${b.est_days ? ' · ' + b.est_days + ' days est.' : ''}</div></div>
-      <div class="bid-amount">${money(b.amount)}</div><div class="bid-status status-${cls}">${label}</div>
+      <div class="bid-amount">${money(b.amount)}${b.prev_amount != null && Number(b.prev_amount) !== Number(b.amount) ? `<div style="font-size:0.7rem;color:var(--stone);font-weight:400">was ${money(b.prev_amount)}</div>` : ''}</div><div class="bid-status status-${cls}">${label}</div>
+      ${b.status === 'pending' && ['open', 'test'].includes(b.job_status) ? `<a href="#" onclick="event.preventDefault();openBidModal(${b.job_id}, true)" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;white-space:nowrap;margin-left:0.75rem">Update</a>` : ''}
       <a href="dirtbidder-messaging.html?job=${b.job_id}" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;white-space:nowrap;margin-left:0.75rem" title="Message the client">💬</a></div>`;
   }
 
@@ -1732,15 +1749,23 @@
     document.getElementById('availLabel').textContent = isAvailable ? 'Available' : 'Unavailable';
   }
 
-  function openBidModal(jobId) {
+  let editBidId = null; // set when the modal is changing an existing bid
+  function openBidModal(jobId, edit) {
     const job = jobs.find(j => j.id === jobId);
-    if (!job || job.my_bid_id) return;
+    const mine = edit ? myBids.find(b => b.job_id === jobId && b.status === 'pending') : null;
+    if (!job || (edit ? !mine : job.my_bid_id)) return;
     currentJobId = jobId;
+    editBidId = mine ? mine.id : null;
+    document.querySelector('#bidModal .modal-title').textContent = mine ? 'Update Your Bid' : 'Submit Your Bid';
+    document.getElementById('bidSubmitBtn').textContent = mine ? 'Update Bid →' : 'Submit Bid →';
+    document.getElementById('bidAsk').href = 'dirtbidder-messaging.html?job=' + jobId;
+    document.getElementById('bidAskWrap').style.display = mine ? 'none' : '';
     document.getElementById('modalJobTitle').textContent = job.title + (job.budget ? ' · Budget: ' + money(job.budget) : '');
     const md = document.getElementById('modalJobDesc');
     md.textContent = job.description || '';
     md.style.display = job.description ? '' : 'none';
-    ['bidPrice', 'bidDays', 'bidEquipment', 'bidNotes'].forEach(id => document.getElementById(id).value = '');
+    const fill = { bidPrice: mine ? Number(mine.amount) : '', bidDays: mine && mine.est_days ? mine.est_days : '', bidEquipment: mine ? mine.equipment || '' : '', bidNotes: mine ? mine.message || '' : '' };
+    Object.keys(fill).forEach(id => document.getElementById(id).value = fill[id]);
     document.getElementById('bidError').style.display = 'none';
     document.getElementById('bidSubmitBtn').disabled = false;
     document.getElementById('bidModal').classList.add('active');
@@ -1760,8 +1785,8 @@
     const btn = document.getElementById('bidSubmitBtn');
     btn.disabled = true;
     try {
-      await api('/api/bids/' + currentJobId + '/bids', {
-        method: 'POST',
+      await api(editBidId ? '/api/bids/' + editBidId : '/api/bids/' + currentJobId + '/bids', {
+        method: editBidId ? 'PUT' : 'POST',
         body: JSON.stringify({
           amount: Number(price),
           est_days: parseInt(days, 10),

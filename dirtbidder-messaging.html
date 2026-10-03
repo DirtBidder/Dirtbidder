@@ -60,6 +60,15 @@
   .compose button { flex: none; height: 44px; padding: 0 1.1rem; border-radius: 22px; border: 0; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.9rem; cursor: pointer; }
   .compose button:disabled { opacity: 0.5; cursor: default; }
   .closed { flex: none; border-top: 1px solid var(--line); padding: 0.9rem 1rem; font-size: 0.85rem; color: var(--stone); text-align: center; }
+  .sitebox { align-self: stretch; margin: 0.25rem 0 0.75rem; padding: 0.75rem 0.9rem; border: 1px solid rgba(232,137,42,0.35); border-radius: 6px; background: rgba(232,137,42,0.07); font-size: 0.88rem; line-height: 1.45; color: var(--chalk); }
+  .sitebox.plain { border-color: var(--line); background: rgba(255,255,255,0.03); color: var(--dust); }
+  .sitebox strong { color: var(--amber); }
+  .sitebox.plain strong { color: var(--chalk); }
+  .sitebox .dim { font-size: 0.78rem; color: var(--stone); margin-top: 0.3rem; }
+  .sitebtn { display: inline-block; margin-top: 0.55rem; padding: 0.55rem 0.9rem; border: 0; border-radius: 4px; background: var(--amber); color: var(--soil); font: inherit; font-weight: 700; font-size: 0.85rem; text-decoration: none; cursor: pointer; }
+  .sitebtn:disabled { opacity: 0.5; }
+  .sitelink { display: inline-block; margin-top: 0.4rem; color: var(--amber); font-weight: 600; text-decoration: none; font-size: 0.85rem; }
+  .tag.ask { background: rgba(52,152,219,0.18); color: #6CB8EC; }
   .empty { margin: auto; text-align: center; color: var(--stone); padding: 2rem 1.25rem; line-height: 1.5; }
   .empty .big { font-size: 2.2rem; margin-bottom: 0.5rem; }
   .err { color: var(--error); padding: 1rem; font-size: 0.9rem; }
@@ -140,8 +149,8 @@
     const el = document.getElementById('threads');
     if (!threads.length) {
       el.innerHTML = `<div class="empty"><div class="big">💬</div>${me && me.role === 'operator'
-        ? 'No conversations yet.<br>Once you bid on a job, you can message that client here.'
-        : 'No conversations yet.<br>When an operator bids on one of your jobs, you can message them here.'}</div>`;
+        ? 'No conversations yet.<br>Tap “Ask a question” on any open job to talk to the client before you bid.'
+        : 'No conversations yet.<br>When an operator bids on one of your jobs or asks a question about it, you can message them here.'}</div>`;
       return;
     }
     if (!list.length) { el.innerHTML = '<div class="empty">No matches.</div>'; return; }
@@ -150,7 +159,7 @@
       const last = t.last_body
         ? (t.last_sender_id === (me && me.id) ? 'You: ' : '') + t.last_body
         : (t.me === 'client' ? `Bid ${money(t.amount)} — say hello` : `You bid ${money(t.amount)}`);
-      const hired = t.bid_status === 'accepted' ? '<span class="tag hired">Hired</span>' : '';
+      const hired = t.bid_status === 'accepted' ? '<span class="tag hired">Hired</span>' : t.bid_status == null ? '<span class="tag ask">Question</span>' : '';
       return `<button class="th${active ? ' active' : ''}${t.unread ? ' unread' : ''}" onclick="openThread(${t.job_id}, ${t.operator_id})">
         <div class="th-row"><div class="th-name">${esc(t.other_name || '—')}${hired}${t.unread ? `<span class="dot">${t.unread}</span>` : ''}</div><div class="th-time">${shortWhen(t.last_at)}</div></div>
         <div class="th-job">${esc(t.job_title)}</div>
@@ -181,7 +190,9 @@
     try {
       const data = await api(`/api/messages/${current.job_id}/${current.operator_id}`);
       if (!current || key(current.job_id, current.operator_id) !== want) return; // user switched threads meanwhile
-      if (!first && data.messages.length === lastCount) return; // nothing new; don't disturb typing
+      const sig = data.messages.length + '|' + (data.thread.location ? 1 : 0) + '|' + (data.thread.share && data.thread.share.shared ? 1 : 0) + '|' + (data.thread.asking ? 1 : 0) + '|' + data.thread.bid_amount;
+      if (!first && sig === lastCount) return; // nothing new; don't disturb typing
+      data.sig = sig;
       renderConvo(data, first);
     } catch (err) {
       if (first) document.getElementById('convo').innerHTML = `<div class="empty">${esc(err.message)}<br><br><button onclick="closeThread()" style="background:none;border:0;color:var(--amber);font:inherit;cursor:pointer">← Back to messages</button></div>`;
@@ -215,6 +226,35 @@
         ? 'You’re working together on this job. Keep job talk here so there’s a record if anything goes wrong.'
         : 'Phone numbers, emails and links are hidden until the job is hired. All payments go through DirtBidder escrow — that’s what protects you both.';
 
+    // Operator: where the job is, once hired or once the client shares it so they can look at the site
+    let extra = '';
+    if (t.location) {
+      const L = t.location, hasPin = L.lat != null && L.lng != null;
+      const street = String(L.address || '').split('\n').find(l => !/^Access:/i.test(l)) || '';
+      const access = String(L.address || '').split('\n').find(l => /^Access:/i.test(l)) || '';
+      const dest = hasPin ? Number(L.lat) + ',' + Number(L.lng) : street;
+      extra += `<div class="sitebox"><strong>📍 ${t.hired ? 'Job site' : esc(t.client_name || 'The client') + ' shared the job location with you'}</strong>
+        <div>${street ? esc(street) : 'No street address — use the GPS pin.'}</div>${access ? `<div class="dim">${esc(access)}</div>` : ''}
+        ${dest ? `<a class="sitebtn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}" target="_blank" rel="noopener">🧭 Get Directions${hasPin ? ' to the Pin' : ''}</a>` : ''}
+        ${t.hired ? '' : `<div class="dim">Go take a look, then ${t.asking ? 'place your bid' : 'update your bid if you need to'}.</div>`}</div>`;
+    }
+    if (t.me === 'operator' && t.can_send && !t.hired && (t.asking || t.bid_status === 'pending')) {
+      extra += `<div class="sitebox plain">${t.asking ? 'You haven’t bid on this job yet. Ask what you need to price it right.' : `Your bid: <strong>${money(t.bid_amount)}</strong>. You can change it until the client accepts.`}
+        <a class="sitelink" href="dirtbidder-operator-dashboard.html#${t.asking ? 'browse' : 'mybids'}">${t.asking ? 'Place your bid →' : 'Update your bid →'}</a></div>`;
+    }
+    // Client: let this one operator see where the job is before hiring
+    if (t.share && t.share.can_share) {
+      const name = esc(t.operator_name || 'this operator');
+      extra += t.share.shared
+        ? `<div class="sitebox"><strong>✓ ${name} can see the job location</strong><div class="dim">They got the address and GPS pin so they can look at the site. Your phone number stays hidden until you hire them.</div>
+           <a class="sitelink" href="#" onclick="event.preventDefault();shareLocation(false)">Stop sharing</a></div>`
+        : t.share.has_location
+          ? `<div class="sitebox plain">${t.asking ? name + ' hasn’t bid yet.' : ''} Want them to look at the site before ${t.asking ? 'they price it' : 'you decide'}?
+             <button class="sitebtn" id="shareBtn" onclick="shareLocation(true)">📍 Share the job location with ${name}</button>
+             <div class="dim">Only they see the address and GPS pin. Your phone number stays hidden until you hire.</div></div>`
+          : `<div class="sitebox plain"><span class="dim">To let ${name} look at the site, add the job address or drop a GPS pin on it in <a class="sitelink" style="margin:0" href="dirtbidder-client-dashboard.html">My Jobs</a>. Then you can share it here.</span></div>`;
+    }
+
     convo.innerHTML = `
       <div class="convo-head">
         <button class="back" onclick="closeThread()" aria-label="Back">‹</button>
@@ -225,6 +265,7 @@
       </div>
       <div class="msgs" id="msgs">
         <div class="notice">${tip}</div>
+        ${extra}
         ${bubbles || `<div class="empty" style="margin:1rem auto">No messages yet.${t.can_send ? ' Say hello 👋' : ''}</div>`}
       </div>
       ${t.can_send ? `<div class="compose">
@@ -236,7 +277,7 @@
     if (nd) { nd.value = keep; grow(nd); if (first && window.innerWidth > 760) nd.focus(); }
     const nb = document.getElementById('msgs');
     if (first || atBottom) nb.scrollTop = nb.scrollHeight;
-    lastCount = msgs.length;
+    lastCount = data.sig;
   }
 
   function grow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
@@ -263,6 +304,17 @@
       sending = false;
       const b = document.getElementById('sendBtn'); if (b) b.disabled = false;
     }
+  }
+
+  // Client: show (or stop showing) this operator where the job is
+  async function shareLocation(share) {
+    if (!current) return;
+    if (!share && !confirm('Stop sharing the job location with this operator?')) return;
+    const btn = document.getElementById('shareBtn'); if (btn) btn.disabled = true;
+    try {
+      await api('/api/jobs/' + current.job_id + '/share-location', { method: 'POST', body: JSON.stringify({ operator_id: current.operator_id, share }) });
+      await refreshThread(true);
+    } catch (err) { alert(err.message); if (btn) btn.disabled = false; }
   }
 
   function closeThread() {
