@@ -1213,7 +1213,11 @@
   const API_BASE = 'https://dirtbidder-backend-production.up.railway.app';
   const TOKEN_KEY = 'dirtbidder_token';
   const token = localStorage.getItem(TOKEN_KEY);
-  if (!token) window.location.replace('dirtbidder-login.html');
+  if (!token) {
+    // Remember where an email link was heading (e.g. #browse) so login can send them back there
+    try { if (/^#[a-z]+$/.test(location.hash)) sessionStorage.setItem('dirtbidder_next', location.hash); } catch (e) {}
+    window.location.replace('dirtbidder-login.html');
+  }
 
   let isAvailable = true;
   let jobs = [];     // open jobs visible to this operator

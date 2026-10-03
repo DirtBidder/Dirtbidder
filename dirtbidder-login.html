@@ -680,7 +680,11 @@
         localStorage.setItem('dirtbidder_token', data.token);
       }
 
-      window.location.href = (data.user && data.user.role) === 'operator' ? 'dirtbidder-operator-dashboard.html' : 'dirtbidder-client-dashboard.html';
+      // If they came from an email link (e.g. a new-job alert), finish the trip to that section
+      let next = '';
+      try { next = sessionStorage.getItem('dirtbidder_next') || ''; sessionStorage.removeItem('dirtbidder_next'); } catch (e) {}
+      if (!/^#[a-z]+$/.test(next)) next = '';
+      window.location.href = (data.user && data.user.role) === 'operator' ? 'dirtbidder-operator-dashboard.html' + next : 'dirtbidder-client-dashboard.html';
 
     } catch (err) {
       btn.disabled = false;
