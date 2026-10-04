@@ -46,7 +46,9 @@
         <label for="stPhone">Phone</label><input id="stPhone" type="tel" value="${esc(me.phone)}" autocomplete="tel" placeholder="(515) 555-1234">
         <div class="st-hint">${isOp ? 'Only shared with a client after they hire you.' : 'Only shared with the operator you hire, so they can reach you.'}</div>
         <label for="stEmail">Email</label><input id="stEmail" value="${esc(me.email)}" readonly>
-        <div class="st-hint">To change your email, reply to any DirtBidder email and we’ll help.</div>
+        <div class="st-hint">${me.email_confirmed === false
+          ? '<span style="color:var(--amber)">Not confirmed yet.</span> Use the box at the top of the page to resend the link or fix the address.'
+          : (me.email_confirmed ? '✓ Confirmed. ' : '') + 'To change your email, reply to any DirtBidder email and we’ll help.'}</div>
         <button id="stSave">Save Changes</button>
         <div class="st-msg" id="stInfoMsg"></div>
       </div>
@@ -103,7 +105,50 @@
     };
   }
 
-  call('/api/me').then(render).catch(() => {
+  // "Confirm your email" box at the top of the dashboard until the address is confirmed
+  function confirmBanner(me) {
+    const old = document.getElementById('confirmEmailBox'); if (old) old.remove();
+    if (me.email_confirmed !== false) return;
+    const host = document.querySelector('.content'); if (!host) return;
+    const b = document.createElement('div');
+    b.id = 'confirmEmailBox';
+    b.style.cssText = 'margin:0 0 1rem;padding:0.9rem 1rem;border:1px solid rgba(232,137,42,0.45);border-radius:4px;background:rgba(232,137,42,0.08);font-size:0.9rem;line-height:1.45;color:var(--chalk)';
+    b.innerHTML = `<strong style="color:var(--amber)">📧 Confirm your email</strong><br>
+      We need to make sure <strong>${esc(me.email)}</strong> is right, so job alerts, bids and payment notices reach you. Tap the link we emailed you, or tap Resend to get a new one. Check your spam folder too.
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem">
+        <button id="ceResend" style="background:var(--amber);color:var(--soil);border:0;border-radius:3px;padding:0.5rem 0.9rem;font:inherit;font-weight:700;font-size:0.82rem;cursor:pointer">Resend the link</button>
+        <button id="ceChange" style="background:none;color:var(--amber);border:1px solid rgba(232,137,42,0.5);border-radius:3px;padding:0.5rem 0.9rem;font:inherit;font-weight:600;font-size:0.82rem;cursor:pointer">Wrong address? Fix it</button>
+      </div>
+      <div id="ceEdit" style="display:none;margin-top:0.6rem">
+        <input id="ceEmail" type="email" autocomplete="email" value="${esc(me.email)}" style="width:100%;max-width:340px;background:var(--clay);border:1.5px solid rgba(196,168,130,0.25);color:var(--chalk);border-radius:3px;padding:0.6rem 0.75rem;font:inherit;font-size:1rem;box-sizing:border-box">
+        <button id="ceSave" style="margin-top:0.5rem;background:var(--amber);color:var(--soil);border:0;border-radius:3px;padding:0.5rem 0.9rem;font:inherit;font-weight:700;font-size:0.82rem;cursor:pointer">Save and send link</button>
+      </div>
+      <div id="ceMsg" style="font-size:0.82rem;margin-top:0.5rem;min-height:1em"></div>`;
+    host.insertBefore(b, host.firstChild);
+    const say = (t, ok) => { const m = document.getElementById('ceMsg'); m.textContent = t; m.style.color = ok ? 'var(--success)' : 'var(--error)'; };
+    document.getElementById('ceResend').onclick = async e => {
+      const btn = e.currentTarget; btn.disabled = true;
+      try {
+        const r = await call('/api/me/confirm-email', { method: 'POST' });
+        if (r.confirmed) { me.email_confirmed = true; confirmBanner(me); return; }
+        say('✓ Sent to ' + r.email + '. It can take a minute.', true);
+      } catch (err) { say(err.message); }
+      btn.disabled = false;
+    };
+    document.getElementById('ceChange').onclick = () => { const x = document.getElementById('ceEdit'); x.style.display = x.style.display === 'none' ? '' : 'none'; };
+    document.getElementById('ceSave').onclick = async e => {
+      const v = document.getElementById('ceEmail').value.trim();
+      const btn = e.currentTarget; btn.disabled = true;
+      try {
+        const r = await call('/api/me/email', { method: 'PUT', body: JSON.stringify({ email: v }) });
+        me.email = r.email; confirmBanner(me);
+        const m = document.getElementById('ceMsg'); if (m) { m.textContent = '✓ Updated. We sent the link to ' + r.email + '.'; m.style.color = 'var(--success)'; }
+        const st = document.getElementById('stEmail'); if (st) st.value = r.email;
+      } catch (err) { say(err.message); btn.disabled = false; }
+    };
+  }
+
+  call('/api/me').then(me => { render(me); confirmBanner(me); }).catch(() => {
     box.innerHTML = '<div class="st-sec" style="color:var(--stone)">Couldn’t load your settings. Refresh to try again.</div>';
   });
 })();
