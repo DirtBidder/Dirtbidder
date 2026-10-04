@@ -164,7 +164,7 @@
   ];
 
   const FEED = {
-    signup: (a) => ['👤', `<b>${esc(a.who)}</b> joined as ${a.detail === 'operator' ? 'an operator' : 'a client'}`],
+    signup: (a) => ['👤', `<b>${esc((a.who || '').trim() || 'Someone (no name given)')}</b> joined as ${a.detail === 'operator' ? 'an operator' : 'a client'}`],
     job: (a) => ['📋', `<b>${esc(a.who)}</b> posted <i>${esc(a.detail)}</i>`],
     bid: (a) => ['💰', `<b>${esc(a.who)}</b> bid on <i>${esc(a.detail)}</i>`],
     payment: (a) => ['🔒', `<b>${esc(a.who)}</b> paid into escrow for <i>${esc(a.detail)}</i>`],

@@ -188,7 +188,7 @@
       : `${u.jobs_posted} job${u.jobs_posted === 1 ? '' : 's'} posted`;
     return `<div class="card">
       <div class="card-head">
-        <div><div class="card-title">${esc(u.company_name || u.name || '—')}</div>
+        <div><div class="card-title">${esc((u.company_name || '').trim() || (u.name || '').trim() || 'No name given')}</div>
           <div style="font-size:0.8rem;color:var(--stone)">${esc(u.role === 'operator' ? 'Operator' : u.role === 'client' ? 'Client' : u.role)}${u.company_name && u.name ? ' · ' + esc(u.name) : ''} · joined ${when(u.created_at)}</div></div>
         <div class="pill ${sus ? 'open' : 'done'}">${sus ? 'Suspended' : u.is_admin ? 'Admin' : 'Active'}</div>
       </div>

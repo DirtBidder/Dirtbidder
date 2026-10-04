@@ -997,6 +997,10 @@
       document.getElementById('emailError').classList.remove('visible');
       document.getElementById('pwError').classList.remove('visible');
 
+      for (const id of ['firstName', 'lastName']) {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) { alert('Please enter your first and last name.'); el.focus(); return; }
+      }
       if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
         document.getElementById('emailError').classList.add('visible');
         return;
@@ -1106,7 +1110,7 @@
         body: JSON.stringify({
           email: email,
           password: password,
-          name: firstName + ' ' + lastName,
+          name: (firstName.trim() + ' ' + lastName.trim()).trim(),
           phone: phone,
           role: currentRole,
           profile: profile,
