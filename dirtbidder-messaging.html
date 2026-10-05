@@ -83,6 +83,7 @@
     .bubble { max-width: 86%; }
   }
 </style>
+<script src="dirtbidder-rules.js" defer></script>
 </head>
 <body>
 <div class="top">
@@ -236,7 +237,7 @@
       extra += `<div class="sitebox"><strong>📍 ${t.hired ? 'Job site' : esc(t.client_name || 'The client') + ' shared the job location with you'}</strong>
         <div>${street ? esc(street) : 'No street address — use the GPS pin.'}</div>${access ? `<div class="dim">${esc(access)}</div>` : ''}
         ${dest ? `<a class="sitebtn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}" target="_blank" rel="noopener">🧭 Get Directions${hasPin ? ' to the Pin' : ''}</a>` : ''}
-        ${t.hired ? '' : `<div class="dim">Go take a look, then ${t.asking ? 'place your bid' : 'update your bid if you need to'}.</div>`}</div>`;
+        ${t.hired ? '' : `<div class="dim">Go take a look, then ${t.asking ? 'place your bid' : 'update your bid if you need to'}. If you get the job, it’s hired and paid through DirtBidder. <a class="sitelink" style="margin:0" href="dirtbidder-how-it-works.html#rules">Why?</a></div>`}</div>`;
     }
     if (t.me === 'operator' && t.can_send && !t.hired && (t.asking || t.bid_status === 'pending')) {
       extra += `<div class="sitebox plain">${t.asking ? 'You haven’t bid on this job yet. Ask what you need to price it right.' : `Your bid: <strong>${money(t.bid_amount)}</strong>. You can change it until the client accepts.`}
@@ -246,7 +247,7 @@
     if (t.share && t.share.can_share) {
       const name = esc(t.operator_name || 'this operator');
       extra += t.share.shared
-        ? `<div class="sitebox"><strong>✓ ${name} can see the job location</strong><div class="dim">They got the address and GPS pin so they can look at the site. Your phone number stays hidden until you hire them.</div>
+        ? `<div class="sitebox"><strong>✓ ${name} can see the job location</strong><div class="dim">They got the address and GPS pin so they can look at the site. Your phone number stays hidden until you hire them. If you pick them, hire them here so your payment is protected.</div>
            <a class="sitelink" href="#" onclick="event.preventDefault();shareLocation(false)">Stop sharing</a></div>`
         : t.share.has_location
           ? `<div class="sitebox plain">${t.asking ? name + ' hasn’t bid yet.' : ''} Want them to look at the site before ${t.asking ? 'they price it' : 'you decide'}?
@@ -310,6 +311,8 @@
   async function shareLocation(share) {
     if (!current) return;
     if (!share && !confirm('Stop sharing the job location with this operator?')) return;
+    // First time sharing a location: agree to the one house rule, once
+    if (share && window.DirtRules && !(await DirtRules.ensure('client'))) return;
     const btn = document.getElementById('shareBtn'); if (btn) btn.disabled = true;
     try {
       await api('/api/jobs/' + current.job_id + '/share-location', { method: 'POST', body: JSON.stringify({ operator_id: current.operator_id, share }) });

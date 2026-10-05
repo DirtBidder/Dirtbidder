@@ -1758,6 +1758,11 @@
 
   let editBidId = null; // set when the modal is changing an existing bid
   function openBidModal(jobId, edit) {
+    // First bid (or first change to one): agree to the one house rule, once. Then the form opens.
+    if (window.DirtRules && !DirtRules.ok()) { DirtRules.ensure('operator').then(yes => { if (yes) openBidForm(jobId, edit); }); return; }
+    openBidForm(jobId, edit);
+  }
+  function openBidForm(jobId, edit) {
     const job = jobs.find(j => j.id === jobId);
     const mine = edit ? myBids.find(b => b.job_id === jobId && b.status === 'pending') : null;
     if (!job || (edit ? !mine : job.my_bid_id)) return;
@@ -1878,6 +1883,7 @@
   (() => { const n = location.hash.slice(1); if (/^[a-z]+$/.test(n) && document.getElementById('section-' + n)) showSection(n); })();
 </script>
 
+<script src="dirtbidder-rules.js"></script>
 <script src="dirtbidder-settings.js"></script>
 </body>
 </html>
