@@ -214,10 +214,12 @@
   // Email this user the "confirm your email" link
   async function sendConfirm(id) {
     const a = document.getElementById('sc-' + id);
+    if (!a || a.dataset.busy) return; // a double-click only sends once
+    a.dataset.busy = '1'; a.textContent = 'Sending…';
     try {
       const r = await api('/api/admin/users/' + id + '/send-confirm', { method: 'POST' });
       if (a) a.outerHTML = '<span style="color:var(--success)">✓ Link sent to ' + esc(r.email) + '</span>';
-    } catch (err) { alert(err.message); }
+    } catch (err) { if (a) { delete a.dataset.busy; a.textContent = 'Send them the confirm link'; } alert(err.message); }
   }
   // Your own accounts can be left out of the HQ numbers. Nothing else about the account changes.
   async function setInternal(id, internal) {
