@@ -194,7 +194,7 @@
       </div>
       <div class="card-body">
         <div class="val" style="margin-bottom:0.3rem">${esc(u.email)}${u.phone ? ' · ' + esc(u.phone) : ''}</div>
-        <div style="font-size:0.82rem;margin-bottom:0.3rem;color:${u.email_confirmed_at ? 'var(--success)' : 'var(--amber)'}">${u.email_confirmed_at ? '✓ Email confirmed' : `✉ Email not confirmed yet. <a href="#" id="sc-${u.id}" style="color:var(--amber)" onclick="event.preventDefault();sendConfirm(${u.id})">Send them the confirm link</a>`}</div>
+        <div style="font-size:0.82rem;margin-bottom:0.3rem;color:${u.email_confirmed_at ? 'var(--success)' : 'var(--amber)'}">${u.email_confirmed_at ? '✓ Email confirmed' : `✉ Confirm link was emailed when they signed up. They haven’t tapped it yet. <a href="#" id="sc-${u.id}" style="color:var(--amber)" onclick="event.preventDefault();sendConfirm(${u.id})">Send it again</a>`}</div>
         ${u.rules_ack_at ? `<div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">✓ Agreed to keep jobs on DirtBidder · ${when(u.rules_ack_at)}</div>` : ''}
         <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.6rem">${stats}${u.disputes ? ` · <span style="color:var(--error)">${u.disputes} dispute${u.disputes === 1 ? '' : 's'}</span>` : ''}${warns.length ? ` · <span style="color:var(--amber)">${warns.length} warning${warns.length === 1 ? '' : 's'}</span>` : ''}${u.money_held ? ` · <span style="color:var(--amber)">${u.money_held} payment${u.money_held === 1 ? '' : 's'} in escrow</span>` : ''}</div>
         <div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.7rem">${/\+(test|op)\d*@/i.test(u.email || '') ? 'Test account — left out of the HQ numbers.'
@@ -220,7 +220,7 @@
     try {
       const r = await api('/api/admin/users/' + id + '/send-confirm', { method: 'POST' });
       if (a) a.outerHTML = '<span style="color:var(--success)">✓ Link sent to ' + esc(r.email) + '</span>';
-    } catch (err) { if (a) { delete a.dataset.busy; a.textContent = 'Send them the confirm link'; } alert(err.message); }
+    } catch (err) { if (a) { delete a.dataset.busy; a.textContent = 'Send it again'; } alert(err.message); }
   }
   // Your own accounts can be left out of the HQ numbers. Nothing else about the account changes.
   async function setInternal(id, internal) {
