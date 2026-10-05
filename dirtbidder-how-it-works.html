@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How DirtBidder Works</title>
+<meta name="description" content="How DirtBidder works for clients and operators: posting, bidding, messaging, escrow, fees, and why phone numbers stay hidden until a job is hired.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DirtBidder">
+<meta property="og:title" content="How DirtBidder Works">
+<meta property="og:description" content="Posting, bidding, messaging, escrow and fees, step by step, for clients and operators.">
+<meta property="og:url" content="https://www.dirtbidder.com/dirtbidder-how-it-works.html">
+<meta property="og:image" content="https://www.dirtbidder.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --dust:#C4A882; --stone:#8C7B6B; --chalk:#F2EDE6; --success:#6FBF73; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--dust); line-height: 1.6; -webkit-text-size-adjust: 100%; }
+  nav { padding: 1rem 1.25rem; border-bottom: 1px solid rgba(232,137,42,0.15); display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; }
+  .logo span { color: var(--amber); }
+  nav a.back { color: var(--amber); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2.5rem; text-transform: uppercase; color: var(--chalk); line-height: 1.05; }
+  h1 em { font-style: normal; color: var(--amber); }
+  .lede { margin: 0.6rem 0 1.5rem; font-size: 1.02rem; max-width: 34rem; }
+  h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--chalk); line-height: 1.1; margin: 3rem 0 0.5rem; scroll-margin-top: 1rem; }
+  h2 + p { margin-bottom: 1rem; }
+  p { font-size: 0.97rem; margin-bottom: 0.8rem; }
+  strong { color: var(--chalk); font-weight: 600; }
+  a { color: var(--amber); }
+
+  /* Who are you: switches the steps and the wording */
+  .who { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--dig); border-radius: 4px; padding: 4px; }
+  .who button { font: inherit; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.8rem 0.5rem; border: 0; border-radius: 3px; background: transparent; color: var(--dust); cursor: pointer; }
+  .who button[aria-selected="true"] { background: var(--amber); color: var(--soil); }
+  .who button:focus-visible, .jump a:focus-visible, .calc input:focus-visible, summary:focus-visible, .cta:focus-visible { outline: 2px solid var(--chalk); outline-offset: 2px; }
+
+  .jump { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 0; }
+  .jump a { font-size: 0.85rem; font-weight: 600; text-decoration: none; color: var(--dust); border: 1px solid rgba(196,168,130,0.25); border-radius: 999px; padding: 0.35rem 0.8rem; }
+  .jump a:hover { color: var(--amber); border-color: var(--amber); }
+
+  /* Steps */
+  .steps { list-style: none; counter-reset: s; margin-top: 1.25rem; }
+  .steps li { counter-increment: s; position: relative; padding: 0 0 1.6rem 3.4rem; }
+  .steps li::before { content: counter(s, decimal-leading-zero); position: absolute; left: 0; top: -0.1rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.9rem; line-height: 1; color: var(--amber); }
+  .steps li::after { content: ''; position: absolute; left: 0.95rem; top: 2.1rem; bottom: 0.3rem; width: 2px; background: rgba(232,137,42,0.2); }
+  .steps li:last-child { padding-bottom: 0; }
+  .steps li:last-child::after { display: none; }
+  .steps h3 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--chalk); line-height: 1.15; margin-bottom: 0.3rem; }
+  .steps p { margin-bottom: 0.45rem; }
+  .steps p:last-child { margin-bottom: 0; }
+  .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--success); border: 1px solid rgba(111,191,115,0.4); border-radius: 3px; padding: 0.05rem 0.4rem; margin-left: 0.4rem; vertical-align: 0.15em; }
+
+  .box { background: var(--dig); border-left: 3px solid var(--amber); border-radius: 3px; padding: 1rem 1.25rem; margin: 1rem 0; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  ul.plain { padding-left: 1.2rem; margin-bottom: 0.8rem; }
+  ul.plain li { font-size: 0.97rem; margin-bottom: 0.45rem; }
+
+  /* Fees */
+  table { width: 100%; border-collapse: collapse; margin: 0.5rem 0 1rem; font-size: 0.93rem; }
+  td, th { border: 1px solid rgba(196,168,130,0.2); padding: 0.5rem 0.65rem; text-align: left; }
+  th { color: var(--chalk); background: var(--dig); font-weight: 600; }
+  td:last-child, th:last-child { text-align: right; white-space: nowrap; }
+  .calc { background: var(--dig); border-radius: 4px; padding: 1.1rem 1.25rem; }
+  .calc label { display: block; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone); margin-bottom: 0.4rem; }
+  .calc .money { display: flex; align-items: center; background: var(--clay); border: 1.5px solid rgba(196,168,130,0.2); border-radius: 3px; padding: 0 0.8rem; }
+  .calc .money span { color: var(--stone); font-size: 1.2rem; }
+  .calc input { flex: 1; min-width: 0; font: inherit; font-size: 1.2rem; font-weight: 600; color: var(--chalk); background: transparent; border: 0; padding: 0.65rem 0.4rem; }
+  .calc dl { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem 1rem; margin-top: 1rem; }
+  .calc dt { font-size: 0.93rem; }
+  .calc dd { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--chalk); text-align: right; font-variant-numeric: tabular-nums; }
+  .calc dd.fee { color: var(--amber); }
+  .calc .note { font-size: 0.82rem; color: var(--stone); margin: 0.8rem 0 0; }
+
+  /* Questions */
+  details { border-bottom: 1px solid rgba(196,168,130,0.15); }
+  summary { cursor: pointer; list-style: none; padding: 0.9rem 1.6rem 0.9rem 0; position: relative; color: var(--chalk); font-weight: 600; font-size: 0.98rem; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; position: absolute; right: 0.2rem; top: 0.7rem; color: var(--amber); font-size: 1.3rem; font-weight: 400; }
+  details[open] summary::after { content: '–'; }
+  details p { padding-right: 1rem; }
+
+  .cta { display: inline-block; margin-top: 0.5rem; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 1.6rem; border-radius: 3px; }
+  .end { margin-top: 2.5rem; }
+  .small { font-size: 0.85rem; color: var(--stone); margin-top: 1.25rem; }
+
+  /* Only the chosen side shows */
+  body[data-role="client"] .for-operator, body[data-role="operator"] .for-client { display: none; }
+  @media (max-width: 560px) { h1 { font-size: 2.1rem; } .steps li { padding-left: 3rem; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body data-role="client">
+<nav><a class="logo" href="index.html"><span>Dirt</span>Bidder</a><a class="back" href="javascript:history.length>1?history.back():location.href='index.html'">← Back</a></nav>
+<main>
+  <h1>How DirtBidder <em>Works</em></h1>
+  <p class="lede">The whole thing, start to finish: posting, bidding, messaging, escrow and getting paid. Pick your side.</p>
+
+  <div class="who" role="tablist" aria-label="Who are you?">
+    <button role="tab" id="tab-client" aria-selected="true" onclick="setRole('client', true)">I need work done</button>
+    <button role="tab" id="tab-operator" aria-selected="false" onclick="setRole('operator', true)">I'm an operator</button>
+  </div>
+  <div class="jump">
+    <a href="#steps">Step by step</a><a href="#fees">Fees</a><a href="#contact">Why phone numbers are hidden</a><a href="#problems">If something goes wrong</a><a href="#questions">Questions</a>
+  </div>
+
+  <!-- ───────── CLIENT STEPS ───────── -->
+  <section class="for-client" aria-labelledby="tab-client">
+    <h2 id="steps">Step by step, for clients</h2>
+    <ol class="steps">
+      <li>
+        <h3>Post your job <span class="tag">Free</span></h3>
+        <p>Say what you need done, roughly where, how big, and when. Add a budget if you have one.</p>
+        <p>Operators only see the town and ZIP. <strong>Your exact address and your phone number stay private.</strong></p>
+      </li>
+      <li>
+        <h3>Operators are told right away</h3>
+        <p>Operators on DirtBidder get an email about your job as soon as you post it. You don't have to chase anyone.</p>
+      </li>
+      <li>
+        <h3>Answer questions in Messages</h3>
+        <p>An operator can message you before bidding, to ask about access, soil, tile size, or anything else they need to price it right. You'll get an email when they do. Answer under <strong>Messages</strong>.</p>
+      </li>
+      <li>
+        <h3>Let an operator look at the site, if you want</h3>
+        <p>Some jobs can't be priced without seeing the ground. In the message thread, tap <strong>Share the job location</strong> to show the address and map pin to that one operator. Nobody else sees it, and you can stop sharing any time.</p>
+      </li>
+      <li>
+        <h3>Compare your bids</h3>
+        <p>You get an email for each bid. Bids are sealed, so operators can't see each other's prices. Look at the price, the timeline, their equipment and their reviews.</p>
+        <p>An operator can change a bid until you hire, for example after seeing the site. You'll see the old price next to the new one. You never have to take the lowest bid, or any bid.</p>
+      </li>
+      <li>
+        <h3>Hire and pay into escrow</h3>
+        <p>Pick your operator and pay the bid plus the DirtBidder fee. <strong>The operator does not get this money yet.</strong> It's held until the work is done.</p>
+        <p>Jobs up to $10,000 can be paid by card or bank. Jobs over $10,000 are paid by bank, which takes about 4 business days to clear. The operator is told to wait until it clears.</p>
+      </li>
+      <li>
+        <h3>Now you can talk directly</h3>
+        <p>Once you've hired and the payment is in, the operator sees your phone number and the exact address, and you can trade numbers freely in Messages. Call, text, meet at the site.</p>
+      </li>
+      <li>
+        <h3>The work gets done</h3>
+        <p>If the job turns out bigger than the bid (rock, more tile, extra loads), the operator sends you a <strong>change request</strong> with a price and a reason. You approve and pay it into escrow, or you decline. Nothing is added without your OK.</p>
+      </li>
+      <li>
+        <h3>Release the payment</h3>
+        <p>When the operator marks the job complete, you have <strong>72 hours</strong> to release the payment or report a problem. If you do neither, it releases on its own.</p>
+      </li>
+      <li>
+        <h3>Leave a review</h3>
+        <p>Rate the operator. Reviews are how good operators earn badges and how the next client knows who to trust.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ───────── OPERATOR STEPS ───────── -->
+  <section class="for-operator" aria-labelledby="tab-operator">
+    <h2 id="steps-op">Step by step, for operators</h2>
+    <ol class="steps">
+      <li>
+        <h3>Sign up <span class="tag">Free</span></h3>
+        <p>Give your name and company, then tap the button in the confirmation email we send you. <strong>You need a name and a confirmed email before you can bid or message a client.</strong> Looking at jobs is always open.</p>
+        <p>Add your equipment and a few words about your outfit under <strong>Edit Profile</strong>. Clients see it next to your bid.</p>
+      </li>
+      <li>
+        <h3>Get job alerts</h3>
+        <p>We email you when a new job is posted. You can turn that off under <strong>Settings</strong>. All open jobs are under <strong>Browse Jobs</strong>.</p>
+      </li>
+      <li>
+        <h3>Ask before you bid</h3>
+        <p>Tap <strong>Ask a question</strong> on any job to message the client. Ask about access, soil, tile size, where spoils go, whatever you need to price it right.</p>
+      </li>
+      <li>
+        <h3>See the site first, if you need to</h3>
+        <p>Ask the client to share the location. If they do, the address and map pin show up for you, with directions. Only you see it.</p>
+      </li>
+      <li>
+        <h3>Place your bid</h3>
+        <p>Enter your price, your timeline and the equipment you'll bring. Bids are sealed, so other operators can't see your number.</p>
+        <p>You can change your bid any time until the client hires, for example after you've walked the site. The client sees the old price and the new one.</p>
+      </li>
+      <li>
+        <h3>Get hired, with the money already there</h3>
+        <p>When a client picks you, they pay the full bid into escrow <strong>before you move equipment</strong>. We email you "You're hired."</p>
+        <p>If they paid by bank (required on jobs over $10,000), it takes about 4 business days to clear. Wait for our "payment cleared" email before you start.</p>
+      </li>
+      <li>
+        <h3>Now you can talk directly</h3>
+        <p>Once you're hired and the payment is in, you see the client's phone number and the exact address, and you can trade numbers freely in Messages. Call, text, meet at the site.</p>
+      </li>
+      <li>
+        <h3>Set up payouts</h3>
+        <p>Under <strong>Earnings</strong>, add the bank account you want to be paid into. It runs through Stripe and takes a few minutes. You can do it any time, but we can't send your money until it's done.</p>
+      </li>
+      <li>
+        <h3>Hit something unexpected?</h3>
+        <p>Send a <strong>change request</strong> with the extra price, the reason, and photos if you have them. The client approves and pays it into escrow, or declines. Don't do extra work on a handshake. If it isn't in escrow, we can't protect it.</p>
+      </li>
+      <li>
+        <h3>Mark it complete and get paid</h3>
+        <p>When you're done, tap <strong>Mark Job Complete</strong>. The client has <strong>72 hours</strong> to release the payment or report a problem. If they do neither, it releases to you automatically. Your bid minus the DirtBidder fee goes to your bank.</p>
+      </li>
+      <li>
+        <h3>Build your name</h3>
+        <p>Clients review you after each paid job. Good reviews and finished jobs earn badges that show on every bid you place.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ───────── FEES ───────── -->
+  <h2 id="fees">What it costs</h2>
+  <p>Signing up, posting jobs, bidding and messaging are all free. <strong>DirtBidder only makes money when a job is hired and paid.</strong> Then each side pays a fee, and the rate drops as the job gets bigger:</p>
+  <table>
+    <tr><th>Part of the job price</th><th>Fee, each side</th></tr>
+    <tr><td>First $10,000</td><td>5%</td></tr>
+    <tr><td>$10,000 to $100,000</td><td>3%</td></tr>
+    <tr><td>$100,000 to $500,000</td><td>2%</td></tr>
+    <tr><td>Over $500,000</td><td>1%</td></tr>
+  </table>
+  <div class="calc">
+    <label for="amt">Try a job price</label>
+    <div class="money"><span>$</span><input id="amt" type="text" inputmode="numeric" value="15,000" autocomplete="off" aria-describedby="calcNote"></div>
+    <dl>
+      <dt>DirtBidder fee, each side</dt><dd class="fee" id="cFee">—</dd>
+      <dt>Client pays in total</dt><dd id="cClient">—</dd>
+      <dt>Operator receives</dt><dd id="cOp">—</dd>
+    </dl>
+    <p class="note" id="calcNote">You always see these numbers before you pay or accept anything.</p>
+  </div>
+
+  <!-- ───────── CONTACT INFO ───────── -->
+  <h2 id="contact">Why phone numbers are hidden before hiring</h2>
+  <p>Until a job is hired and paid into escrow, phone numbers, emails and links typed into a job post, a bid or a message show up as <em>"contact info hidden."</em> You can still say anything else you want in Messages. As soon as the job is hired and the payment is in, the numbers open up.</p>
+  <div class="box">
+    <p><strong>Here's what that does for you:</strong></p>
+    <ul class="plain">
+      <li class="for-operator"><strong>You know the money is real.</strong> The client's payment is sitting in escrow before you load a machine. No chasing invoices.</li>
+      <li class="for-client"><strong>Your money is safe.</strong> The operator isn't paid until the work is done and you release it, or 72 hours pass with no problem reported.</li>
+      <li class="for-operator"><strong>The client is protected too,</strong> which is why they're willing to hire someone they haven't met.</li>
+      <li class="for-client"><strong>You aren't flooded with calls.</strong> Operators reach you through Messages until you choose one.</li>
+      <li><strong>There's a record.</strong> What was asked, what was promised and what was bid is all saved. If there's ever a disagreement, we can see what was actually said.</li>
+      <li><strong>Protection only covers jobs kept on DirtBidder.</strong> If a job is taken off the site and paid in cash or by check, there's no escrow and nothing we can do if it goes wrong.</li>
+    </ul>
+  </div>
+  <p>We'll be straight about the other reason: it's also how DirtBidder stays in business. The site is free until a job is hired, so if jobs get taken off the site after the introduction, there's no site. Messages that try to move a job off DirtBidder are flagged, and accounts that keep doing it can be suspended.</p>
+
+  <!-- ───────── PROBLEMS ───────── -->
+  <h2 id="problems">If something goes wrong</h2>
+  <ul class="plain">
+    <li class="for-client"><strong>Changed your mind before hiring?</strong> Close the job any time. It costs nothing.</li>
+    <li><strong>Need to cancel after paying?</strong> If both sides agree before work starts, contact us and the client is refunded in full, fee included.</li>
+    <li class="for-client"><strong>Not happy with the work?</strong> Tap <strong>Report a Problem</strong> before the payment is released. The money is frozen right away.</li>
+    <li class="for-operator"><strong>Client reports a problem?</strong> The payment is frozen, and you get to answer and send your own photos before anything is decided.</li>
+    <li><strong>How a dispute is settled:</strong> both sides explain and add photos. DirtBidder looks at it and either pays the operator in full, refunds the client in full, or splits it. Our decision only covers the money in escrow.</li>
+    <li class="for-operator"><strong>Client goes quiet after you finish?</strong> 72 hours after you mark the job complete, the payment releases to you on its own.</li>
+  </ul>
+
+  <!-- ───────── QUESTIONS ───────── -->
+  <h2 id="questions">Common questions</h2>
+  <details class="for-client"><summary>Do I have to hire anyone?</summary><p>No. Posting is free and there's no obligation. If none of the bids fit, close the job.</p></details>
+  <details class="for-client"><summary>Who can see my address?</summary><p>Nobody, until you decide. The public listing shows the town and ZIP. An operator sees the exact address only if you share it with them, or after you hire them and pay.</p></details>
+  <details class="for-client"><summary>Does DirtBidder do the work or vouch for the operator?</summary><p>No. DirtBidder is a marketplace. The operator is an independent contractor you choose, and the agreement for the work is between the two of you. We hold the payment and settle disputes over it. Check reviews, ask questions, and ask about insurance before you hire.</p></details>
+  <details class="for-operator"><summary>Can other operators see my bid?</summary><p>No. Bids are sealed. Only the client sees your price.</p></details>
+  <details class="for-operator"><summary>When do I actually get the money?</summary><p>When the client releases the payment, or 72 hours after you mark the job complete if they don't respond. It's sent to the bank account you set up under Earnings. How long your bank takes to show it is up to the bank.</p></details>
+  <details class="for-operator"><summary>What if I bid and then see the job is bigger than described?</summary><p>Before you're hired, update your bid. After you're hired, send a change request. Either way the client sees the new number and agrees to it before you do the extra work.</p></details>
+  <details><summary>Is my card or bank information safe?</summary><p>Payments run through Stripe, the same processor used by many large online businesses. DirtBidder never sees or stores your full card or bank numbers.</p></details>
+  <details><summary>Where are the full rules?</summary><p>In the <a href="dirtbidder-terms.html">Terms of Service</a> and the <a href="dirtbidder-privacy.html">Privacy Policy</a>. If this page and the Terms ever disagree, the Terms control.</p></details>
+
+  <div class="end">
+    <p class="for-client"><strong>Ready?</strong> Posting takes about five minutes.</p>
+    <p class="for-operator"><strong>Ready?</strong> See what's open right now.</p>
+    <a class="cta for-client" id="ctaClient" href="dirtbidder-register.html">Post a job</a>
+    <a class="cta for-operator" id="ctaOperator" href="dirtbidder-register.html">Browse jobs</a>
+    <p class="small">Still have a question? Email <a href="mailto:support@dirtbidder.com">support@dirtbidder.com</a> and a real person will answer.</p>
+  </div>
+</main>
+
+<script>
+  // Which side is showing. Order of preference: the link that brought them here (#operators / #clients),
+  // then the account they're signed in to, then whatever they picked last time, then clients.
+  function setRole(role, byHand) {
+    role = role === 'operator' ? 'operator' : 'client';
+    document.body.dataset.role = role;
+    document.getElementById('tab-client').setAttribute('aria-selected', String(role === 'client'));
+    document.getElementById('tab-operator').setAttribute('aria-selected', String(role === 'operator'));
+    if (byHand) { try { localStorage.setItem('dirtbidder_howto_role', role); } catch (e) {} }
+  }
+  function roleFromToken() {
+    try {
+      const t = localStorage.getItem('dirtbidder_token');
+      if (!t) return null;
+      const p = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return p && p.role === 'operator' ? 'operator' : p && p.role ? 'client' : null;
+    } catch (e) { return null; }
+  }
+  (function () {
+    const h = location.hash.toLowerCase();
+    let saved = null; try { saved = localStorage.getItem('dirtbidder_howto_role'); } catch (e) {}
+    const signedIn = roleFromToken();
+    const fromLink = /^#operators?$/.test(h) ? 'operator' : /^#clients?$/.test(h) ? 'client' : null;
+    setRole(fromLink || signedIn || saved || 'client');
+    // Signed-in people go straight to the right place instead of the sign-up page
+    if (signedIn === 'client') document.getElementById('ctaClient').href = 'dirtbidder-post-job.html';
+    if (signedIn === 'operator') document.getElementById('ctaOperator').href = 'dirtbidder-operator-dashboard.html#browse';
+    // The steps heading has a different id on each side, so "Step by step" always lands on the visible one
+    document.querySelector('.jump a[href="#steps"]').addEventListener('click', function (e) {
+      if (document.body.dataset.role === 'operator') { e.preventDefault(); document.getElementById('steps-op').scrollIntoView(); }
+    });
+    // A link straight to a section (e.g. #contact from the Messages page) still works after the side is set
+    if (h && !fromLink) {
+      const el = document.getElementById(h.slice(1));
+      const go = function () { if (el) el.scrollIntoView(); };
+      setTimeout(go, 0); window.addEventListener('load', go); // again after fonts load, since they shift the page
+    }
+  })();
+
+  // Same bracket fee the site charges (first $10K 5%, to $100K 3%, to $500K 2%, over that 1%), each side
+  const BRACKETS = [[10000, 0.05], [100000, 0.03], [500000, 0.02], [Infinity, 0.01]];
+  function feePerSide(amount) {
+    let fee = 0, lower = 0;
+    for (const [upper, rate] of BRACKETS) { if (amount > lower) fee += (Math.min(amount, upper) - lower) * rate; lower = upper; }
+    return Math.round(fee * 100) / 100;
+  }
+  const money = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  const amt = document.getElementById('amt');
+  function calc() {
+    const a = Number(String(amt.value).replace(/[^0-9.]/g, '')) || 0;
+    const ok = a > 0 && a <= 5000000;
+    const fee = feePerSide(a);
+    document.getElementById('cFee').textContent = ok ? money(fee) : '—';
+    document.getElementById('cClient').textContent = ok ? money(a + fee) : '—';
+    document.getElementById('cOp').textContent = ok ? money(a - fee) : '—';
+  }
+  amt.addEventListener('input', calc);
+  amt.addEventListener('blur', function () { const a = Number(String(amt.value).replace(/[^0-9.]/g, '')) || 0; if (a) amt.value = a.toLocaleString('en-US', { maximumFractionDigits: 2 }); });
+  calc();
+</script>
+<script>
+try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
+</script>
+</body>
+</html>
