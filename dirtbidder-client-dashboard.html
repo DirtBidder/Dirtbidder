@@ -738,6 +738,9 @@
   .star-pick { display: flex; gap: 0.4rem; margin: 0.25rem 0 1rem; }
   .star-pick button { background: none; border: none; font-size: 2.1rem; line-height: 1; cursor: pointer; color: rgba(196,168,130,0.3); padding: 0.1rem; }
   .star-pick button.on { color: var(--amber); }
+  .yn-pick { display: flex; gap: 0.5rem; margin: 0.25rem 0 1rem; }
+  .yn-pick button { flex: 1; max-width: 140px; background: var(--clay); border: 1.5px solid rgba(196,168,130,0.18); color: var(--dust); border-radius: 3px; padding: 0.6rem 0.5rem; font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+  .yn-pick button.on { border-color: var(--amber); color: var(--amber); background: rgba(232,137,42,0.1); }
   .rate-btn { background: none; border: 1.5px solid var(--amber); color: var(--amber); border-radius: 3px; padding: 0.35rem 0.75rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; margin-top: 0.4rem; }
   .review-item { padding: 0.8rem 0; border-top: 1px solid rgba(196,168,130,0.08); font-size: 0.85rem; color: var(--dust); }
   .review-item .rv-stars { color: var(--amber); letter-spacing: 0.05em; }
@@ -950,9 +953,12 @@
       <div id="reviewWho" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
       <label>How did they do?</label>
       <div class="star-pick" id="starPick"></div>
+      <label id="onTimeLbl">Was the job finished on time? (optional)</label>
+      <div class="yn-pick" id="onTimePick" role="group" aria-labelledby="onTimeLbl"></div>
       <label for="reviewComment">Comment (optional)</label>
       <textarea id="reviewComment" placeholder="e.g. Showed up on time, left the site clean, great work."></textarea>
       <div style="font-size:0.78rem;color:var(--stone);margin-top:0.5rem">Other clients will see your rating and comment with your first name.</div>
+      <div style="font-size:0.78rem;color:var(--stone);margin-top:0.4rem">If you give 4 or 5 stars, DirtBidder may give the operator a public shoutout. It names their company, the kind of job and the county. Never you, your address or the price.</div>
       <div id="reviewError" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
     </div>
     <div class="db-modal-foot">
@@ -1576,18 +1582,22 @@
     } catch (err) { body.innerHTML = `<div style="color:var(--error)">${esc(err.message)}</div>`; }
   }
 
-  let reviewJobId = null, reviewRating = 0;
+  let reviewJobId = null, reviewRating = 0, reviewOnTime = null; // on time: true / false / null (not answered)
+  function paintOnTime() {
+    document.getElementById('onTimePick').innerHTML = [[true, 'Yes'], [false, 'No']].map(([v, label]) =>
+      `<button type="button" class="${reviewOnTime === v ? 'on' : ''}" aria-pressed="${reviewOnTime === v}" onclick="reviewOnTime=(reviewOnTime===${v}?null:${v});paintOnTime()">${label}</button>`).join('');
+  }
   function paintStars() {
     document.getElementById('starPick').innerHTML = [1, 2, 3, 4, 5].map(n =>
       `<button type="button" class="${n <= reviewRating ? 'on' : ''}" aria-label="${n} star${n === 1 ? '' : 's'}" onclick="reviewRating=${n};paintStars()">★</button>`).join('');
   }
   function openReview(jobId) {
     const job = jobs.find(j => j.id === jobId); if (!job) return;
-    reviewJobId = jobId; reviewRating = 0;
+    reviewJobId = jobId; reviewRating = 0; reviewOnTime = null;
     document.getElementById('reviewWho').textContent = (job.hired_operator_name || 'Operator') + ' · ' + job.title;
     document.getElementById('reviewComment').value = '';
     document.getElementById('reviewError').style.display = 'none';
-    paintStars();
+    paintStars(); paintOnTime();
     document.getElementById('reviewModal').classList.add('active');
   }
   function closeReview() { document.getElementById('reviewModal').classList.remove('active'); }
@@ -1596,7 +1606,7 @@
     if (!reviewRating) { errEl.textContent = 'Tap a star to pick a rating.'; errEl.style.display = 'block'; return; }
     const btn = document.getElementById('reviewSubmit'); btn.disabled = true;
     try {
-      const r = await api('/api/reviews/jobs/' + reviewJobId, { method: 'POST', body: JSON.stringify({ rating: reviewRating, comment: document.getElementById('reviewComment').value }) });
+      const r = await api('/api/reviews/jobs/' + reviewJobId, { method: 'POST', body: JSON.stringify({ rating: reviewRating, comment: document.getElementById('reviewComment').value, on_time: reviewOnTime }) });
       const job = jobs.find(j => j.id === reviewJobId); if (job) job.my_review = { rating: r.rating, comment: r.comment };
       closeReview(); render();
     } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }

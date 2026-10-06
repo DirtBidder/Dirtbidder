@@ -30,6 +30,44 @@
     #settingsCard .st-hint{font-size:0.8rem;color:var(--stone);margin:-0.6rem 0 0.9rem}`;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
+  // Shoutouts: a 4 or 5 star job can get the operator's company featured on DirtBidder's social media, if they say OK.
+  const FEATURE_HINT = 'When a client rates a finished job 4 or 5 stars, we post a shoutout with your company name, the kind of job, the county and your stars. Never the price, the client or the address. It’s free, and you can turn it off any time.';
+  async function saveFeature(me, on) {
+    const p = await call('/api/me/profile', { method: 'PUT', body: JSON.stringify({ featureOk: on }) });
+    me.profile = p || Object.assign(me.profile || {}, { featureOk: on });
+    const old = document.getElementById('featureAskBox'); if (old) old.remove();
+    const box = document.getElementById('stFeature'); if (box) box.checked = on;
+    document.dispatchEvent(new CustomEvent('dirtbidder:feature', { detail: { on } }));
+  }
+
+  // Asked once, at the top of the operator dashboard, until they answer yes or no (either answer can be changed in Settings)
+  function featureAsk(me) {
+    const old = document.getElementById('featureAskBox'); if (old) old.remove();
+    if (me.role !== 'operator' || me.email_confirmed === false) return; // one box at a time: confirm the email first
+    if (me.profile && typeof me.profile.featureOk === 'boolean') return;
+    const host = document.querySelector('.content'); if (!host) return;
+    const who = String(me.company_name || '').trim() || 'your company';
+    const b = document.createElement('div');
+    b.id = 'featureAskBox';
+    b.style.cssText = 'margin:0 0 1rem;padding:0.9rem 1rem;border:1px solid rgba(232,137,42,0.45);border-radius:4px;background:rgba(232,137,42,0.08);font-size:0.9rem;line-height:1.45;color:var(--chalk)';
+    b.innerHTML = `<strong style="color:var(--amber)">📣 Want a free shoutout?</strong><br>
+      Finish a job with 4 or 5 stars and we’ll feature <strong>${esc(who)}</strong> on DirtBidder’s social media: your company name, the kind of job, the county and your stars. Never the price, the client or the address.
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem">
+        <button id="faYes" style="background:var(--amber);color:var(--soil);border:0;border-radius:3px;padding:0.55rem 0.9rem;font:inherit;font-weight:700;font-size:0.85rem;cursor:pointer">Yes, feature my company</button>
+        <button id="faNo" style="background:none;color:var(--dust);border:1px solid rgba(196,168,130,0.35);border-radius:3px;padding:0.55rem 0.9rem;font:inherit;font-weight:600;font-size:0.85rem;cursor:pointer">No thanks</button>
+      </div>
+      <div style="font-size:0.8rem;color:var(--stone);margin-top:0.5rem">Only jobs hired and paid through DirtBidder count. You can change this any time in Settings.</div>
+      <div id="faMsg" role="alert" style="font-size:0.82rem;margin-top:0.4rem;color:var(--error)"></div>`;
+    host.insertBefore(b, host.firstChild);
+    const answer = on => async e => {
+      const btns = b.querySelectorAll('button'); btns.forEach(x => { x.disabled = true; });
+      try { await saveFeature(me, on); }
+      catch (err) { const m = document.getElementById('faMsg'); if (m) m.textContent = err.message; btns.forEach(x => { x.disabled = false; }); }
+    };
+    document.getElementById('faYes').onclick = answer(true);
+    document.getElementById('faNo').onclick = answer(false);
+  }
+
   function msg(id, text, ok) {
     const el = document.getElementById(id);
     el.textContent = text; el.style.color = ok ? 'var(--success)' : 'var(--error)';
@@ -57,6 +95,12 @@
         <label class="st-check" for="stAlerts"><input id="stAlerts" type="checkbox" ${me.profile && me.profile.jobAlerts === false ? '' : 'checked'}><span>Email me when a new job is posted</span></label>
         <div class="st-hint" style="margin-top:0.5rem">You’ll always get emails about your own bids, jobs and payments.</div>
         <div class="st-msg" id="stAlertMsg"></div>
+      </div>` : ''}
+      ${isOp ? `<div class="st-sec" id="stFeatureSec">
+        <div class="st-h">Free Shoutouts</div>
+        <label class="st-check" for="stFeature"><input id="stFeature" type="checkbox" ${me.profile && me.profile.featureOk === true ? 'checked' : ''}><span>Feature my company on DirtBidder’s social media</span></label>
+        <div class="st-hint" style="margin-top:0.5rem">${FEATURE_HINT}</div>
+        <div class="st-msg" id="stFeatureMsg"></div>
       </div>` : ''}
       <div class="st-sec">
         <div class="st-h">Change Password</div>
@@ -89,6 +133,16 @@
         msg('stAlertMsg', alerts.checked ? '✓ New-job emails are on' : '✓ New-job emails are off', true);
       } catch (err) { alerts.checked = !alerts.checked; msg('stAlertMsg', err.message); }
       alerts.disabled = false;
+    };
+
+    const feature = document.getElementById('stFeature');
+    if (feature) feature.onchange = async () => {
+      feature.disabled = true;
+      try {
+        await saveFeature(me, feature.checked);
+        msg('stFeatureMsg', feature.checked ? '✓ Shoutouts are on. Finish a job with 4 or 5 stars and we’ll feature you.' : '✓ Shoutouts are off. We won’t post about your company.', true);
+      } catch (err) { feature.checked = !feature.checked; msg('stFeatureMsg', err.message); }
+      feature.disabled = false;
     };
 
     document.getElementById('stPw').onclick = async (e) => {
@@ -148,7 +202,7 @@
     };
   }
 
-  call('/api/me').then(me => { render(me); confirmBanner(me); }).catch(() => {
+  call('/api/me').then(me => { render(me); confirmBanner(me); featureAsk(me); }).catch(() => {
     box.innerHTML = '<div class="st-sec" style="color:var(--stone)">Couldn’t load your settings. Refresh to try again.</div>';
   });
 })();

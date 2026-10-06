@@ -71,6 +71,7 @@
     <button class="tab" data-f="users" onclick="setTab(this)">Users</button>
     <button class="tab" data-f="bids" onclick="setTab(this)">All Bids</button>
     <button class="tab" data-f="convos" onclick="setTab(this)">Conversations</button>
+    <button class="tab" data-f="shoutouts" onclick="setTab(this)">📣 Shoutouts <span id="shoutCount"></span></button>
   </div>
   <div id="convoSearch" style="display:none;margin-bottom:1rem">
     <input id="convoQ" type="search" placeholder="Search job, location, operator or client" oninput="searchConvos()" style="width:100%;background:var(--dig);border:1.5px solid rgba(196,168,130,0.2);color:var(--chalk);border-radius:3px;padding:0.75rem 0.9rem;font:inherit;font-size:1rem">
@@ -200,6 +201,7 @@
         <div class="val" style="margin-bottom:0.3rem">${esc(u.email)}${u.phone ? ' · ' + esc(u.phone) : ''}</div>
         <div style="font-size:0.82rem;margin-bottom:0.3rem;color:${u.email_confirmed_at ? 'var(--success)' : 'var(--amber)'}">${u.email_confirmed_at ? '✓ Email confirmed' : `✉ Confirm link was emailed when they signed up. They haven’t tapped it yet. <a href="#" id="sc-${u.id}" style="color:var(--amber)" onclick="event.preventDefault();sendConfirm(${u.id})">Send it again</a>`}</div>
         ${u.rules_ack_at ? `<div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">✓ Agreed to keep jobs on DirtBidder · ${when(u.rules_ack_at)}</div>` : ''}
+        ${u.role === 'operator' ? `<div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">${u.feature_ok === 'true' ? `📣 Said OK to shoutouts${u.feature_ok_at ? ' · ' + when(u.feature_ok_at) : ''}` : u.feature_ok === 'false' ? '📣 Said no to shoutouts' : '📣 Hasn’t answered about shoutouts yet'}</div>` : ''}
         <div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">${u.terms_version ? `Terms: agreed to the ${esc(u.terms_version)} version${u.terms_accepted_at ? ' · ' + when(u.terms_accepted_at) : ''}` : 'Terms: no agreement on record'}</div>
         <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.6rem">${stats}${u.disputes ? ` · <span style="color:var(--error)">${u.disputes} dispute${u.disputes === 1 ? '' : 's'}</span>` : ''}${warns.length ? ` · <span style="color:var(--amber)">${warns.length} warning${warns.length === 1 ? '' : 's'}</span>` : ''}${u.money_held ? ` · <span style="color:var(--amber)">${u.money_held} payment${u.money_held === 1 ? '' : 's'} in escrow</span>` : ''}</div>
         <div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.7rem">${/\+(test|op)\d*@/i.test(u.email || '') ? 'Test account — left out of the HQ numbers.'
@@ -383,9 +385,109 @@
     </div>`;
   }
 
+  // ── Shoutouts: ready-made posts for operators who finished a job with 4 or 5 stars ──
+  // Nothing posts by itself. Copy the post, put it on Facebook, then tap Mark as Posted (that emails the operator).
+  let shout = null, shoutTest = false;
+  async function loadShoutouts() {
+    try {
+      shout = await api('/api/admin/shoutouts' + (shoutTest ? '?test=1' : ''));
+      document.getElementById('shoutCount').textContent = shout.ready.length ? '(' + shout.ready.length + ')' : '';
+      if (tab === 'shoutouts') render();
+    } catch (err) { if (tab === 'shoutouts') document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}</div></div>`; }
+  }
+  const shStars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+  const shFacts = x => `${shStars(x.rating)} · ${esc(x.job_type || 'Job')}${x.area ? ' · ' + esc(x.area) : ''} · reviewed ${when(x.created_at)}`;
+  const shPrivate = x => `<div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.7rem">For your eyes only: “${esc(x.job_title)}”${x.location ? ' · ' + esc(x.location) : ''} · ${esc(x.operator_email)}${x.is_test ? ' · <span style="color:var(--amber)">TEST ACCOUNT — don’t post</span>' : ''}</div>`;
+  function shoutCard(x) {
+    const onTime = x.on_time === true ? 'The client said it was finished on time, so the post says so.'
+      : x.on_time === false ? 'The client said it was <strong style="color:var(--chalk)">not</strong> finished on time, so the post doesn’t mention timing.'
+      : 'The client didn’t say whether it was on time, so the post doesn’t mention timing.';
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(x.company)}</div><div style="font-size:0.8rem;color:var(--stone)">${shFacts(x)}</div></div>
+        <div class="pill done" style="background:rgba(39,174,96,0.15);color:var(--success)">Ready to post</div>
+      </div>
+      <div class="card-body">
+        ${shPrivate(x)}
+        <div class="lbl"><label for="sh-${x.id}">The post (change the words if you like)</label></div>
+        <textarea id="sh-${x.id}" style="width:100%;min-height:250px;background:var(--clay);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.7rem;font:inherit;font-size:0.95rem;line-height:1.45;margin-bottom:0.5rem">${esc(x.text)}</textarea>
+        <div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.7rem">${onTime} They said OK to being featured${x.feature_ok_at ? ' on ' + when(x.feature_ok_at) : ''}.</div>
+        <div class="btns">
+          <button class="btn split" onclick="copyShout(${x.id}, this)">1. Copy Post</button>
+          <a class="btn split" style="text-decoration:none" href="${esc(shout.facebook_url)}" target="_blank" rel="noopener">2. Open Facebook</a>
+          <button class="btn release" onclick="shoutPosted(${x.id}, this)">3. Mark as Posted</button>
+          <button class="btn" style="color:var(--stone);border-color:rgba(140,123,107,0.4)" onclick="shoutSkip(${x.id}, this)">Skip this one</button>
+        </div>
+        <div id="shmsg-${x.id}" role="status" style="font-size:0.82rem;color:var(--success);margin-top:0.5rem;min-height:1em"></div>
+      </div>
+    </div>`;
+  }
+  function shoutWaitCard(x) {
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(x.company || 'No name on the account')}</div><div style="font-size:0.8rem;color:var(--stone)">${shFacts(x)}</div></div>
+        <div class="pill done" style="background:rgba(232,137,42,0.15);color:var(--amber)">${x.feature_declined ? 'Said no thanks' : 'Waiting on their OK'}</div>
+      </div>
+      <div class="card-body">
+        ${shPrivate(x)}
+        <div class="val" style="font-size:0.88rem;color:var(--dust)">${!x.company ? 'This account has no name or company on it, so there’s nothing to feature yet.'
+          : x.feature_declined ? 'This operator turned shoutouts off, so don’t post about them. If they turn it back on in Settings, this moves up to Ready.'
+          : 'This operator hasn’t said it’s OK to feature their company yet, so don’t post it. Their review email told them how to turn it on, and their dashboard asks them. When they say yes, this moves up to Ready and you get an email.'}</div>
+      </div>
+    </div>`;
+  }
+  function shoutDoneCard(x) {
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(x.company)}</div><div style="font-size:0.8rem;color:var(--stone)">${shFacts(x)}</div></div>
+        <div class="pill done">Posted ${when(x.shoutout_at)}</div>
+      </div>
+      <div class="card-body"><div class="quote" style="margin-bottom:0">${esc(x.shoutout_text || x.text)}</div></div>
+    </div>`;
+  }
+  const shHead = (t, n) => `<div class="lbl" style="margin:1.25rem 0 0.5rem;font-size:0.8rem;color:var(--dust)">${t} (${n})</div>`;
+  function shoutHtml() {
+    if (!shout) return '<div class="empty">Loading…</div>';
+    const none = !shout.ready.length && !shout.waiting.length && !shout.posted.length;
+    return (none ? '<div class="empty">No shoutouts yet. When a client rates a finished job 4 or 5 stars, the post shows up here ready to copy.</div>'
+      : shHead('Ready to post', shout.ready.length) + (shout.ready.length ? shout.ready.map(shoutCard).join('') : '<div class="card"><div class="card-body" style="color:var(--stone);font-size:0.9rem">Nothing waiting to be posted.</div></div>')
+        + (shout.waiting.length ? shHead('Good reviews, but the operator hasn’t said OK', shout.waiting.length) + shout.waiting.map(shoutWaitCard).join('') : '')
+        + (shout.posted.length ? shHead('Already posted', shout.posted.length) + shout.posted.map(shoutDoneCard).join('') : ''))
+      + `<div style="text-align:center;font-size:0.82rem;color:var(--stone);margin-top:1rem">${shout.skipped ? shout.skipped + ' skipped · ' : ''}<a href="#" style="color:var(--stone)" onclick="event.preventDefault();shoutTest=!shoutTest;loadShoutouts()">${shoutTest ? 'Hide test accounts' : 'Show test accounts too'}</a></div>`;
+  }
+  async function copyShout(id, btn) {
+    const ta = document.getElementById('sh-' + id), m = document.getElementById('shmsg-' + id);
+    let ok = false;
+    try { await navigator.clipboard.writeText(ta.value); ok = true; }
+    catch (e) { try { ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length); ok = document.execCommand('copy'); } catch (e2) {} }
+    m.style.color = ok ? 'var(--success)' : 'var(--amber)';
+    m.textContent = ok ? '✓ Copied. Open Facebook, start a new post on the DirtBidder page, and paste it in.' : 'Couldn’t copy by itself. Press and hold on the post above, choose Select All, then Copy.';
+  }
+  async function shoutPosted(id, btn) {
+    const x = shout.ready.find(r => r.id === id); if (!x) return;
+    const text = document.getElementById('sh-' + id).value.trim();
+    if (x.is_test) { alert('This one is from a test account. Don’t post it.'); return; }
+    if (!confirm(`Mark this as posted?\n\nOnly do this after it’s up on Facebook. We’ll email ${x.company} to tell them they were featured.`)) return;
+    btn.disabled = true;
+    try { await api('/api/admin/shoutouts/' + id + '/posted', { method: 'POST', body: JSON.stringify({ text }) }); await loadShoutouts(); }
+    catch (err) { alert(err.message); btn.disabled = false; }
+  }
+  async function shoutSkip(id, btn) {
+    if (!confirm('Skip this one? It comes off the list and the operator isn’t told anything.')) return;
+    btn.disabled = true;
+    try { await api('/api/admin/shoutouts/' + id + '/skip', { method: 'POST', body: '{}' }); await loadShoutouts(); }
+    catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
   function render() {
     document.getElementById('bidSearch').style.display = tab === 'bids' ? '' : 'none';
     document.getElementById('convoSearch').style.display = tab === 'convos' ? '' : 'none';
+    if (tab === 'shoutouts') {
+      document.getElementById('userSearch').style.display = 'none';
+      document.getElementById('tabSub').textContent = 'Operators who finished a job with 4 or 5 stars. Copy the post, put it on Facebook, then mark it posted. A post names the company, the kind of job and the county. Never the client, the address or the price.';
+      document.getElementById('list').innerHTML = shoutHtml();
+      return;
+    }
     if (tab === 'convos') {
       document.getElementById('userSearch').style.display = 'none';
       document.getElementById('tabSub').textContent = 'Every conversation between a client and an operator, newest first. You can read them but not post in them.';
@@ -432,6 +534,7 @@
     render();
     if (tab === 'bids') loadBids();
     if (tab === 'convos') loadConvos();
+    if (tab === 'shoutouts') loadShoutouts();
   }
 
   async function resolve(id, resolution, btn) {
@@ -461,6 +564,7 @@
       render();
       loadUsers();
       loadFlags();
+      loadShoutouts();
     } catch (err) {
       document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }

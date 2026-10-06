@@ -937,6 +937,15 @@
             </label>
           </div>
 
+          <!-- OPTIONAL: FREE SHOUTOUTS -->
+          <div style="background:rgba(196,168,130,0.05);border:1.5px solid rgba(196,168,130,0.18);border-radius:3px;padding:1.25rem;margin-top:0.85rem">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--amber);margin-bottom:0.6rem">📣 Free Shoutouts (optional)</div>
+            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--dust)">
+              <input type="checkbox" id="featureOk" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)" />
+              <span><strong style="color:var(--chalk)">Feature my company.</strong> When I finish a job through DirtBidder and the client gives me 4 or 5 stars, post a shoutout on DirtBidder's social media with my company name, the kind of job, the county and my star rating. Never the price, the client or the address. I can turn this off any time in Settings.</span>
+            </label>
+          </div>
+
           <button class="submit-btn" onclick="completeOperatorRegistration()" style="margin-top:1.25rem">Create My Operator Account</button>
           <button class="back-btn" onclick="goToStep(2)">← Back</button>
         </div>
@@ -985,7 +994,8 @@
         <li>Browse jobs matched to your equipment and area</li>
         <li>Get paid to your bank in 2 business days</li>
         <li>Access Cat Financial and rental partners</li>
-        <li>Build reviews and grow your reputation</li>`;
+        <li>Build reviews and grow your reputation</li>
+        <li>Finish a job with 4 or 5 stars and we feature your company</li>`;
     }
   }
 
@@ -1091,7 +1101,9 @@
         zip: document.getElementById('opZip').value,
         serviceRadius: document.getElementById('serviceRadius').value,
         equipment: equipment,
-        yearsExp: document.getElementById('yearsExp').value
+        yearsExp: document.getElementById('yearsExp').value,
+        // Shoutouts: only a ticked box is sent. Left blank, the dashboard asks once later.
+        featureOk: document.getElementById('featureOk').checked ? true : undefined
       };
     }
   }

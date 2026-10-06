@@ -39,7 +39,7 @@
           '<p style="font-size:1rem;color:#F2EDE6;font-weight:600;margin:0 0 0.7rem">You met through DirtBidder, so this job is hired and paid through DirtBidder.</p>' +
           '<p style="font-size:0.93rem;margin:0 0 0.7rem">' + w.why + '</p>' +
           '<p style="font-size:0.93rem;margin:0 0 0.7rem">Talking, asking questions and looking at the site are all fine. Settle on a price in person if you like, then put that number in the bid and accept it here.</p>' +
-          '<p style="font-size:0.93rem;margin:0 0 1.1rem">Jobs taken off the site get no escrow, no help in a dispute and no review. Accounts that take jobs off DirtBidder can be suspended.</p>' +
+          '<p style="font-size:0.93rem;margin:0 0 1.1rem">Jobs taken off the site get no escrow, no help in a dispute, no review and no shoutout. Accounts that take jobs off DirtBidder can be suspended.</p>' +
           '<div id="dbRulesErr" role="alert" style="display:none;color:#E57373;font-size:0.88rem;margin-bottom:0.7rem"></div>' +
           '<button type="button" id="dbRulesYes" style="width:100%;background:#E8892A;color:#1C1410;border:0;border-radius:3px;padding:0.85rem;font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer">I understand</button>' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.8rem;font-size:0.88rem">' +

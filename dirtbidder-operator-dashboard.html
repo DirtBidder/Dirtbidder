@@ -1137,7 +1137,7 @@
 
     <!-- ── OTHER SECTIONS ── -->
     <div id="section-messages" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Messages</span></div></div><div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages</div><div class="empty-sub"><a href="dirtbidder-messaging.html" style="color:var(--amber)">Open your messages →</a></div></div></div></div>
-    <div id="section-reviews" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Reviews</span></div><div class="greeting-sub">Clients rate you after each paid job. Good ratings earn you badges that show on every bid.</div></div><div class="card" id="myRepCard"></div></div>
+    <div id="section-reviews" style="display:none"><div class="greeting"><div class="greeting-text">My <span>Reviews</span></div><div class="greeting-sub">Clients rate you after each paid job. Good ratings earn you badges that show on every bid, and a 4 or 5 star job can earn your company a shoutout.</div></div><div class="card" id="myRepCard"></div></div>
     <div id="section-profile" style="display:none"><div class="greeting"><div class="greeting-text">Edit <span>Profile</span></div><div class="greeting-sub">What clients see when they tap your name on a bid</div></div><div class="card" id="profileCard"></div></div>
     <div id="section-settings" style="display:none"><div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div><div class="card" id="settingsCard"></div></div>
 
@@ -1684,8 +1684,12 @@
   }
 
   // ── My rating, badge and reviews ──
+  let lastRep = null;
+  // Settings (or the box at the top of the page) turned shoutouts on or off: show it here right away
+  document.addEventListener('dirtbidder:feature', e => { myProfile = Object.assign(myProfile || {}, { featureOk: e.detail.on }); if (lastRep) renderRep(lastRep); });
   function renderRep(p) {
     const box = document.getElementById('myRepCard'); if (!box) return;
+    lastRep = p;
     if (!p) { box.innerHTML = '<div style="padding:1.25rem 1.5rem;color:var(--stone)">Couldn’t load your reviews. Refresh to try again.</div>'; return; }
     const st = n => '★'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
     const pill = (t, green) => `<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:2px;background:${green ? 'rgba(39,174,96,0.12)' : 'rgba(232,137,42,0.12)'};color:${green ? 'var(--success)' : 'var(--amber)'}">${t}</span>`;
@@ -1700,9 +1704,13 @@
         ${p.next_badge ? `<div style="margin-top:1rem;font-size:0.85rem;color:var(--dust)">Next badge: <strong style="color:var(--chalk)">${p.next_badge.icon} ${esc(p.next_badge.label)}</strong> — you need ${p.next_badge.need.map(esc).join(' and ')}.</div>` : ''}
         ${p.verified ? '' : '<div style="margin-top:0.5rem;font-size:0.8rem;color:var(--stone)">Set up payouts (Earnings) to get the ✓ Verified badge.</div>'}
         <div style="margin-top:1rem;display:grid;gap:0.3rem">${levels.map(l => `<div style="font-size:0.78rem;color:${p.badge && p.badge.label === l[1] ? 'var(--amber)' : 'var(--stone)'}">${l[0]} <strong>${l[1]}</strong> — ${l[2]}</div>`).join('')}</div>
+        <div style="margin-top:1rem;font-size:0.85rem;color:var(--dust)">📣 <strong style="color:var(--chalk)">Free shoutouts are ${myProfile && myProfile.featureOk === true ? 'on' : 'off'}.</strong> ${myProfile && myProfile.featureOk === true
+          ? 'Finish a job with 4 or 5 stars and we feature your company on DirtBidder’s social media.'
+          : 'Turn them on, and when you finish a job with 4 or 5 stars we feature your company on DirtBidder’s social media. <a href="#settings" style="color:var(--amber)" onclick="event.preventDefault();showSection(\'settings\')">Turn on in Settings</a>'}</div>
+        <div style="margin-top:0.4rem;font-size:0.8rem;color:var(--stone)">Reviews, badges and shoutouts only come from jobs hired and paid through DirtBidder.</div>
       </div>
       ${p.reviews.length ? p.reviews.map(v => `<div style="padding:0.9rem 1.5rem;border-bottom:1px solid rgba(196,168,130,0.08);font-size:0.85rem;color:var(--dust)">
-          <span style="color:var(--amber)">${st(v.rating)}</span> · ${esc(v.reviewer || 'Client')} · ${esc(v.job_title)} · ${ago(v.created_at)}
+          <span style="color:var(--amber)">${st(v.rating)}</span> · ${esc(v.reviewer || 'Client')} · ${esc(v.job_title)} · ${ago(v.created_at)}${v.featured ? ' · <span style="color:var(--success)">📣 Featured</span>' : ''}
           ${v.comment ? `<div style="color:var(--chalk);margin-top:0.3rem">“${esc(v.comment)}”</div>` : ''}</div>`).join('')
         : '<div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">No reviews yet</div><div class="empty-sub">Clients can rate you after a job is paid out</div></div>'}`;
   }
