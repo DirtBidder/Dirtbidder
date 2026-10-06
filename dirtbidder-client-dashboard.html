@@ -1220,6 +1220,10 @@
         : `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();openPin(${job.id})">+ Drop a GPS pin on the job site</a> <span style="color:var(--stone)">(private)</span></div>`;
     }
     if (detailed && (job.status === 'open' || job.status === 'test')) {
+      // More detail and photos get better bids: both can be added any time before hiring
+      const nPhotos = Array.isArray(job.photos) ? job.photos.length : 0;
+      addr += `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();addJobDetails(${job.id})">+ Add details for bidders</a>
+        <span style="color:var(--stone)"> · </span><a href="#" id="jp-${job.id}" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();pickJobPhotos(${job.id})">📷 Add photos${nPhotos ? ' (' + nPhotos + ' so far)' : ''}</a></div>`;
       addr += `<button class="rate-btn" style="border-color:var(--stone);color:var(--stone)" onclick="event.stopPropagation();closeJob(${job.id})">Close Job</button>`;
     }
     if (job.status === 'completed' && job.hired_operator_id) {
@@ -1606,6 +1610,42 @@
     catch (err) { alert(err.message); }
   }
 
+  // ── Add details or photos to a job that's still open ──
+  async function addJobDetails(jobId) {
+    const job = jobs.find(j => j.id === jobId);
+    const v = prompt('Add details bidders should know (size, depth, what’s there now, where the dirt goes). This is added to your job post:', '');
+    if (v === null || !v.trim()) return;
+    try {
+      const r = await api('/api/jobs/' + jobId + '/details', { method: 'PUT', body: JSON.stringify({ note: v }) });
+      if (job) job.description = r.description;
+      render();
+      alert('Added to your job post. Bidders will see it.');
+    } catch (err) { alert(err.message || 'Could not save that'); }
+  }
+  let photoJobId = null;
+  function pickJobPhotos(jobId) {
+    photoJobId = jobId;
+    const input = document.getElementById('jobPhotoInput');
+    input.value = ''; input.click();
+  }
+  async function addJobPhotos(files) {
+    const jobId = photoJobId, link = document.getElementById('jp-' + jobId);
+    const list = Array.from(files || []);
+    if (!jobId || !list.length) return;
+    let added = 0, problem = '';
+    for (let i = 0; i < list.length; i++) {
+      if (link) link.textContent = 'Uploading ' + (i + 1) + ' of ' + list.length + '…';
+      try {
+        const image = await shrinkPhoto(list[i]);
+        await api('/api/jobs/' + jobId + '/photos', { method: 'POST', body: JSON.stringify({ image }) });
+        added++;
+      } catch (err) { problem = (err && err.message === 'unreadable') ? 'One of those wasn’t a photo we could read.' : (err && err.message) || 'A photo didn’t upload.'; if (/up to 10/.test(problem)) break; }
+    }
+    document.getElementById('jobPhotoInput').value = '';
+    await load();
+    alert((added ? added + ' photo' + (added === 1 ? '' : 's') + ' added to your job.' : 'No photos were added.') + (problem ? '\n\n' + problem : ''));
+  }
+
   async function editAddress(jobId) {
     const job = jobs.find(j => j.id === jobId);
     const v = prompt('Exact job site address (only the operator you hire will see this):', (job && job.site_address) || '');
@@ -1745,6 +1785,7 @@
   document.querySelectorAll('.sidebar .nav-item').forEach(el => el.addEventListener('click', () => toggleMenu(false)));
 </script>
 
+<input type="file" id="jobPhotoInput" accept="image/*" multiple style="display:none" onchange="addJobPhotos(this.files)">
 <script src="dirtbidder-settings.js"></script>
 </body>
 </html>
