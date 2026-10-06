@@ -217,7 +217,7 @@
       lastDay = d;
       const who = t.me === 'admin' ? (m.sender_id === t.operator_id ? t.operator_name : t.client_name) + ' · ' : '';
       const seen = m.sender_id === t.my_id && m.read_at ? ' · Seen' : '';
-      const orig = m.original_body ? `<span class="orig">Originally: ${esc(m.original_body)}</span>` : '';
+      const orig = m.original_body ? `<span class="orig">Only you see this. The other person saw the hidden version above. What was typed: ${esc(m.original_body)}</span>` : '';
       return `${dayLine}<div class="bubble ${mine ? 'me' : 'them'}">${esc(m.body)}${orig}<span class="meta">${esc(who)}${timeOf(m.created_at)}${seen}</span></div>`;
     }).join('');
 

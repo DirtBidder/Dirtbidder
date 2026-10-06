@@ -1275,14 +1275,28 @@
       `</div>`;
   }
 
+  // How soon the client wants to start, as a tag an operator can't miss.
+  // "Just planning" jobs are real, but the client isn't hiring yet, so say so before anyone spends time pricing it.
+  function timelineInfo(timeline) {
+    const t = String(timeline || '').trim();
+    if (!t) return null;
+    if (/just (planning|getting prices)|planning ahead|not hiring/i.test(t))
+      return { planning: true, tag: `<span class="tag" style="background:transparent;border:1px dashed var(--stone);color:var(--dust)">🗓 Planning ahead · not hiring yet</span>` };
+    if (/asap/i.test(t)) return { tag: `<span class="tag tag-amber">🔥 Wants to start ASAP</span>` };
+    if (/^flexible/i.test(t)) return { tag: `<span class="tag">Flexible start</span>` };
+    return { tag: `<span class="tag">Start: ${esc(t.replace(/\s+from now$/i, ''))}</span>` };
+  }
+
   function jobCard(job) {
     const tags = [];
+    const tl = timelineInfo(job.timeline);
+    if (tl) tags.push(tl.tag);
     if (job.job_type) tags.push(`<span class="tag">${esc(job.job_type)}</span>`);
     if (job.acreage) tags.push(`<span class="tag tag-amber">${esc(job.acreage)}</span>`);
     if (job.location) tags.push(`<span class="tag">${esc(job.location)}</span>`);
     if (job.status === 'test') tags.push(`<span class="tag" style="color:var(--info)">Test job</span>`);
     const meta = ['Posted ' + ago(job.created_at)];
-    if (job.timeline) meta.push(esc(job.timeline));
+    if (tl && tl.planning) meta.push('This client is getting prices for later. A bid now may not be hired for a while.');
     const count = job.bid_count ? `🔒 ${job.bid_count} sealed bid${job.bid_count === 1 ? '' : 's'}` : '🔒 0 bids — be first!';
     const pendingBid = job.my_bid_id && job.my_bid_status === 'pending';
     const ask = `<a href="dirtbidder-messaging.html?job=${job.id}" onclick="event.stopPropagation()" style="font-size:0.8rem;color:var(--amber);text-decoration:none;font-weight:600;white-space:nowrap">💬 ${job.my_bid_id ? 'Message client' : 'Ask a question'}</a>`;
