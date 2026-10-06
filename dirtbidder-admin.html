@@ -70,6 +70,10 @@
     <button class="tab" data-f="flags" onclick="setTab(this)">🚩 Flagged <span id="flagCount"></span></button>
     <button class="tab" data-f="users" onclick="setTab(this)">Users</button>
     <button class="tab" data-f="bids" onclick="setTab(this)">All Bids</button>
+    <button class="tab" data-f="convos" onclick="setTab(this)">Conversations</button>
+  </div>
+  <div id="convoSearch" style="display:none;margin-bottom:1rem">
+    <input id="convoQ" type="search" placeholder="Search job, location, operator or client" oninput="searchConvos()" style="width:100%;background:var(--dig);border:1.5px solid rgba(196,168,130,0.2);color:var(--chalk);border-radius:3px;padding:0.75rem 0.9rem;font:inherit;font-size:1rem">
   </div>
   <div id="bidSearch" style="display:none;margin-bottom:1rem">
     <input id="bidQ" type="search" placeholder="Search job, location, operator or client" oninput="searchBids()" style="width:100%;background:var(--dig);border:1.5px solid rgba(196,168,130,0.2);color:var(--chalk);border-radius:3px;padding:0.75rem 0.9rem;font:inherit;font-size:1rem;margin-bottom:0.6rem">
@@ -341,8 +345,53 @@
     </div>`;
   }
 
+  // ── Conversations: every client/operator thread, newest first (read-only for the admin) ──
+  let convos = [], convoTimer = null, convosLoaded = false;
+  function searchConvos() { clearTimeout(convoTimer); convoTimer = setTimeout(loadConvos, 300); }
+  async function loadConvos() {
+    try {
+      const q = document.getElementById('convoQ').value.trim();
+      const data = await api('/api/admin/conversations?q=' + encodeURIComponent(q));
+      convos = data.conversations || []; convosLoaded = true;
+      if (tab === 'convos') render();
+    } catch (err) { if (tab === 'convos') document.getElementById('list').innerHTML = `<div class="card"><div class="msg">${esc(err.message)}</div></div>`; }
+  }
+  function convoCard(c) {
+    const op = c.operator_company || c.operator_name || c.operator_email || 'Operator';
+    const cl = c.client_name || c.client_email || 'Client';
+    const fromClient = c.last_sender_id === c.client_id;
+    const bid = c.bid_amount != null ? `Bid ${money(c.bid_amount)}${c.bid_status && c.bid_status !== 'pending' ? ' (' + esc(c.bid_status) + ')' : ''}` : 'No bid yet';
+    const test = /\+(test|op)\d*@/i.test((c.operator_email || '') + ' ' + (c.client_email || ''));
+    return `<div class="card">
+      <div class="card-head">
+        <div><div class="card-title">${esc(c.job_title)}</div>
+          <div style="font-size:0.8rem;color:var(--stone)">${esc(c.job_location || '')} · job ${esc(String(c.job_status || '').replace('_', ' '))} · last message ${when(c.last_at)}</div></div>
+        <div class="pill done">${c.messages} message${c.messages === 1 ? '' : 's'}</div>
+      </div>
+      <div class="card-body">
+        <div class="grid">
+          <div><div class="lbl">Client</div><div class="val">${esc(cl)}<br><small>${esc(c.client_email || '')}</small></div></div>
+          <div><div class="lbl">Operator</div><div class="val">${esc(op)}<br><small>${esc(c.operator_email || '')}</small></div></div>
+          <div><div class="lbl">Where it stands</div><div class="val">${bid}${c.location_shared ? '<br><small>Job location shared</small>' : ''}</div></div>
+        </div>
+        <div class="lbl">Last message, from the ${fromClient ? 'client' : 'operator'}</div>
+        <div class="quote" style="white-space:pre-line">${esc(String(c.last_body || '').slice(0, 280))}${String(c.last_body || '').length > 280 ? '…' : ''}</div>
+        ${c.hidden || test ? `<div style="font-size:0.82rem;margin-bottom:0.6rem">${c.hidden ? `<span style="color:var(--amber)">🚩 ${c.hidden} message${c.hidden === 1 ? '' : 's'} had contact info hidden</span>` : ''}${c.hidden && test ? ' · ' : ''}${test ? '<span style="color:var(--stone)">Test account</span>' : ''}</div>` : ''}
+        <div class="btns"><a class="btn release" style="text-decoration:none" href="dirtbidder-messaging.html?job=${c.job_id}&op=${c.operator_id}" target="_blank">Read the Conversation</a></div>
+      </div>
+    </div>`;
+  }
+
   function render() {
     document.getElementById('bidSearch').style.display = tab === 'bids' ? '' : 'none';
+    document.getElementById('convoSearch').style.display = tab === 'convos' ? '' : 'none';
+    if (tab === 'convos') {
+      document.getElementById('userSearch').style.display = 'none';
+      document.getElementById('tabSub').textContent = 'Every conversation between a client and an operator, newest first. You can read them but not post in them.';
+      document.getElementById('list').innerHTML = !convosLoaded ? '<div class="empty">Loading…</div>'
+        : convos.length ? convos.map(convoCard).join('') : `<div class="empty">${document.getElementById('convoQ').value.trim() ? 'No conversations match that search.' : 'No conversations yet.'}</div>`;
+      return;
+    }
     if (tab === 'bids') {
       document.getElementById('userSearch').style.display = 'none';
       document.getElementById('tabSub').textContent = 'Every bid on DirtBidder, newest first. Spot lowballs, bid-shopping, or operators who need a look.';
@@ -381,6 +430,7 @@
     tab = btn.dataset.f;
     render();
     if (tab === 'bids') loadBids();
+    if (tab === 'convos') loadConvos();
   }
 
   async function resolve(id, resolution, btn) {
