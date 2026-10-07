@@ -13,11 +13,11 @@
     --amber:    #E8892A;
     --amber-lt: #F5A94E;
     --dust:     #C4A882;
-    --stone:    #8C7B6B;
+    --stone:    #A89887;
     --chalk:    #F2EDE6;
     --error:    #E74C3C;
     --success:  #27AE60;
-    --info:     #3498DB;
+    --info:     #5DADE2;
     --sidebar:  240px;
   }
 
@@ -505,7 +505,7 @@
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: var(--success);
+    background: #1E8449;
     color: white;
     border: none;
     padding: 0.4rem 0.9rem;
@@ -674,7 +674,7 @@
     margin-bottom: 0.4rem;
   }
 
-  .empty-sub { font-size: 0.8rem; color: var(--clay); }
+  .empty-sub { font-size: 0.8rem; color: var(--stone); }
 
   /* Stack the two cards before the job list gets too narrow */
   @media (max-width: 1200px) {
@@ -754,7 +754,7 @@
   .db-modal-body textarea { width: 100%; min-height: 110px; background: var(--clay); border: 1.5px solid rgba(196,168,130,0.18); color: var(--chalk); border-radius: 3px; padding: 0.7rem; font: inherit; font-size: 0.9rem; resize: vertical; }
   .db-modal-foot { display: flex; gap: 0.75rem; justify-content: flex-end; padding: 1rem 1.25rem; border-top: 1px solid rgba(196,168,130,0.1); }
   .db-btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.6rem 1.1rem; border-radius: 3px; cursor: pointer; border: 1px solid rgba(196,168,130,0.25); background: transparent; color: var(--dust); }
-  .db-btn.primary { background: var(--error); border-color: var(--error); color: #fff; }
+  .db-btn.primary { background: #C0392B; border-color: #C0392B; color: #fff; }
   .db-thumbs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
   .db-thumbs img { width: 60px; height: 60px; object-fit: cover; border-radius: 3px; }
 </style>
@@ -764,7 +764,7 @@
 <body>
 
 <!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" role="navigation" aria-label="Menu">
   <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
 
   <div class="sidebar-user">
@@ -778,44 +778,44 @@
   <nav class="nav-section">
     <div class="nav-label">Main</div>
     <div class="nav-item active" onclick="showSection('overview')">
-      <span class="nav-icon">📊</span> Overview
+      <span class="nav-icon" aria-hidden="true">📊</span> Overview
     </div>
     <div class="nav-item" onclick="showSection('jobs')">
-      <span class="nav-icon">📋</span> My Jobs
+      <span class="nav-icon" aria-hidden="true">📋</span> My Jobs
       <span class="nav-badge" id="badgeJobs" style="display:none"></span>
     </div>
     <div class="nav-item" onclick="showSection('bids')">
-      <span class="nav-icon">💰</span> Bids Received
+      <span class="nav-icon" aria-hidden="true">💰</span> Bids Received
       <span class="nav-badge" id="badgeBids" style="display:none"></span>
     </div>
     <div class="nav-item" onclick="showSection('payments')">
-      <span class="nav-icon">🏦</span> Payments
+      <span class="nav-icon" aria-hidden="true">🏦</span> Payments
     </div>
 
     <div class="nav-label" style="margin-top:0.5rem">Communication</div>
     <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'">
-      <span class="nav-icon">💬</span> Messages
+      <span class="nav-icon" aria-hidden="true">💬</span> Messages
       <span class="nav-badge" id="badgeMsgs" style="display:none"></span>
     </div>
     <div class="nav-item" onclick="showSection('notifications')">
-      <span class="nav-icon">🔔</span> Notifications
+      <span class="nav-icon" aria-hidden="true">🔔</span> Notifications
     </div>
 
     <div class="nav-label" style="margin-top:0.5rem">Account</div>
     <div class="nav-item" onclick="showSection('settings')">
-      <span class="nav-icon">⚙️</span> Settings
+      <span class="nav-icon" aria-hidden="true">⚙️</span> Settings
     </div>
     <div class="nav-item" onclick="showSection('reviews')">
-      <span class="nav-icon">⭐</span> My Reviews
+      <span class="nav-icon" aria-hidden="true">⭐</span> My Reviews
     </div>
     <a class="nav-item" href="dirtbidder-how-it-works.html#clients" style="text-decoration:none">
-      <span class="nav-icon">❓</span> How It Works
+      <span class="nav-icon" aria-hidden="true">❓</span> How It Works
     </a>
     <a class="nav-item" id="hqLink" href="dirtbidder-hq.html" style="display:none;text-decoration:none">
-      <span class="nav-icon">📈</span> DirtBidder HQ
+      <span class="nav-icon" aria-hidden="true">📈</span> DirtBidder HQ
     </a>
     <a class="nav-item" id="adminLink" href="dirtbidder-admin.html" style="display:none;text-decoration:none">
-      <span class="nav-icon">🛡️</span> Admin — Disputes
+      <span class="nav-icon" aria-hidden="true">🛡️</span> Admin — Disputes
     </a>
   </nav>
 
@@ -826,7 +826,7 @@
   </div>
 </aside>
 
-<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMenu(false)"></div>
+<div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true" onclick="toggleMenu(false)"></div>
 
 <!-- MAIN -->
 <div class="main">
@@ -835,10 +835,10 @@
   <div class="topbar">
     <div class="topbar-left">
       <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">☰</button>
-      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-title" role="heading" aria-level="1" id="topbarTitle">Dashboard</div>
     </div>
     <div class="topbar-right">
-      <div class="notif-btn" onclick="showSection('notifications')">
+      <div class="notif-btn" role="button" tabindex="0" aria-label="Notifications" onclick="showSection('notifications')">
         🔔 <div class="notif-dot" id="notifDot" style="display:none"></div>
       </div>
       <button class="post-job-btn" onclick="window.location='dirtbidder-post-job.html'">+ Post a Job</button>
@@ -846,17 +846,17 @@
   </div>
 
   <!-- CONTENT -->
-  <div class="content">
+  <div class="content" role="main" id="dbMain">
 
     <!-- ── OVERVIEW SECTION ── -->
     <div id="section-overview">
 
       <div class="greeting">
-        <div class="greeting-text"><span id="greetWord">Welcome</span>, <span id="greetName">there.</span></div>
+        <div class="greeting-text" role="heading" aria-level="2"><span id="greetWord">Welcome</span>, <span id="greetName">there.</span></div>
         <div class="greeting-sub" id="greetSub">Loading your jobs…</div>
       </div>
 
-      <div id="loadError" class="card" style="display:none;margin-bottom:1rem;border-color:var(--error)">
+      <div id="loadError" role="alert" class="card" style="display:none;margin-bottom:1rem;border-color:var(--error)">
         <div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Couldn't load your dashboard</div><div class="empty-sub" id="loadErrorText">Check your connection and refresh.</div></div>
       </div>
 
@@ -905,7 +905,7 @@
 
     <!-- ── OTHER SECTIONS (placeholders) ── -->
     <div id="section-jobs" style="display:none">
-      <div class="greeting"><div class="greeting-text">My <span>Jobs</span></div><div class="greeting-sub">All jobs you've posted on DirtBidder</div></div>
+      <div class="greeting"><div class="greeting-text" role="heading" aria-level="2">My <span>Jobs</span></div><div class="greeting-sub">All jobs you've posted on DirtBidder</div></div>
       <div class="card">
         <div class="card-header"><div class="card-title">All Jobs</div><button class="post-job-btn" onclick="window.location='dirtbidder-post-job.html'">+ Post New Job</button></div>
         <div id="allJobs"></div>
@@ -913,32 +913,32 @@
     </div>
 
     <div id="section-bids" style="display:none">
-      <div class="greeting"><div class="greeting-text">Bids <span>Received</span></div><div class="greeting-sub">Review and accept bids from operators</div></div>
+      <div class="greeting"><div class="greeting-text" role="heading" aria-level="2">Bids <span>Received</span></div><div class="greeting-sub">Review and accept bids from operators</div></div>
       <div id="bidsByJob"></div>
     </div>
 
     <div id="section-payments" style="display:none">
-      <div class="greeting"><div class="greeting-text">Payments &amp; <span>Escrow</span></div><div class="greeting-sub">Your payment is held securely by Stripe until you release it to the operator</div></div>
+      <div class="greeting"><div class="greeting-text" role="heading" aria-level="2">Payments &amp; <span>Escrow</span></div><div class="greeting-sub">Your payment is held securely by Stripe until you release it to the operator</div></div>
       <div class="card"><div id="paymentsList"></div></div>
     </div>
 
     <div id="section-messages" style="display:none">
-      <div class="greeting"><div class="greeting-text">My <span>Messages</span></div><div class="greeting-sub">Direct messages with your operators</div></div>
+      <div class="greeting"><div class="greeting-text" role="heading" aria-level="2">My <span>Messages</span></div><div class="greeting-sub">Direct messages with your operators</div></div>
       <div class="card"><div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">Messages</div><div class="empty-sub"><a href="dirtbidder-messaging.html" style="color:var(--amber)">Open your messages →</a></div></div></div>
     </div>
 
     <div id="section-notifications" style="display:none">
-      <div class="greeting"><div class="greeting-text">My <span>Notifications</span></div></div>
+      <div class="greeting"><div class="greeting-text" role="heading" aria-level="2">My <span>Notifications</span></div></div>
       <div class="card"><div id="notifList"></div></div>
     </div>
 
     <div id="section-settings" style="display:none">
-      <div class="greeting"><div class="greeting-text">Account <span>Settings</span></div></div>
+      <div class="greeting"><div class="greeting-text" role="heading" aria-level="2">Account <span>Settings</span></div></div>
       <div class="card" id="settingsCard"></div>
     </div>
 
     <div id="section-reviews" style="display:none">
-      <div class="greeting"><div class="greeting-text">My <span>Reviews</span></div></div>
+      <div class="greeting"><div class="greeting-text" role="heading" aria-level="2">My <span>Reviews</span></div></div>
       <div class="card" id="myReviewsList"></div>
     </div>
 
@@ -948,7 +948,7 @@
 <!-- RATE OPERATOR -->
 <div class="db-modal-overlay" id="reviewModal">
   <div class="db-modal">
-    <div class="db-modal-head"><div class="db-modal-title">Rate Your Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeReview()">✕</button></div>
+    <div class="db-modal-head"><div class="db-modal-title">Rate Your Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeReview()" aria-label="Close">✕</button></div>
     <div class="db-modal-body">
       <div id="reviewWho" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
       <label>How did they do?</label>
@@ -959,7 +959,7 @@
       <textarea id="reviewComment" placeholder="e.g. Showed up on time, left the site clean, great work."></textarea>
       <div style="font-size:0.78rem;color:var(--stone);margin-top:0.5rem">Other clients will see your rating and comment with your first name.</div>
       <div style="font-size:0.78rem;color:var(--stone);margin-top:0.4rem">If you give 4 or 5 stars, DirtBidder may give the operator a public shoutout. It names their company, the kind of job and the county. Never you, your address or the price.</div>
-      <div id="reviewError" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
+      <div id="reviewError" role="alert" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
     </div>
     <div class="db-modal-foot">
       <button class="db-btn" onclick="closeReview()">Cancel</button>
@@ -971,7 +971,7 @@
 <!-- REPORT OPERATOR -->
 <div class="db-modal-overlay" id="reportModal">
   <div class="db-modal">
-    <div class="db-modal-head"><div class="db-modal-title">Report Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeReport()">✕</button></div>
+    <div class="db-modal-head"><div class="db-modal-title">Report Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeReport()" aria-label="Close">✕</button></div>
     <div class="db-modal-body">
       <div id="reportWho" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
       <label for="reportReason">What happened?</label>
@@ -986,7 +986,7 @@
       <label for="reportDetails">Details (optional)</label>
       <textarea id="reportDetails" placeholder="e.g. He called and said he'd knock 10% off if I paid cash."></textarea>
       <div style="font-size:0.78rem;color:var(--stone);margin-top:0.5rem">Only DirtBidder sees this. The operator isn’t told who reported them.</div>
-      <div id="reportError" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
+      <div id="reportError" role="alert" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
       <div id="reportDone" style="display:none;color:var(--success);font-size:0.9rem;margin-top:0.75rem">✓ Thanks — we’ll look into it.</div>
     </div>
     <div class="db-modal-foot">
@@ -999,7 +999,7 @@
 <!-- OPERATOR PROFILE -->
 <div class="db-modal-overlay" id="opModal">
   <div class="db-modal">
-    <div class="db-modal-head"><div class="db-modal-title" id="opName">Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="document.getElementById('opModal').classList.remove('active')">✕</button></div>
+    <div class="db-modal-head"><div class="db-modal-title" id="opName">Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="document.getElementById('opModal').classList.remove('active')" aria-label="Close">✕</button></div>
     <div class="db-modal-body" id="opBody"></div>
   </div>
 </div>
@@ -1007,13 +1007,13 @@
 <!-- GPS PIN -->
 <div class="db-modal-overlay" id="pinModal">
   <div class="db-modal">
-    <div class="db-modal-head"><div class="db-modal-title">📍 Job Site GPS Pin</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closePin()">✕</button></div>
+    <div class="db-modal-head"><div class="db-modal-title">📍 Job Site GPS Pin</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closePin()" aria-label="Close">✕</button></div>
     <div class="db-modal-body">
       <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.75rem">Tap the map right where the work is. It stays <strong style="color:var(--chalk)">private</strong> — only the operator you hire and pay sees it.</div>
       <div id="pinJobTitle" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
       <button class="db-btn" onclick="pinHere(this)" style="margin-bottom:0.6rem">📱 Use My Current Location</button>
       <div id="pinMap" style="height:300px;border-radius:3px;border:1px solid rgba(196,168,130,0.15);background:#2a211b"></div>
-      <div id="pinStatus" style="font-size:0.8rem;color:var(--stone);margin-top:0.5rem"></div>
+      <div id="pinStatus" role="status" aria-live="polite" style="font-size:0.8rem;color:var(--stone);margin-top:0.5rem"></div>
       <div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap">
         <button class="btn-accept" id="pinSaveBtn" onclick="savePin()">Save Pin</button>
         <button class="btn-decline" id="pinRemoveBtn" onclick="savePin(true)">Remove Pin</button>
@@ -1026,19 +1026,19 @@
 <!-- REPORT A PROBLEM -->
 <div class="db-modal-overlay" id="disputeModal">
   <div class="db-modal">
-    <div class="db-modal-head"><div class="db-modal-title">Report a Problem</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeDispute()">✕</button></div>
+    <div class="db-modal-head"><div class="db-modal-title">Report a Problem</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeDispute()" aria-label="Close">✕</button></div>
     <div class="db-modal-body">
       <div style="font-size:0.85rem;color:var(--dust);margin-bottom:1rem">Your payment stays <strong style="color:var(--chalk)">frozen in escrow</strong> while DirtBidder reviews this. We'll hear from the operator too, then decide whether to pay them, refund you, or split it.</div>
       <div id="disputeJobTitle" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:1rem"></div>
       <label for="disputeReason">What went wrong?</label>
       <textarea id="disputeReason" placeholder="e.g. Pond was dug 4 ft deep, we agreed on 8 ft. Spoils left on the driveway."></textarea>
       <div style="margin-top:1rem">
-        <label>Photos (optional, up to 10)</label>
-        <input type="file" id="disputePhotoInput" accept="image/*" multiple style="display:none" onchange="addDisputePhotos(this.files)">
+        <label for="disputePhotoInput">Photos (optional, up to 10)</label>
+        <input type="file" id="disputePhotoInput" aria-label="Add photos" accept="image/*" multiple style="display:none" onchange="addDisputePhotos(this.files)">
         <button class="db-btn" onclick="document.getElementById('disputePhotoInput').click()">📷 Add Photos</button>
         <div class="db-thumbs" id="disputeThumbs"></div>
       </div>
-      <div id="disputeError" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
+      <div id="disputeError" role="alert" style="display:none;color:var(--error);font-size:0.8rem;margin-top:0.75rem"></div>
     </div>
     <div class="db-modal-foot">
       <button class="db-btn" onclick="closeDispute()">Cancel</button>
@@ -1795,8 +1795,9 @@
   document.querySelectorAll('.sidebar .nav-item').forEach(el => el.addEventListener('click', () => toggleMenu(false)));
 </script>
 
-<input type="file" id="jobPhotoInput" accept="image/*" multiple style="display:none" onchange="addJobPhotos(this.files)">
+<input type="file" id="jobPhotoInput" aria-label="Add photos" accept="image/*" multiple style="display:none" onchange="addJobPhotos(this.files)">
 <script src="dirtbidder-terms-box.js"></script>
 <script src="dirtbidder-settings.js"></script>
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

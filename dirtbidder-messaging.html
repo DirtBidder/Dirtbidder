@@ -9,7 +9,7 @@
 <style>
   :root {
     --soil: #1C1410; --dig: #2A1F17; --clay: #3D2B1F; --amber: #E8892A;
-    --dust: #C4A882; --stone: #8C7B6B; --chalk: #F2EDE6;
+    --dust: #C4A882; --stone: #A89887; --chalk: #F2EDE6;
     --error: #E74C3C; --success: #27AE60;
     --line: rgba(196,168,130,0.1);
   }
@@ -52,7 +52,7 @@
   .bubble { max-width: 78%; padding: 0.55rem 0.8rem; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; }
   .bubble.them { align-self: flex-start; background: var(--clay); border-bottom-left-radius: 3px; }
   .bubble.me { align-self: flex-end; background: var(--amber); color: var(--soil); border-bottom-right-radius: 3px; }
-  .bubble .meta { display: block; font-size: 0.68rem; opacity: 0.7; margin-top: 0.2rem; text-align: right; }
+  .bubble .meta { display: block; font-size: 0.68rem; opacity: 0.9; margin-top: 0.2rem; text-align: right; }
   .bubble .orig { display: block; font-size: 0.78rem; margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px dashed rgba(0,0,0,0.25); opacity: 0.85; }
   .compose { flex: none; border-top: 1px solid var(--line); padding: 0.7rem; padding-bottom: max(0.7rem, env(safe-area-inset-bottom)); display: flex; gap: 0.5rem; align-items: flex-end; background: var(--soil); }
   .compose textarea { flex: 1; resize: none; max-height: 140px; min-height: 44px; background: var(--dig); border: 1.5px solid rgba(196,168,130,0.2); color: var(--chalk); border-radius: 20px; padding: 0.65rem 0.95rem; font: inherit; font-size: 1rem; line-height: 1.3; }
@@ -90,11 +90,11 @@
   <a class="logo" id="homeLink" href="dirtbidder-client-dashboard.html"><span>Dirt</span>Bidder</a>
   <a class="back" id="backLink" href="dirtbidder-client-dashboard.html">← Dashboard</a>
 </div>
-<div class="app">
+<div class="app" role="main" id="dbMain">
   <div class="list">
     <div class="list-head">
       <h1>My <span>Messages</span></h1>
-      <input id="q" type="search" placeholder="Search name or job" oninput="renderThreads()">
+      <input id="q" type="search" aria-label="Search conversations by name or job" placeholder="Search name or job" oninput="renderThreads()">
     </div>
     <div class="threads" id="threads"><div class="empty">Loading…</div></div>
   </div>
@@ -260,7 +260,7 @@
       <div class="convo-head">
         <button class="back" onclick="closeThread()" aria-label="Back">‹</button>
         <div style="min-width:0">
-          <div class="convo-title">${esc(other || '—')}${t.hired ? '<span class="tag hired">Hired</span>' : ''}</div>
+          <div class="convo-title" role="heading" aria-level="2">${esc(other || '—')}${t.hired ? '<span class="tag hired">Hired</span>' : ''}</div>
           <div class="convo-sub">${esc(t.job_title)}</div>
         </div>
       </div>
@@ -270,7 +270,7 @@
         ${bubbles || `<div class="empty" style="margin:1rem auto">No messages yet.${t.can_send ? ' Say hello 👋' : ''}</div>`}
       </div>
       ${t.can_send ? `<div class="compose">
-        <textarea id="draft" rows="1" placeholder="Message ${esc(other || '')}" oninput="grow(this)" onkeydown="enterSend(event)"></textarea>
+        <textarea id="draft" rows="1" aria-label="Type a message" placeholder="Message ${esc(other || '')}" oninput="grow(this)" onkeydown="enterSend(event)"></textarea>
         <button id="sendBtn" onclick="send()">Send</button>
       </div>` : `<div class="closed">${esc(t.closed_reason || 'Read only')}</div>`}`;
 
@@ -358,5 +358,6 @@
   }
   if (token) init();
 </script>
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

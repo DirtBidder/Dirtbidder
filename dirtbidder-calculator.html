@@ -13,7 +13,7 @@
     --amber:    #E8892A;
     --amber-lt: #F5A94E;
     --dust:     #C4A882;
-    --stone:    #8C7B6B;
+    --stone:    #A89887;
     --chalk:    #F2EDE6;
     --error:    #E74C3C;
     --success:  #27AE60;
@@ -149,7 +149,7 @@
 <body>
 
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" role="navigation" aria-label="Menu">
   <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
   <div class="sidebar-user">
     <div class="avatar" id="calcAvatar">🧮</div>
@@ -160,17 +160,17 @@
   </div>
   <nav class="nav-section">
     <div class="nav-label">Work</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">📊</span> Overview</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🗺️</span> Browse Jobs</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">💰</span> My Bids</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🏦</span> Earnings</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon" aria-hidden="true">📊</span> Overview</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon" aria-hidden="true">🗺️</span> Browse Jobs</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon" aria-hidden="true">💰</span> My Bids</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon" aria-hidden="true">🏦</span> Earnings</div>
     <div class="nav-label" style="margin-top:0.5rem">Tools</div>
-    <div class="nav-item active"><span class="nav-icon">🧮</span> Calculators</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🔧</span> My Equipment</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon">🤝</span> Equipment Resources</div>
+    <div class="nav-item active"><span class="nav-icon" aria-hidden="true">🧮</span> Calculators</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon" aria-hidden="true">🔧</span> My Equipment</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-operator-dashboard.html'"><span class="nav-icon" aria-hidden="true">🤝</span> Equipment Resources</div>
     <div class="nav-label" style="margin-top:0.5rem">Account</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'"><span class="nav-icon">💬</span> Messages</div>
-    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-messaging.html'"><span class="nav-icon" aria-hidden="true">💬</span> Messages</div>
+    <div class="nav-item"><span class="nav-icon" aria-hidden="true">⚙️</span> Settings</div>
   </nav>
   <div class="sidebar-footer">
     <button class="signout-btn" id="calcBack" onclick="window.location='dirtbidder-operator-dashboard.html'">← Back to Dashboard</button>
@@ -180,7 +180,7 @@
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title">Earthwork Calculators</div>
+    <div class="topbar-title" role="heading" aria-level="1">Earthwork Calculators</div>
     <div style="font-size:0.8rem;color:var(--stone)">7 calculators · Free for all operators</div>
   </div>
 
@@ -195,13 +195,13 @@
     <button class="calc-tab" onclick="showCalc('timeest', this)">📅 Time Estimate</button>
   </div>
 
-  <div class="content">
+  <div class="content" role="main" id="dbMain">
 
     <!-- ── 1. CUT & FILL ── -->
     <div class="calc-section active" id="calc-cutfill">
       <div class="section-header">
         <div class="section-eyebrow">Calculator 1 of 7</div>
-        <div class="section-title">Cut &amp; <span>Fill</span></div>
+        <div class="section-title" role="heading" aria-level="2">Cut &amp; <span>Fill</span></div>
         <div class="section-sub">Calculate how much dirt needs to move based on site dimensions. Helps you estimate haul-off volume and fill requirements.</div>
       </div>
       <div class="calc-grid">
@@ -209,25 +209,25 @@
           <div class="card-header"><div class="card-title">Site Dimensions</div></div>
           <div class="card-body">
             <div class="field">
-              <span class="field-label">Site Length</span>
+              <label class="field-label" for="cf_length">Site Length</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="cf_length" placeholder="e.g. 200" /><span class="input-unit">ft</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Site Width</span>
+              <label class="field-label" for="cf_width">Site Width</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="cf_width" placeholder="e.g. 150" /><span class="input-unit">ft</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Average Cut Depth</span>
+              <label class="field-label" for="cf_cut">Average Cut Depth</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="cf_cut" placeholder="e.g. 2" /><span class="input-unit">ft</span></div>
               <div class="field-hint">How deep you're cutting on average across the site</div>
             </div>
             <div class="field">
-              <span class="field-label">Average Fill Depth</span>
+              <label class="field-label" for="cf_fill">Average Fill Depth</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="cf_fill" placeholder="e.g. 1" /><span class="input-unit">ft</span></div>
               <div class="field-hint">How deep you're filling on average (0 if cut only)</div>
             </div>
             <div class="field">
-              <span class="field-label">Soil Swell Factor</span>
+              <label class="field-label" for="cf_swell">Soil Swell Factor</label>
               <select class="calc-input" id="cf_swell">
                 <option value="1.25">Sandy / Loose soil — 25% swell</option>
                 <option value="1.30" selected>Average soil — 30% swell</option>
@@ -268,7 +268,7 @@
     <div class="calc-section" id="calc-hauloff">
       <div class="section-header">
         <div class="section-eyebrow">Calculator 2 of 7</div>
-        <div class="section-title">Haul Off &amp; <span>Truck Loads</span></div>
+        <div class="section-title" role="heading" aria-level="2">Haul Off &amp; <span>Truck Loads</span></div>
         <div class="section-sub">How many dump truck loads to remove spoils from the site. Price your haul-off accurately.</div>
       </div>
       <div class="calc-grid">
@@ -276,12 +276,12 @@
           <div class="card-header"><div class="card-title">Haul Off Details</div></div>
           <div class="card-body">
             <div class="field">
-              <span class="field-label">Total Dirt Volume to Remove</span>
+              <label class="field-label" for="ho_volume">Total Dirt Volume to Remove</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="ho_volume" placeholder="e.g. 500" /><span class="input-unit">cy</span></div>
               <div class="field-hint">Cubic yards — use Cut & Fill calculator above to get this number</div>
             </div>
             <div class="field">
-              <span class="field-label">Truck Bed Size</span>
+              <label class="field-label" for="ho_trucksize">Truck Bed Size</label>
               <select class="calc-input" id="ho_trucksize">
                 <option value="10">10 cubic yards (small dump)</option>
                 <option value="14" selected>14 cubic yards (standard)</option>
@@ -290,16 +290,16 @@
               </select>
             </div>
             <div class="field">
-              <span class="field-label">Haul Distance (one way)</span>
+              <label class="field-label" for="ho_distance">Haul Distance (one way)</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="ho_distance" placeholder="e.g. 10" /><span class="input-unit">miles</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Your Cost Per Load</span>
+              <label class="field-label" for="ho_costperload">Your Cost Per Load</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="ho_costperload" placeholder="e.g. 150" /><span class="input-unit">$</span></div>
               <div class="field-hint">Your fuel + time cost per round trip — typ. $100–$300</div>
             </div>
             <div class="field">
-              <span class="field-label">Dump Fee Per Load (if any)</span>
+              <label class="field-label" for="ho_dumpfee">Dump Fee Per Load (if any)</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="ho_dumpfee" placeholder="e.g. 50" /><span class="input-unit">$</span></div>
             </div>
             <button class="calc-btn" onclick="calcHaulOff()">Calculate Haul Off →</button>
@@ -341,7 +341,7 @@
     <div class="calc-section" id="calc-jobcost">
       <div class="section-header">
         <div class="section-eyebrow">Calculator 3 of 7</div>
-        <div class="section-title">Job Cost <span>Estimator</span></div>
+        <div class="section-title" role="heading" aria-level="2">Job Cost <span>Estimator</span></div>
         <div class="section-sub">Calculate your minimum bid price based on real costs — equipment, fuel, labor, overhead, and profit margin.</div>
       </div>
       <div class="calc-grid">
@@ -349,38 +349,38 @@
           <div class="card-header"><div class="card-title">Your Job Costs</div></div>
           <div class="card-body">
             <div class="field">
-              <span class="field-label">Estimated Job Duration</span>
+              <label class="field-label" for="jc_days">Estimated Job Duration</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="jc_days" placeholder="e.g. 4" /><span class="input-unit">days</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Hours Per Day on Site</span>
+              <label class="field-label" for="jc_hoursperday">Hours Per Day on Site</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="jc_hoursperday" placeholder="e.g. 10" /><span class="input-unit">hrs</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Equipment Cost Per Hour</span>
+              <label class="field-label" for="jc_equip">Equipment Cost Per Hour</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="jc_equip" placeholder="e.g. 85" /><span class="input-unit">$/hr</span></div>
               <div class="field-hint">Ownership/rental cost + wear — typ. $50–$200/hr by machine</div>
             </div>
             <div class="field">
-              <span class="field-label">Fuel Cost Per Hour</span>
+              <label class="field-label" for="jc_fuel">Fuel Cost Per Hour</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="jc_fuel" placeholder="e.g. 35" /><span class="input-unit">$/hr</span></div>
               <div class="field-hint">Diesel burn rate × price per gallon — typ. $25–$60/hr</div>
             </div>
             <div class="field">
-              <span class="field-label">Operator Labor Per Hour</span>
+              <label class="field-label" for="jc_labor">Operator Labor Per Hour</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="jc_labor" placeholder="e.g. 45" /><span class="input-unit">$/hr</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Haul Off Cost (total)</span>
+              <label class="field-label" for="jc_haul">Haul Off Cost (total)</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="jc_haul" placeholder="e.g. 800" /><span class="input-unit">$</span></div>
               <div class="field-hint">Use Haul Off calculator — enter 0 if not applicable</div>
             </div>
             <div class="field">
-              <span class="field-label">Other Costs (mobilization, permits, etc.)</span>
+              <label class="field-label" for="jc_other">Other Costs (mobilization, permits, etc.)</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="jc_other" placeholder="e.g. 200" /><span class="input-unit">$</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Your Profit Margin</span>
+              <label class="field-label" for="jc_margin">Your Profit Margin</label>
               <select class="calc-input" id="jc_margin">
                 <option value="0.15">15% — Competitive market</option>
                 <option value="0.20" selected>20% — Standard</option>
@@ -440,7 +440,7 @@
     <div class="calc-section" id="calc-hourlyrate">
       <div class="section-header">
         <div class="section-eyebrow">Calculator 4 of 7</div>
-        <div class="section-title">Hourly <span>Rate Builder</span></div>
+        <div class="section-title" role="heading" aria-level="2">Hourly <span>Rate Builder</span></div>
         <div class="section-sub">What should you charge per hour? Build your rate from the ground up based on your real costs.</div>
       </div>
       <div class="calc-grid">
@@ -448,36 +448,36 @@
           <div class="card-header"><div class="card-title">Your Annual Costs</div></div>
           <div class="card-body">
             <div class="field">
-              <span class="field-label">Billable Days Per Year</span>
+              <label class="field-label" for="hr_days">Billable Days Per Year</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_days" placeholder="e.g. 200" /><span class="input-unit">days</span></div>
               <div class="field-hint">Days you actually work and bill — not weekends or downtime</div>
             </div>
             <div class="field">
-              <span class="field-label">Billable Hours Per Day</span>
+              <label class="field-label" for="hr_hoursday">Billable Hours Per Day</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_hoursday" placeholder="e.g. 9" /><span class="input-unit">hrs</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Annual Equipment Payment / Rental</span>
+              <label class="field-label" for="hr_equipcost">Annual Equipment Payment / Rental</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_equipcost" placeholder="e.g. 36000" /><span class="input-unit">$/yr</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Annual Fuel Cost</span>
+              <label class="field-label" for="hr_fuelcost">Annual Fuel Cost</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_fuelcost" placeholder="e.g. 18000" /><span class="input-unit">$/yr</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Annual Insurance Cost</span>
+              <label class="field-label" for="hr_insurance">Annual Insurance Cost</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_insurance" placeholder="e.g. 6000" /><span class="input-unit">$/yr</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Annual Maintenance & Repairs</span>
+              <label class="field-label" for="hr_maintenance">Annual Maintenance & Repairs</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_maintenance" placeholder="e.g. 8000" /><span class="input-unit">$/yr</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Your Annual Salary Target</span>
+              <label class="field-label" for="hr_salary">Your Annual Salary Target</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_salary" placeholder="e.g. 80000" /><span class="input-unit">$/yr</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Other Annual Overhead</span>
+              <label class="field-label" for="hr_overhead">Other Annual Overhead</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="hr_overhead" placeholder="e.g. 5000" /><span class="input-unit">$/yr</span></div>
               <div class="field-hint">Accounting, phone, software, truck, etc.</div>
             </div>
@@ -523,7 +523,7 @@
     <div class="calc-section" id="calc-pond">
       <div class="section-header">
         <div class="section-eyebrow">Calculator 5 of 7</div>
-        <div class="section-title">Pond <span>Volume</span></div>
+        <div class="section-title" role="heading" aria-level="2">Pond <span>Volume</span></div>
         <div class="section-sub">Calculate cubic yards to excavate for a pond based on shape and depth. One of the most common earthwork jobs on DirtBidder.</div>
       </div>
       <div class="calc-grid">
@@ -531,7 +531,7 @@
           <div class="card-header"><div class="card-title">Pond Dimensions</div></div>
           <div class="card-body">
             <div class="field">
-              <span class="field-label">Pond Shape</span>
+              <label class="field-label" for="pv_shape">Pond Shape</label>
               <select class="calc-input" id="pv_shape" onchange="updatePondShape()">
                 <option value="rect">Rectangular</option>
                 <option value="oval">Oval / Elliptical</option>
@@ -540,19 +540,19 @@
             </div>
             <div class="field">
               <span class="field-label" id="pv_dim1label">Length</span>
-              <div class="input-wrap"><input class="calc-input" type="number" id="pv_length" placeholder="e.g. 150" /><span class="input-unit">ft</span></div>
+              <div class="input-wrap"><input class="calc-input" type="number" id="pv_length" aria-labelledby="pv_dim1label" placeholder="e.g. 150" /><span class="input-unit">ft</span></div>
             </div>
             <div class="field">
               <span class="field-label" id="pv_dim2label">Width</span>
-              <div class="input-wrap"><input class="calc-input" type="number" id="pv_width" placeholder="e.g. 80" /><span class="input-unit">ft</span></div>
+              <div class="input-wrap"><input class="calc-input" type="number" id="pv_width" aria-labelledby="pv_dim2label" placeholder="e.g. 80" /><span class="input-unit">ft</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Average Depth</span>
+              <label class="field-label" for="pv_depth">Average Depth</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="pv_depth" placeholder="e.g. 8" /><span class="input-unit">ft</span></div>
               <div class="field-hint">Use average depth — ponds slope so edges are shallower</div>
             </div>
             <div class="field">
-              <span class="field-label">Side Slope Ratio</span>
+              <label class="field-label" for="pv_slope">Side Slope Ratio</label>
               <select class="calc-input" id="pv_slope">
                 <option value="1.0">1:1 — Steep banks (rocky soil)</option>
                 <option value="1.5" selected>1.5:1 — Standard slope</option>
@@ -561,7 +561,7 @@
               </select>
             </div>
             <div class="field">
-              <span class="field-label">Your Rate Per Cubic Yard</span>
+              <label class="field-label" for="pv_rate">Your Rate Per Cubic Yard</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="pv_rate" placeholder="e.g. 8" /><span class="input-unit">$/cy</span></div>
               <div class="field-hint">Typical range: $4–$12/cy depending on soil and haul</div>
             </div>
@@ -597,7 +597,7 @@
     <div class="calc-section" id="calc-compaction">
       <div class="section-header">
         <div class="section-eyebrow">Calculator 6 of 7</div>
-        <div class="section-title">Compaction <span>Factor</span></div>
+        <div class="section-title" role="heading" aria-level="2">Compaction <span>Factor</span></div>
         <div class="section-sub">How much does excavated dirt swell and compact? Use this to accurately price fill work and avoid leaving money on the table.</div>
       </div>
       <div class="calc-grid">
@@ -605,12 +605,12 @@
           <div class="card-header"><div class="card-title">Soil & Compaction Details</div></div>
           <div class="card-body">
             <div class="field">
-              <span class="field-label">Bank Volume (in ground)</span>
+              <label class="field-label" for="comp_bank">Bank Volume (in ground)</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="comp_bank" placeholder="e.g. 1000" /><span class="input-unit">cy</span></div>
               <div class="field-hint">Volume of dirt before it's excavated</div>
             </div>
             <div class="field">
-              <span class="field-label">Soil Type</span>
+              <label class="field-label" for="comp_soil">Soil Type</label>
               <select class="calc-input" id="comp_soil" onchange="updateCompactionFactors()">
                 <option value="sandy">Sandy / Gravel (swell 12%, shrink 8%)</option>
                 <option value="average" selected>Average Soil (swell 25%, shrink 10%)</option>
@@ -619,12 +619,12 @@
               </select>
             </div>
             <div class="field">
-              <span class="field-label">Swell Factor</span>
+              <label class="field-label" for="comp_swell">Swell Factor</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="comp_swell" placeholder="25" /><span class="input-unit">%</span></div>
               <div class="field-hint">How much bigger dirt gets when excavated</div>
             </div>
             <div class="field">
-              <span class="field-label">Shrink Factor (after compaction)</span>
+              <label class="field-label" for="comp_shrink">Shrink Factor (after compaction)</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="comp_shrink" placeholder="10" /><span class="input-unit">%</span></div>
               <div class="field-hint">How much it compacts below original bank volume</div>
             </div>
@@ -668,7 +668,7 @@
     <div class="calc-section" id="calc-timeest">
       <div class="section-header">
         <div class="section-eyebrow">Calculator 7 of 7</div>
-        <div class="section-title">Time <span>Estimator</span></div>
+        <div class="section-title" role="heading" aria-level="2">Time <span>Estimator</span></div>
         <div class="section-sub">How many days will a job take? Set a realistic timeline before you submit your bid.</div>
       </div>
       <div class="calc-grid">
@@ -676,12 +676,12 @@
           <div class="card-header"><div class="card-title">Job Details</div></div>
           <div class="card-body">
             <div class="field">
-              <span class="field-label">Total Volume to Move</span>
+              <label class="field-label" for="te_volume">Total Volume to Move</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="te_volume" placeholder="e.g. 800" /><span class="input-unit">cy</span></div>
               <div class="field-hint">Use Cut & Fill or Pond calculator to get this</div>
             </div>
             <div class="field">
-              <span class="field-label">Primary Machine</span>
+              <label class="field-label" for="te_machine">Primary Machine</label>
               <select class="calc-input" id="te_machine" onchange="updateMachineRate()">
                 <option value="50">Mini Excavator — 50 cy/hr</option>
                 <option value="80">Standard Excavator (CAT 320 size) — 80 cy/hr</option>
@@ -693,12 +693,12 @@
               </select>
             </div>
             <div class="field">
-              <span class="field-label">Machine Production Rate</span>
+              <label class="field-label" for="te_rate">Machine Production Rate</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="te_rate" placeholder="130" /><span class="input-unit">cy/hr</span></div>
               <div class="field-hint">Adjust based on soil conditions and terrain</div>
             </div>
             <div class="field">
-              <span class="field-label">Efficiency Factor</span>
+              <label class="field-label" for="te_efficiency">Efficiency Factor</label>
               <select class="calc-input" id="te_efficiency">
                 <option value="0.60">60% — Rocky, steep, or difficult terrain</option>
                 <option value="0.70">70% — Average conditions</option>
@@ -708,11 +708,11 @@
               <div class="field-hint">No machine runs at 100% — accounts for turns, repositioning, breaks</div>
             </div>
             <div class="field">
-              <span class="field-label">Number of Machines</span>
+              <label class="field-label" for="te_machines">Number of Machines</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="te_machines" placeholder="1" /><span class="input-unit">units</span></div>
             </div>
             <div class="field">
-              <span class="field-label">Working Hours Per Day</span>
+              <label class="field-label" for="te_hoursday">Working Hours Per Day</label>
               <div class="input-wrap"><input class="calc-input" type="number" id="te_hoursday" placeholder="10" /><span class="input-unit">hrs</span></div>
             </div>
             <button class="calc-btn" onclick="calcTimeEst()">Calculate Job Duration →</button>
@@ -1008,5 +1008,6 @@
 <script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
 try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
 </script>
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

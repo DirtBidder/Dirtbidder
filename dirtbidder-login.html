@@ -24,7 +24,7 @@
     --amber:    #E8892A;
     --amber-lt: #F5A94E;
     --dust:     #C4A882;
-    --stone:    #8C7B6B;
+    --stone:    #A89887;
     --chalk:    #F2EDE6;
     --error:    #E74C3C;
     --success:  #27AE60;
@@ -505,34 +505,34 @@
   </div>
 
   <!-- RIGHT PANEL -->
-  <div class="right-panel">
+  <div class="right-panel" role="main" id="dbMain">
     <div class="form-wrap">
 
       <!-- LOGIN FORM -->
       <div class="login-screen" id="loginScreen">
-        <div class="form-title">Sign In</div>
+        <div class="form-title" role="heading" aria-level="1">Sign In</div>
         <div class="form-sub">Don't have an account? <a href="dirtbidder-register.html">Create one free</a></div>
 
         <!-- ERROR BANNER -->
-        <div class="error-banner" id="errorBanner">
+        <div class="error-banner" id="errorBanner" role="alert">
           ⚠️ <span id="errorText">Incorrect email or password. Please try again.</span>
         </div>
 
         <!-- EMAIL -->
         <div class="field">
           <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="john@example.com" oninput="clearErrors()" />
-          <span class="field-error" id="emailError">Please enter a valid email address</span>
+          <input type="email" id="email" autocomplete="email" placeholder="john@example.com" oninput="clearErrors()" />
+          <span class="field-error" id="emailError" role="alert">Please enter a valid email address</span>
         </div>
 
         <!-- PASSWORD -->
         <div class="field">
           <label for="password">Password</label>
           <div class="pw-row">
-            <input type="password" id="password" placeholder="Your password" oninput="clearErrors()" style="padding-right:4rem" />
+            <input type="password" id="password" autocomplete="current-password" placeholder="Your password" oninput="clearErrors()" style="padding-right:4rem" />
             <button class="pw-toggle" onclick="togglePassword()" id="pwToggle">Show</button>
           </div>
-          <span class="field-error" id="pwError">Password is required</span>
+          <span class="field-error" id="pwError" role="alert">Password is required</span>
         </div>
 
         <!-- REMEMBER / FORGOT -->
@@ -573,19 +573,19 @@
       <div class="forgot-screen" id="forgotScreen">
         <span class="back-link" onclick="showLogin()">← Back to Sign In</span>
 
-        <div class="form-title">Reset Password</div>
+        <div class="form-title" role="heading" aria-level="1">Reset Password</div>
         <div class="form-sub" style="margin-bottom:1.5rem">
           Enter your email and we'll send you a reset link.
         </div>
 
-        <div class="success-msg" id="resetSuccess">
+        <div class="success-msg" id="resetSuccess" role="status">
           ✓ If that email has a DirtBidder account, a reset link is on its way. Check your inbox (and spam) — the link works for 1 hour.
         </div>
 
         <div class="field" id="resetEmailField">
           <label for="resetEmail">Email Address</label>
-          <input type="email" id="resetEmail" placeholder="john@example.com" />
-          <span class="field-error" id="resetEmailError">Please enter a valid email</span>
+          <input type="email" id="resetEmail" autocomplete="email" placeholder="john@example.com" />
+          <span class="field-error" id="resetEmailError" role="alert">Please enter a valid email</span>
         </div>
 
         <button class="submit-btn" id="resetBtn" onclick="handleReset()" style="margin-top:0.5rem">
@@ -759,5 +759,6 @@
 <script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
 try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
 </script>
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --dust:#C4A882; --stone:#8C7B6B; --chalk:#F2EDE6; --success:#6FBF73; }
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --dust:#C4A882; --stone:#A89887; --chalk:#F2EDE6; --success:#6FBF73; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--dust); line-height: 1.6; -webkit-text-size-adjust: 100%; }
@@ -371,5 +371,6 @@
 <script>
 try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
 </script>
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

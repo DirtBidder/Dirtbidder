@@ -44,7 +44,7 @@
           '<button type="button" id="dbRulesYes" style="width:100%;background:#E8892A;color:#1C1410;border:0;border-radius:3px;padding:0.85rem;font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer">I understand</button>' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.8rem;font-size:0.88rem">' +
             '<a href="dirtbidder-how-it-works.html#rules" target="_blank" rel="noopener" style="color:#E8892A">Why we ask</a>' +
-            '<button type="button" id="dbRulesNo" style="background:none;border:0;color:#8C7B6B;font:inherit;cursor:pointer;padding:0.3rem 0">Not now</button>' +
+            '<button type="button" id="dbRulesNo" style="background:none;border:0;color:#A89887;font:inherit;cursor:pointer;padding:0.3rem 0">Not now</button>' +
           '</div>' +
         '</div>';
       document.body.appendChild(o);

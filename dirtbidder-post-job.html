@@ -24,7 +24,7 @@
     --amber:    #E8892A;
     --amber-lt: #F5A94E;
     --dust:     #C4A882;
-    --stone:    #8C7B6B;
+    --stone:    #A89887;
     --chalk:    #F2EDE6;
     --error:    #E74C3C;
     --success:  #27AE60;
@@ -234,7 +234,7 @@
   }
 
   .progress-step.active .p-num { border-color: var(--amber); background: var(--amber); color: var(--soil); }
-  .progress-step.done .p-num { border-color: var(--success); background: var(--success); color: white; }
+  .progress-step.done .p-num { border-color: #1E8449; background: #1E8449; color: white; }
 
   .p-label {
     font-family: 'Barlow Condensed', sans-serif;
@@ -552,7 +552,7 @@
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 800; font-size: 0.95rem;
     letter-spacing: 0.1em; text-transform: uppercase;
-    background: var(--success); color: white;
+    background: #1E8449; color: white;
     border: none; padding: 0.85rem 2rem;
     border-radius: 3px; cursor: pointer;
     transition: background 0.2s;
@@ -610,7 +610,7 @@
 <body>
 
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" role="navigation" aria-label="Menu">
   <a class="sidebar-logo" href="dirtbidder-landing.html"><span>Dirt</span>Bidder</a>
   <div class="sidebar-user">
     <div class="avatar" id="userAvatar">··</div>
@@ -621,13 +621,13 @@
   </div>
   <nav class="nav-section">
     <div class="nav-label">Main</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📊</span> Overview</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📋</span> My Jobs</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">💰</span> Bids Received</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">🏦</span> Payments</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon" aria-hidden="true">📊</span> Overview</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon" aria-hidden="true">📋</span> My Jobs</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon" aria-hidden="true">💰</span> Bids Received</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon" aria-hidden="true">🏦</span> Payments</div>
     <div class="nav-label" style="margin-top:0.5rem">Account</div>
-    <div class="nav-item active"><span class="nav-icon">➕</span> Post a Job</div>
-    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">⚙️</span> Settings</div>
+    <div class="nav-item active"><span class="nav-icon" aria-hidden="true">➕</span> Post a Job</div>
+    <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon" aria-hidden="true">⚙️</span> Settings</div>
   </nav>
   <div class="sidebar-footer">
     <button class="signout-btn" onclick="window.location='dirtbidder-login.html'">🚪 Sign Out</button>
@@ -637,11 +637,11 @@
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title" id="topbarTitle">Post a New Job</div>
+    <div class="topbar-title" role="heading" aria-level="1" id="topbarTitle">Post a New Job</div>
     <a class="topbar-back" href="dirtbidder-client-dashboard.html">← Back to Dashboard</a>
   </div>
 
-  <div class="content">
+  <div class="content" role="main" id="dbMain">
 
     <!-- STEP PROGRESS -->
     <div class="progress-bar" id="progressBar">
@@ -661,38 +661,38 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Job Type <span class="field-req">*</span></div>
-        <div class="job-type-grid">
-          <div class="job-type-btn selected" onclick="selectJobType(this)"><div class="jt-icon">🌲</div><div class="jt-name">Land Clearing</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">📐</div><div class="jt-name">Rough Grading</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">✅</div><div class="jt-name">Fine Grading</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🏗️</div><div class="jt-name">Excavation</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">⚡</div><div class="jt-name">Trenching</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">💧</div><div class="jt-name">Pond Digging</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🛣️</div><div class="jt-name">Road Building</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🏠</div><div class="jt-name">Foundation Prep</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🚛</div><div class="jt-name">Haul Off</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🔧</div><div class="jt-name">Site Prep</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">💧</div><div class="jt-name">Drainage Work</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🌾</div><div class="jt-name">Field Tile</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🚧</div><div class="jt-name">Underground Utilities</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">💦</div><div class="jt-name">Hydrovac</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🏚️</div><div class="jt-name">Demolition</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">🕳️</div><div class="jt-name">Septic</div></div>
-          <div class="job-type-btn" onclick="selectJobType(this)"><div class="jt-icon">❓</div><div class="jt-name">Other</div></div>
+        <div class="form-card-title" role="heading" aria-level="2">Job Type <span class="field-req">*</span></div>
+        <div class="job-type-grid" role="group" aria-label="Type of work">
+          <div class="job-type-btn selected" role="button" tabindex="0" aria-pressed="true" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🌲</div><div class="jt-name">Land Clearing</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">📐</div><div class="jt-name">Rough Grading</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">✅</div><div class="jt-name">Fine Grading</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🏗️</div><div class="jt-name">Excavation</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">⚡</div><div class="jt-name">Trenching</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">💧</div><div class="jt-name">Pond Digging</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🛣️</div><div class="jt-name">Road Building</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🏠</div><div class="jt-name">Foundation Prep</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🚛</div><div class="jt-name">Haul Off</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🔧</div><div class="jt-name">Site Prep</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">💧</div><div class="jt-name">Drainage Work</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🌾</div><div class="jt-name">Field Tile</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🚧</div><div class="jt-name">Underground Utilities</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">💦</div><div class="jt-name">Hydrovac</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🏚️</div><div class="jt-name">Demolition</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">🕳️</div><div class="jt-name">Septic</div></div>
+          <div class="job-type-btn" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectJobType(this)"><div class="jt-icon" aria-hidden="true">❓</div><div class="jt-name">Other</div></div>
         </div>
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Job Title & Description <span class="field-req">*</span></div>
+        <div class="form-card-title" role="heading" aria-level="2">Job Title & Description <span class="field-req">*</span></div>
         <div class="field-group">
           <div class="field">
-            <label>Job Title</label>
+            <label for="jobTitle">Job Title</label>
             <input type="text" id="jobTitle" placeholder="e.g. Land Clearing — 12 Acres, Pond Excavation, Site Prep for New Home" />
             <div class="field-hint">Keep it short and descriptive — operators see this first</div>
           </div>
           <div class="field">
-            <label>Full Description</label>
+            <label for="jobDesc">Full Description</label>
             <textarea id="jobDesc" placeholder="Describe the work in detail. Include:&#10;• What needs to be done&#10;• Current state of the land (trees, brush, flat, sloped, etc.)&#10;• Any access issues or site conditions&#10;• Specific requirements or preferences&#10;• Any materials to be hauled off or kept on site"></textarea>
             <div class="field-hint">Don’t put your phone number or email here — it’s hidden automatically. The operator you hire gets your contact info after you pay.</div>
             <div class="field-hint">The more detail you give, the more accurate your bids will be</div>
@@ -701,29 +701,29 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Equipment Needed</div>
+        <div class="form-card-title" role="heading" aria-level="2">Equipment Needed</div>
         <div class="field-hint" style="margin-bottom:1rem">Select any equipment you think the job will require (optional — operators will decide what they need)</div>
-        <div class="equip-grid">
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Excavator</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Bulldozer</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Dump Truck</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Skid Steer</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Motor Grader</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Compactor</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Frontend Loader</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Impact Hammer</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Water Truck</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Chain Trencher</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Tile Plow</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Pull-Type Scraper</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Forestry Mulcher</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Long-Reach Excavator</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Directional Drill (HDD)</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Articulated Dump Truck</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Semi End Dump / Belly Dump</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Stump Grinder</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">Vacuum Excavator</div></div>
-          <div class="equip-check" onclick="toggleEquip(this)"><input type="checkbox" /><div class="check-icon"></div><div class="equip-check-label">GPS / Laser Grading</div></div>
+        <div class="equip-grid" role="group" aria-label="Equipment needed">
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Excavator</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Bulldozer</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Dump Truck</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Skid Steer</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Motor Grader</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Compactor</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Frontend Loader</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Impact Hammer</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Water Truck</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Chain Trencher</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Tile Plow</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Pull-Type Scraper</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Forestry Mulcher</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Long-Reach Excavator</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Directional Drill (HDD)</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Articulated Dump Truck</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Semi End Dump / Belly Dump</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Stump Grinder</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">Vacuum Excavator</div></div>
+          <div class="equip-check" role="checkbox" tabindex="0" aria-checked="false" data-db-sync onclick="toggleEquip(this)"><input type="checkbox" tabindex="-1" aria-hidden="true" /><div class="check-icon"></div><div class="equip-check-label">GPS / Laser Grading</div></div>
         </div>
       </div>
 
@@ -741,20 +741,20 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Site Location <span class="field-req">*</span></div>
+        <div class="form-card-title" role="heading" aria-level="2">Site Location <span class="field-req">*</span></div>
         <div class="field-group">
           <div class="field">
-            <label>Street Address 🔒</label>
+            <label for="address">Street Address 🔒</label>
             <input type="text" id="address" placeholder="123 Farm Road" />
             <div class="field-hint">Private — bidders only see the city. Only the operator you hire and pay sees the full address. You can also add it later from your dashboard.</div>
           </div>
           <div class="field-row">
             <div class="field">
-              <label>City <span class="field-req">*</span></label>
+              <label for="city">City <span class="field-req">*</span></label>
               <input type="text" id="city" placeholder="e.g. Humboldt" />
             </div>
             <div class="field">
-              <label>State <span class="field-req">*</span></label>
+              <label for="state">State <span class="field-req">*</span></label>
               <select id="state">
                 <option value="">Select state...</option>
                 <option>Alabama</option><option>Alaska</option><option>Arizona</option>
@@ -778,11 +778,11 @@
             </div>
           </div>
           <div class="field" style="max-width:200px">
-            <label>ZIP Code <span class="field-req">*</span></label>
+            <label for="zip">ZIP Code <span class="field-req">*</span></label>
             <input type="text" id="zip" placeholder="50548" maxlength="5" />
           </div>
           <div class="field">
-            <label>Site Access Notes</label>
+            <label for="access">Site Access Notes</label>
             <input type="text" id="access" placeholder="e.g. Gate code required, gravel driveway, steep hill at entrance" />
             <div class="field-hint">Private too — only shown to the operator you hire.</div>
           </div>
@@ -790,11 +790,11 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Site Size & Conditions <span class="field-req">*</span></div>
+        <div class="form-card-title" role="heading" aria-level="2">Site Size & Conditions <span class="field-req">*</span></div>
         <div class="field-group">
           <div class="field-row">
             <div class="field">
-              <label>Approximate Acreage</label>
+              <label for="acreage">Approximate Acreage</label>
               <select id="acreage">
                 <option value="">Select size...</option>
                 <option>Less than 0.5 acres</option>
@@ -810,7 +810,7 @@
               </select>
             </div>
             <div class="field">
-              <label>Terrain Type</label>
+              <label for="terrain">Terrain Type</label>
               <select id="terrain">
                 <option value="">Select terrain...</option>
                 <option>Flat / Level</option>
@@ -825,7 +825,7 @@
           </div>
           <div class="field-row">
             <div class="field">
-              <label>Current Land State</label>
+              <label for="landState">Current Land State</label>
               <select id="landState">
                 <option value="">Select...</option>
                 <option>Raw / Undeveloped</option>
@@ -838,7 +838,7 @@
               </select>
             </div>
             <div class="field">
-              <label>Soil Type (if known)</label>
+              <label for="soilType">Soil Type (if known)</label>
               <select id="soilType">
                 <option value="">Select if known...</option>
                 <option>Sandy / Loose</option>
@@ -851,7 +851,7 @@
             </div>
           </div>
           <div class="field">
-            <label>Spoils / Haul Off</label>
+            <label for="spoils">Spoils / Haul Off</label>
             <select id="spoils">
               <option value="">Select...</option>
               <option>Keep all material on site</option>
@@ -878,15 +878,15 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Budget Range <span class="field-req">*</span></div>
+        <div class="form-card-title" role="heading" aria-level="2">Budget Range <span class="field-req">*</span></div>
         <div class="budget-row">
           <div class="field">
-            <label>Minimum Budget ($)</label>
+            <label for="budgetMin">Minimum Budget ($)</label>
             <input type="number" id="budgetMin" placeholder="e.g. 3000" oninput="updateBudgetPreview()" />
           </div>
           <div class="budget-dash">—</div>
           <div class="field">
-            <label>Maximum Budget ($)</label>
+            <label for="budgetMax">Maximum Budget ($)</label>
             <input type="number" id="budgetMax" placeholder="e.g. 6000" oninput="updateBudgetPreview()" />
           </div>
         </div>
@@ -895,10 +895,10 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Timeline <span class="field-req">*</span></div>
+        <div class="form-card-title" role="heading" aria-level="2">Timeline <span class="field-req">*</span></div>
         <div class="field-group">
           <div class="field">
-            <label>When do you need work to start?</label>
+            <label for="startTimeline">When do you need work to start?</label>
             <select id="startTimeline">
               <option value="">Select start date...</option>
               <option>ASAP — As soon as possible</option>
@@ -912,16 +912,16 @@
           </div>
           <div class="field-row">
             <div class="field">
-              <label>Preferred Start Date (optional)</label>
+              <label for="startDate">Preferred Start Date (optional)</label>
               <input type="date" id="startDate" />
             </div>
             <div class="field">
-              <label>Must Be Done By (optional)</label>
+              <label for="endDate">Must Be Done By (optional)</label>
               <input type="date" id="endDate" />
             </div>
           </div>
           <div class="field">
-            <label>How Flexible Is Your Timeline?</label>
+            <label for="flexibility">How Flexible Is Your Timeline?</label>
             <select id="flexibility">
               <option value="">Select...</option>
               <option>Firm — must start and end on specific dates</option>
@@ -933,10 +933,10 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Additional Preferences</div>
+        <div class="form-card-title" role="heading" aria-level="2">Additional Preferences</div>
         <div class="field-group">
           <div class="field">
-            <label>Minimum Operator Experience</label>
+            <label for="minExp">Minimum Operator Experience</label>
             <select id="minExp">
               <option value="">No requirement</option>
               <option>At least 1 year on DirtBidder</option>
@@ -947,7 +947,7 @@
             </select>
           </div>
           <div class="field">
-            <label>Anything Else Operators Should Know?</label>
+            <label for="extraNotes">Anything Else Operators Should Know?</label>
             <textarea id="extraNotes" placeholder="e.g. Must have liability insurance, pets on property, buried utilities present, prefer local operators, willing to pay premium for fast start..." style="min-height:70px"></textarea>
           </div>
         </div>
@@ -968,8 +968,8 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Site Photos (optional but highly recommended)</div>
-        <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="addPhotos(this.files)" />
+        <div class="form-card-title" role="heading" aria-level="2">Site Photos (optional but highly recommended)</div>
+        <input type="file" id="photoInput" aria-label="Add photos" accept="image/*" multiple style="display:none" onchange="addPhotos(this.files)" />
         <div class="upload-area" onclick="document.getElementById('photoInput').click()" id="uploadArea">
           <div class="upload-icon">📷</div>
           <div class="upload-text">Tap to Add Photos</div>
@@ -982,18 +982,18 @@
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">📍 Drop a GPS Pin (optional)</div>
+        <div class="form-card-title" role="heading" aria-level="2">📍 Drop a GPS Pin (optional)</div>
         <div class="field-hint" style="margin-bottom:0.75rem">No street address out in the field? Put a pin right on the job site. <strong style="color:var(--chalk)">It stays private</strong> — only the operator you hire and pay sees it, and they get directions straight to it.</div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem">
           <button type="button" class="btn-back" style="padding:0.55rem 0.9rem;font-size:0.8rem" onclick="pinHere(this)">📱 Use My Current Location</button>
           <button type="button" class="btn-back" id="pinClearBtn" style="padding:0.55rem 0.9rem;font-size:0.8rem;display:none" onclick="clearPin()">Remove Pin</button>
         </div>
         <div id="pinMap" style="height:300px;border-radius:3px;border:1px solid rgba(196,168,130,0.15);background:#2a211b"></div>
-        <div class="field-hint" id="pinStatus" style="margin-top:0.6rem">Tap the map where the work is. Pinch or scroll to zoom in.</div>
+        <div class="field-hint" id="pinStatus" role="status" aria-live="polite" style="margin-top:0.6rem">Tap the map where the work is. Pinch or scroll to zoom in.</div>
       </div>
 
       <div class="form-card">
-        <div class="form-card-title">Photo Tips</div>
+        <div class="form-card-title" role="heading" aria-level="2">Photo Tips</div>
         <div style="display:flex;flex-direction:column;gap:0.6rem">
           <div style="display:flex;gap:0.6rem;align-items:flex-start;font-size:0.83rem;color:var(--dust)"><span style="color:var(--amber)">▸</span> Take photos from multiple angles — walk the whole property</div>
           <div style="display:flex;gap:0.6rem;align-items:flex-start;font-size:0.83rem;color:var(--dust)"><span style="color:var(--amber)">▸</span> Show any trees, stumps, or brush that needs clearing</div>
@@ -1235,7 +1235,7 @@
 
   function renderPhotoPreviews() {
     document.getElementById('photoPreviews').innerHTML = photos.map((src, i) =>
-      `<div class="photo-preview"><img src="${src}" alt="Site photo ${i + 1}"><button class="remove" onclick="removePhoto(${i})">✕</button></div>`
+      `<div class="photo-preview"><img src="${src}" alt="Site photo ${i + 1}"><button class="remove" onclick="removePhoto(${i})" aria-label="Close">✕</button></div>`
     ).join('');
   }
 
@@ -1448,5 +1448,6 @@
 
 
 
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

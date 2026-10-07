@@ -24,7 +24,7 @@
     --amber:    #E8892A;
     --amber-lt: #F5A94E;
     --dust:     #C4A882;
-    --stone:    #8C7B6B;
+    --stone:    #A89887;
     --chalk:    #F2EDE6;
     --error:    #E74C3C;
     --success:  #27AE60;
@@ -306,8 +306,8 @@
   }
 
   .step-dot.done {
-    border-color: var(--success);
-    background: var(--success);
+    border-color: #1E8449;
+    background: #1E8449;
     color: white;
   }
 
@@ -609,14 +609,14 @@
 
     <div class="role-label">I am a...</div>
     <div class="role-cards">
-      <div class="role-card selected" id="leftClient" onclick="selectRole('client')">
+      <div class="role-card selected" id="leftClient" role="button" tabindex="0" aria-pressed="true" data-db-sync onclick="selectRole('client')">
         <div class="role-radio"></div>
         <div class="role-info">
           <div class="role-name">Client</div>
           <div class="role-desc">I need excavation, grading, or dirt work done on my property</div>
         </div>
       </div>
-      <div class="role-card" id="leftOperator" onclick="selectRole('operator')">
+      <div class="role-card" id="leftOperator" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectRole('operator')">
         <div class="role-radio"></div>
         <div class="role-info">
           <div class="role-name">Operator</div>
@@ -635,7 +635,7 @@
   </div>
 
   <!-- RIGHT PANEL -->
-  <div class="right-panel">
+  <div class="right-panel" role="main" id="dbMain">
     <div class="form-wrap">
 
       <!-- STEP INDICATOR -->
@@ -654,19 +654,19 @@
 
       <!-- STEP 1 — ROLE SELECT (mobile only, desktop uses left panel) -->
       <div class="form-panel active" id="step1">
-        <div class="form-title">Create Your Account</div>
-        <div class="form-sub">Already have one? <span onclick="goToLogin()">Sign in here</span></div>
+        <div class="form-title" role="heading" aria-level="1">Create Your Account</div>
+        <div class="form-sub">Already have one? <span role="link" tabindex="0" onclick="goToLogin()">Sign in here</span></div>
 
         <div class="role-label" style="margin-bottom:0.75rem">I am a...</div>
         <div class="role-cards" style="margin-bottom:2rem">
-          <div class="role-card selected" id="roleClient" onclick="selectRole('client')">
+          <div class="role-card selected" id="roleClient" role="button" tabindex="0" aria-pressed="true" data-db-sync onclick="selectRole('client')">
             <div class="role-radio"></div>
             <div class="role-info">
               <div class="role-name">Client — I Need Work Done</div>
               <div class="role-desc">Post jobs, receive bids, hire operators, release payment when complete</div>
             </div>
           </div>
-          <div class="role-card" id="roleOperator" onclick="selectRole('operator')">
+          <div class="role-card" id="roleOperator" role="button" tabindex="0" aria-pressed="false" data-db-sync onclick="selectRole('operator')">
             <div class="role-radio"></div>
             <div class="role-info">
               <div class="role-name">Operator — I Run Equipment</div>
@@ -687,32 +687,32 @@
 
       <!-- STEP 2 — ACCOUNT INFO -->
       <div class="form-panel" id="step2">
-        <div class="form-title" id="step2Title">Create Your Account</div>
+        <div class="form-title" role="heading" aria-level="1" id="step2Title">Create Your Account</div>
         <div class="form-sub" id="step2Sub">Step 2 of 3 — Basic Info</div>
 
         <div class="field-group">
           <div class="field-row">
             <div class="field">
               <label for="firstName">First Name</label>
-              <input type="text" id="firstName" placeholder="John" />
+              <input type="text" id="firstName" autocomplete="given-name" placeholder="John" />
             </div>
             <div class="field">
               <label for="lastName">Last Name</label>
-              <input type="text" id="lastName" placeholder="Smith" />
+              <input type="text" id="lastName" autocomplete="family-name" placeholder="Smith" />
             </div>
           </div>
           <div class="field">
             <label for="email">Email Address</label>
-            <input type="email" id="email" placeholder="john@example.com" />
-            <span class="field-error" id="emailError">Please enter a valid email</span>
+            <input type="email" id="email" autocomplete="email" placeholder="john@example.com" />
+            <span class="field-error" id="emailError" role="alert">Please enter a valid email</span>
           </div>
           <div class="field">
             <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" placeholder="(555) 000-0000" oninput="formatPhone(this)" />
+            <input type="tel" id="phone" autocomplete="tel" placeholder="(555) 000-0000" oninput="formatPhone(this)" />
           </div>
           <div class="field">
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Min. 8 characters" oninput="checkPassword(this)" />
+            <input type="password" id="password" autocomplete="new-password" placeholder="Min. 8 characters" oninput="checkPassword(this)" />
             <div class="pw-strength">
               <div class="pw-bar" id="pwBar1"></div>
               <div class="pw-bar" id="pwBar2"></div>
@@ -723,8 +723,8 @@
           </div>
           <div class="field">
             <label for="confirmPw">Confirm Password</label>
-            <input type="password" id="confirmPw" placeholder="Repeat password" />
-            <span class="field-error" id="pwError">Passwords do not match</span>
+            <input type="password" id="confirmPw" autocomplete="new-password" placeholder="Repeat password" />
+            <span class="field-error" id="pwError" role="alert">Passwords do not match</span>
           </div>
         </div>
 
@@ -744,7 +744,7 @@
 
         <!-- CLIENT PROFILE -->
         <div id="clientProfile">
-          <div class="form-title">Your Project Info</div>
+          <div class="form-title" role="heading" aria-level="1">Your Project Info</div>
           <div class="form-sub">Step 3 of 3 — Tell us about your property</div>
           <div class="field-group">
             <div class="field">
@@ -808,12 +808,12 @@
 
         <!-- OPERATOR PROFILE -->
         <div id="operatorProfile" style="display:none">
-          <div class="form-title">Your Equipment & Area</div>
+          <div class="form-title" role="heading" aria-level="1">Your Equipment & Area</div>
           <div class="form-sub">Step 3 of 3 — Tell us what you run</div>
           <div class="field-group">
             <div class="field">
               <label for="companyName">Company Name (optional)</label>
-              <input type="text" id="companyName" placeholder="Smith Excavating LLC" />
+              <input type="text" id="companyName" autocomplete="organization" placeholder="Smith Excavating LLC" />
             </div>
             <div class="field">
               <label for="opZip">Your Home ZIP Code</label>
@@ -1207,5 +1207,6 @@
 <script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
 try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
 </script>
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

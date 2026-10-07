@@ -25,7 +25,7 @@
     --amber:    #E8892A;
     --amber-lt: #F5A94E;
     --dust:     #C4A882;
-    --stone:    #8C7B6B;
+    --stone:    #A89887;
     --chalk:    #F2EDE6;
     --white:    #FFFFFF;
     --danger:   #C0392B;
@@ -599,7 +599,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--stone);
-    opacity: 0.6;
+    opacity: 0.85;
     transition: opacity 0.2s;
   }
 
@@ -695,7 +695,7 @@
 
   .footer-copy {
     font-size: 0.75rem;
-    color: var(--clay);
+    color: var(--stone);
     margin-top: 1.5rem;
   }
 
@@ -724,7 +724,7 @@
   .db-chat-btn { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 60px; height: 60px; border-radius: 50%; background: var(--amber); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(232,137,42,0.4); z-index: 999; transition: transform 0.2s, box-shadow 0.2s; }
   .db-chat-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(232,137,42,0.55); }
   .db-chat-btn svg { width: 26px; height: 26px; fill: var(--soil); }
-  .db-unread { position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%; background: #E74C3C; border: 2px solid var(--soil); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.65rem; color: white; }
+  .db-unread { position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%; background: #C0392B; border: 2px solid var(--soil); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.65rem; color: white; }
   .db-chat-window { position: fixed; bottom: 5.5rem; right: 1.5rem; width: 360px; max-height: 560px; background: var(--dig); border: 1px solid rgba(196,168,130,0.12); border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,0.5); display: flex; flex-direction: column; z-index: 998; overflow: hidden; transform: scale(0.92) translateY(10px); opacity: 0; pointer-events: none; transition: transform 0.2s ease, opacity 0.2s ease; }
   .db-chat-window.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
   .db-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: var(--soil); border-bottom: 1px solid rgba(196,168,130,0.08); flex-shrink: 0; }
@@ -783,6 +783,7 @@
   </div>
 </nav>
 
+<main id="dbMain">
 <!-- HERO -->
 <section class="hero">
   <div class="hero-stripe"></div>
@@ -832,25 +833,25 @@
   <!-- CLIENT STEPS -->
   <div class="steps-grid steps-panel active" id="steps-client">
     <div class="step">
-      <div class="step-num">01</div>
+      <div class="step-num" aria-hidden="true">01</div>
       <div class="step-icon">📍</div>
       <div class="step-title">Post Your Job</div>
       <div class="step-desc">Describe the work — location, acreage, job type, timeline, and budget. Add photos if you have them.</div>
     </div>
     <div class="step">
-      <div class="step-num">02</div>
+      <div class="step-num" aria-hidden="true">02</div>
       <div class="step-icon">📬</div>
       <div class="step-title">Get Bids</div>
       <div class="step-desc">Local operators see your job and submit competitive bids. Compare pricing, reviews, and equipment.</div>
     </div>
     <div class="step">
-      <div class="step-num">03</div>
+      <div class="step-num" aria-hidden="true">03</div>
       <div class="step-icon">🤝</div>
       <div class="step-title">Hire the Right Crew</div>
       <div class="step-desc">Accept the bid that fits. Payment is held securely in escrow — your operator gets paid when the job is done right.</div>
     </div>
     <div class="step">
-      <div class="step-num">04</div>
+      <div class="step-num" aria-hidden="true">04</div>
       <div class="step-icon">✅</div>
       <div class="step-title">Release & Review</div>
       <div class="step-desc">Confirm the job is complete, release payment, and leave a review. Your money never moves until you say so.</div>
@@ -860,25 +861,25 @@
   <!-- OPERATOR STEPS -->
   <div class="steps-grid steps-panel" id="steps-operator">
     <div class="step">
-      <div class="step-num">01</div>
+      <div class="step-num" aria-hidden="true">01</div>
       <div class="step-icon">🚜</div>
       <div class="step-title">Build Your Profile</div>
       <div class="step-desc">List your equipment, set your service area, and show your work. Free to join — no monthly fees to start.</div>
     </div>
     <div class="step">
-      <div class="step-num">02</div>
+      <div class="step-num" aria-hidden="true">02</div>
       <div class="step-icon">🗺️</div>
       <div class="step-title">Browse Local Jobs</div>
       <div class="step-desc">See open jobs in your area filtered by job type and equipment match. No chasing leads — they come to you.</div>
     </div>
     <div class="step">
-      <div class="step-num">03</div>
+      <div class="step-num" aria-hidden="true">03</div>
       <div class="step-icon">💰</div>
       <div class="step-title">Submit Your Bid</div>
       <div class="step-desc">Name your price, set your timeline, add notes. Clients compare bids and hire the operator that fits best.</div>
     </div>
     <div class="step">
-      <div class="step-num">04</div>
+      <div class="step-num" aria-hidden="true">04</div>
       <div class="step-icon">🏦</div>
       <div class="step-title">Get Paid Fast</div>
       <div class="step-desc">Complete the job, mark it done, and get paid direct to your bank account within 2 business days via Stripe.</div>
@@ -1023,6 +1024,7 @@
 </section>
 
 <!-- FOOTER -->
+</main>
 <footer>
   <div class="footer-logo"><span>Dirt</span>Bidder</div>
   <div class="footer-tagline">Find the dirt. Find the deal.</div>
@@ -1055,7 +1057,7 @@
 </script>
 
 <!-- CHATBOT WIDGET -->
-<button class="db-chat-btn" onclick="toggleChat()" id="dbChatBtn" title="Chat with DirtBidder Support">
+<button class="db-chat-btn" onclick="toggleChat()" id="dbChatBtn" title="Chat with DirtBidder Support" aria-label="Chat with DirtBidder Support">
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
   <div class="db-unread" id="dbUnread">1</div>
 </button>
@@ -1066,7 +1068,7 @@
       <div class="db-bot-name">DirtBidder Support</div>
       <div class="db-bot-status">Online — replies instantly</div>
     </div>
-    <button class="db-close" onclick="toggleChat()">✕</button>
+    <button class="db-close" onclick="toggleChat()" aria-label="Close">✕</button>
   </div>
   <div class="db-messages" id="dbMessages">
     <div class="db-msg bot"><div class="db-msg-av">🚜</div><div class="db-bubble">Hey! 👋 I'm the DirtBidder assistant. I can help with signing up, posting jobs, bidding, payments, and anything else about the app.<br><br>What can I help you with?</div></div>
@@ -1081,8 +1083,8 @@
     <button class="db-chip" onclick="quickReply('How do I become an operator?')">Become an operator</button>
   </div>
   <div class="db-input-row">
-    <input class="db-input" type="text" id="dbInput" placeholder="Ask anything about DirtBidder..." onkeydown="handleDbKey(event)" />
-    <button class="db-send" onclick="sendDbMessage()">➤</button>
+    <input class="db-input" type="text" id="dbInput" aria-label="Ask a question about DirtBidder" placeholder="Ask anything about DirtBidder..." onkeydown="handleDbKey(event)" />
+    <button class="db-send" aria-label="Send" onclick="sendDbMessage()">➤</button>
   </div>
 </div>
 <script>
@@ -1105,5 +1107,6 @@ setTimeout(()=>{if(!isOpen)document.getElementById('dbUnread').style.display='fl
 <script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
 try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
 </script>
+<script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

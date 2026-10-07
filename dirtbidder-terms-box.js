@@ -44,7 +44,7 @@
         '<p style="font-size:0.9rem;margin:0 0 1.1rem">Read the full <a href="dirtbidder-terms.html" target="_blank" rel="noopener" style="' + A + '">Terms of Service</a> and <a href="dirtbidder-privacy.html" target="_blank" rel="noopener" style="' + A + '">Privacy Policy</a>.</p>' +
         '<div id="dbTermsErr" role="alert" style="display:none;color:#E57373;font-size:0.88rem;margin-bottom:0.7rem"></div>' +
         '<button type="button" id="dbTermsYes" style="width:100%;background:#E8892A;color:#1C1410;border:0;border-radius:3px;padding:0.85rem 0.6rem;font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer">I agree to the updated Terms and Privacy Policy</button>' +
-        '<div style="text-align:right;margin-top:0.8rem;font-size:0.88rem"><button type="button" id="dbTermsNo" style="background:none;border:0;color:#8C7B6B;font:inherit;cursor:pointer;padding:0.3rem 0">Not now</button></div>' +
+        '<div style="text-align:right;margin-top:0.8rem;font-size:0.88rem"><button type="button" id="dbTermsNo" style="background:none;border:0;color:#A89887;font:inherit;cursor:pointer;padding:0.3rem 0">Not now</button></div>' +
       '</div>';
     document.body.appendChild(o);
     var yes = o.querySelector('#dbTermsYes'), no = o.querySelector('#dbTermsNo'), err = o.querySelector('#dbTermsErr');
