@@ -856,6 +856,8 @@
         <div class="greeting-sub" id="greetSub">Loading your jobs…</div>
       </div>
 
+      <div id="dbTestBox" class="card" style="display:none;margin-bottom:1rem;padding:1rem 1.1rem;border-color:rgba(232,137,42,0.35)"></div>
+
       <div id="loadError" role="alert" class="card" style="display:none;margin-bottom:1rem;border-color:var(--error)">
         <div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Couldn't load your dashboard</div><div class="empty-sub" id="loadErrorText">Check your connection and refresh.</div></div>
       </div>
@@ -1390,7 +1392,7 @@
       const name = (me.name || me.email || '').trim();
       const first = name.split(/[\s@]/)[0] || 'there';
       document.getElementById('userName').textContent = name || 'My Account';
-      if (me.is_admin) { document.getElementById('userRole').textContent = 'Owner'; document.getElementById('adminLink').style.display = ''; document.getElementById('hqLink').style.display = ''; try { localStorage.setItem('dirtbidder_admin', '1'); } catch (e) {} }
+      if (me.is_admin) { document.getElementById('userRole').textContent = 'Owner'; if (window.DirtOwner) DirtOwner.fill(); document.getElementById('adminLink').style.display = ''; document.getElementById('hqLink').style.display = ''; try { localStorage.setItem('dirtbidder_admin', '1'); } catch (e) {} }
       document.getElementById('userAvatar').textContent = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
       document.getElementById('greetName').textContent = first + '.';
       const h = new Date().getHours();
@@ -1798,6 +1800,7 @@
 <input type="file" id="jobPhotoInput" aria-label="Add photos" accept="image/*" multiple style="display:none" onchange="addJobPhotos(this.files)">
 <script src="dirtbidder-terms-box.js"></script>
 <script src="dirtbidder-settings.js"></script>
+<script src="dirtbidder-owner-switch.js"></script>
 <script src="dirtbidder-a11y.js"></script>
 </body>
 </html>
