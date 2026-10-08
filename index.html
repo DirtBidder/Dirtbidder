@@ -123,6 +123,16 @@
       );
   }
 
+
+  /* Real jobsite photo behind the headline, darkened on the left so the words stay easy to read */
+  .hero-photo {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(28,20,16,0.97) 0%, rgba(28,20,16,0.88) 38%, rgba(28,20,16,0.45) 70%, rgba(28,20,16,0.25) 100%),
+      linear-gradient(0deg, rgba(28,20,16,1) 0%, rgba(28,20,16,0) 22%),
+      url('hero-jobsite.jpg') center right / cover no-repeat;
+  }
+
   /* Caterpillar-yellow hazard stripe accent */
   .hero-stripe {
     position: absolute;
@@ -707,6 +717,11 @@
     .nav-links a { font-size: 0.8rem; }
     .btn-nav { padding: 0.45rem 0.9rem; }
     .hero-bg { background: none; }
+    .hero-photo {
+      background:
+        linear-gradient(0deg, rgba(28,20,16,1) 0%, rgba(28,20,16,0.88) 40%, rgba(28,20,16,0.55) 70%, rgba(28,20,16,0.3) 100%),
+        url('hero-jobsite-mobile.jpg') center top / cover no-repeat;
+    }
     .hero { padding: 7rem 1.25rem 3rem; }
     .hero-stats { gap: 1.5rem; }
     .who-inner { grid-template-columns: 1fr; }
@@ -786,6 +801,7 @@
 <main id="dbMain">
 <!-- HERO -->
 <section class="hero">
+  <div class="hero-photo" role="img" aria-label="A John Deere excavator loading dirt into an articulated haul truck on an Iowa jobsite"></div>
   <div class="hero-stripe"></div>
   <div class="hero-bg"></div>
   <div class="hero-inner">
