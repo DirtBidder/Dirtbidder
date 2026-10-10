@@ -31,6 +31,12 @@
     '.db-skip:focus{left:0}' +
     'html.db-kbd :focus{outline:3px solid #FFD9A8 !important;outline-offset:2px !important}' +
     '.db-sr-only{position:absolute !important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}' +
+    // Pop-ups taller than the screen (the bid form on a phone): the pop-up scrolls, not the page behind it
+    '.modal-overlay,.db-modal-overlay{overflow-y:auto !important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}' +
+    '.modal-overlay.active,.db-modal-overlay.active{align-items:flex-start !important}' +
+    '.modal-overlay>.modal,.db-modal-overlay>.db-modal{margin-top:auto !important;margin-bottom:auto !important;flex-shrink:0}' +
+    '@media (max-width:600px){.modal-overlay{padding:1rem 0.75rem !important}}' +
+    'html.db-modal-open,html.db-modal-open body{overflow:hidden !important}' +
     '@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}}';
   (document.head || document.documentElement).appendChild(style);
   var root = document.documentElement;
@@ -132,6 +138,7 @@
   function modalOpened(ov) {
     if (openOnes.indexOf(ov) !== -1) return;
     openOnes.push(ov);
+    root.classList.add('db-modal-open');
     var box = dialogBox(ov);
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
@@ -151,6 +158,7 @@
     var i = openOnes.indexOf(ov);
     if (i === -1) return;
     openOnes.splice(i, 1);
+    if (!openOnes.length) root.classList.remove('db-modal-open');
     var back = returnTo.get(ov);
     returnTo.delete(ov);
     if (back && document.contains(back) && (ov.contains(document.activeElement) || document.activeElement === document.body)) { try { back.focus(); } catch (err) {} }
@@ -196,6 +204,8 @@
           for (var j = 0; j < m.addedNodes.length; j++) if (m.addedNodes[j].nodeType === 1) pending.push(m.addedNodes[j]);
         }
       }
+      // a pop-up taken off the page while open must not leave the page locked
+      for (var k = openOnes.length - 1; k >= 0; k--) if (!document.contains(openOnes[k])) modalClosed(openOnes[k]);
       if (pending.length && !timer) timer = setTimeout(flush, 40);
     }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   }
