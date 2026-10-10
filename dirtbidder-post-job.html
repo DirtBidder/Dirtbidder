@@ -1431,6 +1431,7 @@
       document.getElementById('progressBar').style.display = 'none';
       document.getElementById('successScreen').classList.add('active');
       window.scrollTo(0, 0);
+      if (window.dbTrack) dbTrack('Lead', { content_name: 'job_posted' });
     } catch (err) {
       console.error(err);
       alert('Network error — could not reach the server. Please try again.');
@@ -1449,6 +1450,7 @@
 
 
 <script src="dirtbidder-owner-switch.js"></script>
+<script src="dirtbidder-pixel.js"></script>
 <script src="dirtbidder-a11y.js"></script>
 </body>
 </html>

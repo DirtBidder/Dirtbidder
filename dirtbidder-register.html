@@ -1186,6 +1186,7 @@
     const steps = document.querySelector('.steps');
     if (steps) steps.style.display = 'none';
     document.getElementById('successScreen').classList.add('active');
+    if (window.dbTrack) dbTrack('CompleteRegistration', { content_name: currentRole });
   }
 
   function goToDashboard() {
@@ -1207,6 +1208,7 @@
 <script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
 try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
 </script>
+<script src="dirtbidder-pixel.js"></script>
 <script src="dirtbidder-a11y.js"></script>
 </body>
 </html>
