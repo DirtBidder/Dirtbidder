@@ -251,6 +251,7 @@
         </div>
         <div style="display:flex;flex-direction:column;gap:0.75rem">
           <div class="card" id="waitCard" hidden></div>
+          <div class="card" id="bidCard"></div>
           <div class="card">
             <div class="card-head"><div class="card-title">To-do</div><span class="pill" id="todoCount"></span></div>
             <div class="card-body">
@@ -275,6 +276,55 @@
       </div>`;
     renderTasks();
     renderWait();
+    renderBids();
+  }
+
+  // ── Public bid board: county, city and Iowa DOT jobs shown on dirtbidder-public-bids.html ──
+  let pbids = null, pbMsg = '';
+  function renderBids() {
+    const el = document.getElementById('bidCard'); if (!el) return;
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+    const list = (pbids || []).filter(b => !b.hidden && b.letting_date >= today).sort((a, b) => a.letting_date < b.letting_date ? -1 : 1);
+    const field = (id, label, extra = '') => `<label style="display:block;font-size:0.8rem;color:var(--stone);margin-top:0.45rem">${label}<input id="${id}" ${extra} style="display:block;width:100%;margin-top:0.2rem;background:var(--soil);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.5rem 0.6rem;font:inherit;font-size:0.92rem"></label>`;
+    el.innerHTML = `
+      <div class="card-head"><div class="card-title">Public bid board</div><span class="pill">${pbids ? list.length + ' showing' : '…'}</span></div>
+      <div class="card-body">
+        <div style="font-size:0.85rem;color:var(--stone);margin-bottom:0.5rem">County and Iowa DOT jobs operators see on the <a href="dirtbidder-public-bids.html" target="_blank" rel="noopener" style="color:var(--amber)">Public Bid Board</a>. Past dates drop off on their own.</div>
+        <ul class="todo">${list.map(b => `<li><span class="t"><b>${esc(b.title)}</b><br><small style="color:var(--stone)">${esc(b.letting_date)} · ${esc(b.county ? b.county + ' Co.' : b.agency)}${b.status === 'estimated' ? ' · estimated' : ''}</small></span><button class="x" onclick="hideBid(${b.id})" aria-label="Hide this bid" title="Hide">×</button></li>`).join('') || '<li><span class="t" style="color:var(--stone)">No upcoming bids.</span></li>'}</ul>
+        <details id="bidAdd" style="margin-top:0.6rem"${pbMsg && !/^✓/.test(pbMsg) ? ' open' : ''}>
+          <summary style="cursor:pointer;color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;font-size:0.85rem">+ Add a bid</summary>
+          <form onsubmit="addBid(event)">
+            ${field('pbTitle', 'Job (what it is)', 'maxlength="300" required placeholder="170th St box culvert"')}
+            ${field('pbAgency', 'Agency', 'maxlength="300" required placeholder="Webster County"')}
+            ${field('pbCounty', 'County', 'maxlength="100" placeholder="Webster"')}
+            ${field('pbDate', 'Bid date', 'type="date" required')}
+            ${field('pbWork', 'Dirt work in it', 'maxlength="300" placeholder="Excavation, culvert pipe, seeding"')}
+            ${field('pbUrl', 'Link to the official notice', 'type="url" required placeholder="https://"')}
+            <label style="display:block;font-size:0.8rem;color:var(--stone);margin-top:0.45rem"><input type="checkbox" id="pbEst" style="accent-color:var(--amber)"> Estimated date (not advertised yet)</label>
+            <button class="btn solid" type="submit" style="margin-top:0.6rem">Add to the board</button>
+          </form>
+        </details>
+        ${pbMsg ? `<div class="wait-note" style="color:var(--chalk)">${esc(pbMsg)}</div>` : ''}
+      </div>`;
+  }
+  async function loadBids() {
+    try { pbids = (await api('/api/public-bids/all')).bids; } catch (e) { pbids = null; }
+    renderBids();
+  }
+  async function addBid(e) {
+    e.preventDefault();
+    const v = id => document.getElementById(id).value.trim();
+    const body = { title: v('pbTitle'), agency: v('pbAgency'), county: v('pbCounty'), letting_date: v('pbDate'), work_type: v('pbWork'), source_url: v('pbUrl'), status: document.getElementById('pbEst').checked ? 'estimated' : 'advertised' };
+    try { await api('/api/public-bids', { method: 'POST', body: JSON.stringify(body) }); pbMsg = '✓ Added. It shows on the board within 5 minutes.'; }
+    catch (err) { pbMsg = err.message; }
+    await loadBids();
+  }
+  async function hideBid(id) {
+    const b = pbids.find(x => x.id === id);
+    if (!confirm('Take "' + b.title + '" off the public bid board?')) return;
+    try { await api('/api/public-bids/' + id, { method: 'DELETE' }); pbMsg = '✓ Taken off the board.'; }
+    catch (err) { pbMsg = err.message; }
+    await loadBids();
   }
 
   // ── Waiting to hire: clients who tried to hire before payments were live ──
@@ -358,12 +408,13 @@
       try { localStorage.setItem('dirtbidder_admin', '1'); } catch (e) {}
       render(d);
       loadWait();
+      loadBids();
     } catch (err) {
       document.getElementById('sub').textContent = '';
       document.getElementById('main').innerHTML = `<div class="card"><div class="err">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }
   }
-  if (token) { load(); setInterval(() => { const a = document.activeElement; if (!document.hidden && !(a && a.id === 'newTask')) load(); }, 60000); }
+  if (token) { load(); setInterval(() => { const a = document.activeElement; if (!document.hidden && !(a && a.id === 'newTask') && !(document.getElementById('bidAdd') || {}).open) load(); }, 60000); }
 </script>
 </body>
 </html>
