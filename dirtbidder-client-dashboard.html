@@ -1026,6 +1026,37 @@
 </div>
 
 <!-- REPORT A PROBLEM -->
+<div class="db-modal-overlay" id="hireModal" role="dialog" aria-modal="true" aria-labelledby="hireTitle">
+  <div class="db-modal">
+    <div class="db-modal-head"><div class="db-modal-title" id="hireTitle">Hire This Operator</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeHire()" aria-label="Close">✕</button></div>
+    <div class="db-modal-body">
+      <div id="hireWho" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--amber);margin-bottom:0.75rem"></div>
+      <div style="font-size:0.88rem;color:var(--dust);margin-bottom:1rem;line-height:1.5">You'd normally hand a contractor a deposit with nothing protecting you. On DirtBidder, <strong style="color:var(--chalk)">your money isn't paid to anyone until you say the work is done.</strong> If the job never starts, you get it back.</div>
+      <label>How do you want to pay?</label>
+      <div id="hirePlans" role="radiogroup" aria-label="How do you want to pay?"></div>
+      <div id="hireNote" style="font-size:0.8rem;color:var(--stone);margin-top:0.9rem;line-height:1.45"></div>
+      <div id="hireError" role="alert" style="display:none;color:var(--error);font-size:0.85rem;margin-top:0.75rem"></div>
+    </div>
+    <div class="db-modal-foot">
+      <button class="db-btn" onclick="closeHire()">Cancel</button>
+      <button class="db-btn primary" id="hireSubmit" onclick="submitHire()">Continue to Payment</button>
+    </div>
+  </div>
+</div>
+<style>
+  .db-modal-body label.plan-opt { display: flex; text-transform: none; letter-spacing: normal; font-family: inherit; font-weight: 400; font-size: inherit; color: inherit; margin: 0 0 0.6rem; }
+  .plan-opt { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.8rem 0.9rem; border: 1.5px solid rgba(196,168,130,0.18); border-radius: 4px; margin-bottom: 0.6rem; cursor: pointer; background: var(--clay); }
+  .plan-opt:has(input:checked) { border-color: var(--amber); background: rgba(232,137,42,0.08); }
+  .plan-opt input { margin-top: 0.25rem; accent-color: var(--amber); width: 18px; height: 18px; flex-shrink: 0; }
+  .plan-opt b { display: block; color: var(--chalk); font-size: 0.95rem; margin-bottom: 0.15rem; }
+  .plan-opt span { display: block; color: var(--dust); font-size: 0.82rem; line-height: 1.4; }
+  .stage-box { margin-top: 0.6rem; border: 1px solid rgba(196,168,130,0.15); border-radius: 4px; padding: 0.6rem 0.8rem; background: rgba(196,168,130,0.03); }
+  .stage-line { display: flex; flex-wrap: wrap; gap: 0.4rem 0.75rem; align-items: center; justify-content: space-between; padding: 0.35rem 0; font-size: 0.85rem; color: var(--dust); }
+  .stage-line + .stage-line { border-top: 1px solid rgba(196,168,130,0.08); }
+  .stage-line strong { color: var(--chalk); }
+  .stage-btn { font: inherit; font-size: 0.8rem; font-weight: 700; padding: 0.4rem 0.75rem; border-radius: 3px; border: 1px solid var(--amber); background: transparent; color: var(--amber); cursor: pointer; min-height: 36px; }
+  .stage-btn.solid { background: var(--amber); color: var(--soil); }
+</style>
 <div class="db-modal-overlay" id="disputeModal">
   <div class="db-modal">
     <div class="db-modal-head"><div class="db-modal-title">Report a Problem</div><button class="db-btn" style="border:none;font-size:1.1rem" onclick="closeDispute()" aria-label="Close">✕</button></div>
@@ -1060,6 +1091,7 @@
   let escrows = [];   // payments held / released
   let paymentsOn = false, paymentsLive = false;
   let coByJob = {};   // change orders (operator asked for more) by job
+  let stagesByJob = {}; // jobs paid / released in stages: jobId -> { plan, count, stages: [...] }
 
   // DirtBidder fee for one side: 5% first $10K, 3% to $100K, 2% to $500K, 1% above (bracket style)
   function dbFeePerSide(a){a=Number(a)||0;const t=[[10000,.05],[100000,.03],[500000,.02],[Infinity,.01]];let f=0,lo=0;for(const[hi,r]of t){if(a>lo)f+=(Math.min(a,hi)-lo)*r;lo=hi;}return Math.round(f*100)/100;}
@@ -1198,7 +1230,9 @@
     const heldHere = escrows.filter(e => e.job_id === job.id && e.status === 'held');
     const heldTotal = heldHere.reduce((n, e) => n + Number(e.amount), 0);
     const canAct = heldHere.length && (job.status === 'awaiting_release' || job.status === 'in_progress');
-    const releaseBtn = canAct
+    const staged = stagesByJob[job.id];
+    const releaseBtn = staged ? (canAct ? `<button class="dispute-btn" onclick="event.stopPropagation();openDispute(${job.id})">Report a Problem</button>` : '')
+      : canAct
       ? `<button class="release-btn" style="margin-left:0.5rem" onclick="event.stopPropagation();releasePayment(${job.id})">Release ${money(heldTotal)}</button>` +
         `<button class="dispute-btn" onclick="event.stopPropagation();openDispute(${job.id})">Report a Problem</button>` : '';
     let note = '';
@@ -1242,11 +1276,54 @@
     return `<div class="job-row" ${click}>
       <div class="job-status-dot dot-${si.cls}"></div>
       <div class="job-info"><div class="job-title">${esc(job.title)}</div>
-        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div>${note}${detailed ? coHistory(job) : ''}${addr}${detailed ? photoStrip(job) : ''}</div>
+        <div class="job-meta">${meta.filter(Boolean).join(' · ')}${job.hired_operator_name ? ' · Operator: ' + esc(job.hired_operator_name) : ''}</div>${note}${staged ? stageBox(job, staged) : ''}${detailed ? coHistory(job) : ''}${addr}${detailed ? photoStrip(job) : ''}</div>
       <div class="job-bids">${right}</div>
       <div class="job-badge badge-${si.cls}">${si.label}</div>
       ${releaseBtn}
     </div>${coBanner(job)}`;
+  }
+
+  // Jobs paid or released in stages: where each stage's money is, and the next thing to do
+  function stageBox(job, s) {
+    const active = ['in_progress', 'awaiting_release'].includes(job.status);
+    const nextUnpaid = s.stages.find(x => x.status === 'unpaid');
+    const lines = s.stages.map(x => {
+      const last = x.n === s.count;
+      let state, act = '';
+      if (x.status === 'released') state = '✓ Paid to the operator';
+      else if (x.status === 'held') {
+        state = x.done_at ? `<span style="color:var(--amber)">Operator says it’s done</span> · auto-releases in ${timeLeft(Math.max(0, 72 * 3600000 - (Date.now() - new Date(x.done_at).getTime())))}` : 'Held for you 🔒';
+        if (active) act = last
+          ? `<button class="stage-btn${job.status === 'awaiting_release' ? ' solid' : ''}" onclick="event.stopPropagation();releasePayment(${job.id})">Release final stage</button>`
+          : `<button class="stage-btn${x.done_at ? ' solid' : ''}" onclick="event.stopPropagation();releaseStage(${job.id}, ${x.n}, ${x.amount})">Release ${money(x.amount)}</button>`;
+      }
+      else if (x.status === 'processing') state = '⏳ Bank payment clearing';
+      else if (x.status === 'disputed') state = '<span style="color:var(--error)">Frozen (problem reported)</span>';
+      else if (x.status === 'refunded') state = 'Refunded to you';
+      else {
+        state = 'Not paid yet';
+        if (active && s.plan === 'stages' && nextUnpaid && nextUnpaid.n === x.n) act = `<button class="stage-btn solid" onclick="event.stopPropagation();payStage(${job.id}, ${x.n}, ${x.client_total})">Pay stage ${x.n}: ${money2(x.client_total)}</button>`;
+      }
+      return `<div class="stage-line"><span><strong>Stage ${x.n} of ${s.count}</strong> · ${money(x.amount)} · ${state}</span>${act}</div>`;
+    }).join('');
+    const head = s.plan === 'stages' ? 'Paying in stages' : 'Paid up front · released in stages';
+    const tip = s.plan === 'stages' && nextUnpaid && active ? `<div style="font-size:0.78rem;color:var(--stone);margin-top:0.3rem">Pay stage ${nextUnpaid.n} when you’re ready for the operator to start it. They won’t start until it’s paid.</div>` : '';
+    return `<div class="stage-box" onclick="event.stopPropagation()"><div style="font-size:0.72rem;color:var(--stone);text-transform:uppercase;letter-spacing:0.1em;font-weight:700">${head}</div>${lines}${tip}</div>`;
+  }
+  async function releaseStage(jobId, n, amount) {
+    const job = jobs.find(j => j.id === jobId);
+    const who = job && job.hired_operator_name ? job.hired_operator_name : 'the operator';
+    if (!confirm(`Release ${money2(amount)} for stage ${n} to ${who}?\n\nOnly do this when that part of the work is done to your satisfaction. This can't be undone.`)) return;
+    try { await api('/api/stages/' + jobId + '/' + n + '/release', { method: 'POST' }); await load(); alert('Stage ' + n + ' released. The operator has been told.'); }
+    catch (err) { alert(err.message); }
+  }
+  async function payStage(jobId, n, total) {
+    if (!confirm(`Pay ${money2(total)} for stage ${n}?\n\nIt's held until you release it, and the operator is told they can start that stage.`)) return;
+    try {
+      const r = await api('/api/stages/' + jobId + '/' + n + '/pay', { method: 'POST' });
+      if (r.checkout_url) { window.location.href = r.checkout_url; return; }
+      await load();
+    } catch (err) { alert(err.message); }
   }
 
   function bidCard(bid, job, compact) {
@@ -1412,6 +1489,10 @@
       const cos = await Promise.all(hired.map(j => api('/api/changes/jobs/' + j.id).catch(() => null)));
       coByJob = {};
       hired.forEach((j, i) => { if (cos[i]) coByJob[j.id] = cos[i]; });
+      stagesByJob = {};
+      if (jobs.some(j => j.pay_plan === 'full_staged' || j.pay_plan === 'stages')) {
+        (await api('/api/stages/mine').catch(() => [])).forEach(s => { stagesByJob[s.job_id] = s; });
+      }
       render();
     } catch (err) {
       if (err.message === 'Session expired') return;
@@ -1449,18 +1530,66 @@
       catch (err) { alert('💳 ' + err.message); btn.disabled = false; }
       return;
     }
-    const msg = paymentsOn
-      ? `Hire this operator?\n\nYou'll pay ${money2(amt + fee)} (${money2(amt)} job + ${money2(fee)} DirtBidder fee). It's held in escrow and only released to the operator when you say the job is done.\n\n` +
-        (amt > 10000 ? 'Jobs over $10,000 are paid from your bank account (no card limits). It takes about 4 business days to clear.' : 'Pay by bank account (recommended, about 4 business days to clear) or by card (instant).') +
-        `\n\nThe other bids on this job will be declined.`
-      : 'Hire this operator? The other bids on this job will be declined.';
-    if (!confirm(msg)) return;
+    if (!paymentsOn) {
+      if (!confirm('Hire this operator? The other bids on this job will be declined.')) return;
+      btn.disabled = true;
+      try { await api('/api/bids/' + id + '/accept', { method: 'POST' }); await load(); }
+      catch (err) { alert(err.message); btn.disabled = false; }
+      return;
+    }
+    // Pick how to pay: all now, all now but released in stages, or one stage at a time
+    btn.disabled = true;
+    let opts;
+    try { opts = await api('/api/bids/' + id + '/plans'); }
+    catch (err) { alert(err.message); btn.disabled = false; return; }
+    btn.disabled = false;
+    openHire(id, bid, opts, amt, fee);
+  }
+
+  let hireBidId = null, hireOpts = null, hireAmt = 0;
+  function openHire(id, bid, opts, amt, fee) {
+    hireBidId = id; hireOpts = opts; hireAmt = amt;
+    const who = bid && bid.operator_name ? bid.operator_name : 'this operator';
+    document.getElementById('hireWho').textContent = who + ' · ' + money2(amt) + ' bid';
+    const st = opts.stages || [];
+    const list = st.map(s => 'Stage ' + s.n + ': ' + money2(s.amount)).join(' · ');
+    const opt = (val, title, text, checked) => `<label class="plan-opt"><input type="radio" name="hirePlan" value="${val}" ${checked ? 'checked' : ''} onchange="hirePlanChanged()"><div><b>${title}</b><span>${text}</span></div></label>`;
+    let html = opt('full', `Pay all now: ${money2(opts.full.client_total)}`,
+      `Includes the ${money2(fee)} DirtBidder fee. Held until you say the whole job is done, then paid to the operator.`, true);
+    if (opts.staged_available) {
+      html += opt('full_staged', `Pay all now, release in ${st.length} stages: ${money2(opts.full.client_total)}`,
+        `Same total. The operator gets paid one stage at a time as the work gets done, and you release each stage. (${list})`, false);
+      html += opt('stages', `Pay in ${st.length} stages: ${money2(st[0].client_total)} now`,
+        `Pay stage 1 now. Pay each next stage before the operator starts it. Each stage is held until you release it. (${list}, plus the fee on each)`, false);
+    }
+    document.getElementById('hirePlans').innerHTML = html;
+    document.getElementById('hireError').style.display = 'none';
+    document.getElementById('hireSubmit').disabled = false;
+    hirePlanChanged();
+    document.getElementById('hireModal').classList.add('active');
+  }
+  function hirePlanChanged() {
+    const plan = (document.querySelector('input[name="hirePlan"]:checked') || {}).value || 'full';
+    const due = plan === 'stages' ? hireOpts.stages[0].client_total : hireOpts.full.client_total;
+    const jobAmt = plan === 'stages' ? hireOpts.stages[0].amount : hireAmt;
+    document.getElementById('hireNote').innerHTML =
+      (jobAmt > 10000 ? 'Over $10,000 is paid from your bank account (no card limits). It takes about 4 business days to clear.' : 'Pay by bank account (about 4 business days to clear) or by card (instant).') +
+      ' If the operator marks the work done and you don’t release it or report a problem within 72 hours, it releases to them automatically.<br>The other bids on this job will be declined.';
+    document.getElementById('hireSubmit').textContent = 'Pay ' + money2(due);
+  }
+  function closeHire() { document.getElementById('hireModal').classList.remove('active'); }
+  async function submitHire() {
+    const plan = (document.querySelector('input[name="hirePlan"]:checked') || {}).value || 'full';
+    const btn = document.getElementById('hireSubmit');
     btn.disabled = true;
     try {
-      const r = await api('/api/bids/' + id + '/accept', { method: 'POST' });
+      const r = await api('/api/bids/' + hireBidId + '/accept', { method: 'POST', body: JSON.stringify({ plan }) });
       if (r.checkout_url) { window.location.href = r.checkout_url; return; }
-      await load();
-    } catch (err) { alert(err.message); btn.disabled = false; }
+      closeHire(); await load();
+    } catch (err) {
+      const e = document.getElementById('hireError'); e.textContent = err.message; e.style.display = '';
+      btn.disabled = false;
+    }
   }
 
   function timeLeft(ms) {
@@ -1745,10 +1874,11 @@
     const cancelled = q.get('payment') === 'cancelled';
     const coSid = q.get('co_session');
     const coCancelled = q.get('co') === 'cancelled';
-    if (!sid && !cancelled && !coSid && !coCancelled) return;
+    const stageCancelled = q.get('payment') === 'stage_cancelled';
+    if (!sid && !cancelled && !coSid && !coCancelled && !stageCancelled) return;
     history.replaceState(null, '', location.pathname);
     // Came back without paying: was it Stripe's bank limit?
-    if ((cancelled || coCancelled) && q.get('e')) {
+    if ((cancelled || coCancelled || stageCancelled) && q.get('e')) {
       try {
         const r = await api('/api/payments/abandoned', { method: 'POST', body: JSON.stringify({ escrow_id: q.get('e') }) });
         if (r.limit) { alert('🏦 ' + r.message); return; }
@@ -1765,8 +1895,15 @@
       return;
     }
     if (cancelled) { alert('Payment cancelled. The operator was not hired. You can accept the bid again any time.'); return; }
+    if (stageCancelled) { alert('Payment cancelled. That stage is still unpaid. You can pay it any time from My Jobs.'); return; }
     try {
       const r = await api('/api/payments/confirm', { method: 'POST', body: JSON.stringify({ session_id: sid }) });
+      if (r.stage) {
+        alert(r.status === 'processing'
+          ? `Bank payment for stage ${r.stage} started. It takes about 4 business days to clear. We'll tell your operator to start that stage once it does.`
+          : `Stage ${r.stage} paid and held. Your operator has been told they can start it.`);
+        return;
+      }
       alert(r.status === 'processing'
         ? "Bank payment started! It takes about 4 business days to clear.\n\nYour operator has been told they're picked, and to wait until it clears. We'll email you both when it does."
         : 'Payment received and held in escrow. Your operator is hired!');

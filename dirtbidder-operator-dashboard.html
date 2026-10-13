@@ -1236,6 +1236,7 @@
   let escrows = [];  // payments on jobs I was hired for
   let payout = null; // payout account status
   let coByJob = {};  // change orders on jobs I'm hired for
+  let stagesByJob = {}; // jobs paid / released in stages: jobId -> { plan, count, stages: [...] }
   let currentJobId = null;
   let currentFilter = '';
 
@@ -1369,11 +1370,49 @@
         <div>${lbl('Payment')}${payInfo(b)}</div>
       </div>
       ${changeBox(b)}
-      ${b.job_status === 'in_progress' ? `<button class="bid-btn" onclick="markComplete(${b.job_id})" style="background:var(--success);margin-top:1rem">✓ Mark Job Complete</button>`
+      ${stagesByJob[b.job_id] ? opStageBox(b, stagesByJob[b.job_id]) : ''}
+      ${b.job_status === 'in_progress' && !opUnpaidStage(b.job_id) ? `<button class="bid-btn" onclick="markComplete(${b.job_id})" style="background:var(--success);margin-top:1rem">✓ Mark Job Complete${stagesByJob[b.job_id] ? ' (last stage done)' : ''}</button>`
         : b.job_status === 'awaiting_release' ? `<div style="margin-top:1rem;font-size:0.82rem;color:var(--amber)">Marked complete — the client has 72 hours to release payment or report a problem. If they do nothing, it releases to you automatically${b.job_completed_at ? ' (' + autoReleaseIn(b.job_completed_at) + ')' : ''}.</div>`
         : b.job_status === 'disputed' && b.dispute ? disputeBox(b) : ''}
       ${full && b.job_timeline ? `<div style="margin-top:1rem">${lbl('Timeline')}<div style="font-size:0.9rem;color:var(--chalk)">${esc(b.job_timeline)}</div></div>` : ''}
     </div>`;
+  }
+
+  // Paid in stages: the first stage that isn't paid yet (don't start it), or null
+  function opUnpaidStage(jobId) {
+    const s = stagesByJob[jobId];
+    if (!s || s.plan !== 'stages') return null;
+    const u = s.stages.find(x => x.status === 'unpaid' || x.status === 'processing');
+    return u || null;
+  }
+  // Each stage: is it paid (safe to start), done, paid out?
+  function opStageBox(b, s) {
+    const active = ['in_progress', 'awaiting_release'].includes(b.job_status);
+    const m2 = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const lines = s.stages.map(x => {
+      const last = x.n === s.count;
+      let state, act = '';
+      if (x.status === 'released') state = `<span style="color:var(--success)">✓ Paid out to you · ${m2(x.operator_payout)}</span>`;
+      else if (x.status === 'held') {
+        state = x.done_at ? `<span style="color:var(--amber)">Waiting on the client · auto-releases ${autoReleaseIn(x.done_at)}</span>` : `<span style="color:var(--success)">🔒 Paid & held · OK to work</span>`;
+        if (active && !last && !x.done_at) act = `<button class="bid-btn" style="width:auto;padding:0.45rem 0.8rem;margin:0;font-size:0.8rem" onclick="stageDone(${b.job_id}, ${x.n})">✓ Stage ${x.n} done</button>`;
+      }
+      else if (x.status === 'processing') state = `<span style="color:var(--amber)">⏳ Client's bank payment clearing · don't start yet</span>`;
+      else if (x.status === 'disputed') state = `<span style="color:var(--error)">⚠ On hold · client reported a problem</span>`;
+      else if (x.status === 'refunded') state = 'Refunded to the client';
+      else state = `<span style="color:var(--error)">Not paid yet · don't start this stage</span>`;
+      return `<div style="display:flex;flex-wrap:wrap;gap:0.4rem 0.75rem;align-items:center;justify-content:space-between;padding:0.45rem 0;border-top:1px solid rgba(196,168,130,0.08);font-size:0.85rem;color:var(--dust)">
+        <span><strong style="color:var(--chalk)">Stage ${x.n} of ${s.count}</strong> · ${m2(x.amount)} · ${state}</span>${act}</div>`;
+    }).join('');
+    const head = s.plan === 'stages' ? 'Client is paying in stages' : 'Paid up front · you’re paid in stages';
+    return `<div style="margin-top:1rem;padding:0.6rem 0.9rem;border:1px solid rgba(196,168,130,0.15);border-radius:3px">
+      <div style="font-size:0.72rem;color:var(--stone);text-transform:uppercase;letter-spacing:0.1em;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:0.2rem">${head}</div>${lines}
+      <div style="font-size:0.78rem;color:var(--stone);margin-top:0.4rem">Tap “Stage done” when a stage is finished. The client releases it, or it releases to you automatically after 72 hours.${s.plan === 'stages' ? ' Only start a stage once it shows paid. We’ll email you when it is.' : ''}</div></div>`;
+  }
+  async function stageDone(jobId, n) {
+    if (!confirm(`Mark stage ${n} done?\n\nThe client will be asked to check it and release that stage's payment. If they do nothing for 72 hours, it releases to you automatically.`)) return;
+    try { await api('/api/stages/' + jobId + '/' + n + '/done', { method: 'POST' }); await load(); }
+    catch (err) { alert(err.message); }
   }
 
   // Exact job-site address — only sent to the operator who was hired
@@ -1426,6 +1465,11 @@
   }
 
   function payInfo(b) {
+    const s = stagesByJob[b.job_id];
+    if (s) {
+      const paidIn = s.stages.filter(x => ['held', 'released', 'disputed'].includes(x.status)).length;
+      return `<div style="font-size:0.9rem;color:var(--success)">${s.plan === 'stages' ? `Paid in ${s.count} stages · ${paidIn} paid so far` : `Fully paid · paid out in ${s.count} stages`}</div>`;
+    }
     const all = escrows.filter(x => x.job_id === b.job_id);
     const e = all.find(x => !x.change_order_id) || all[0];
     if (!e) return '<div style="font-size:0.9rem;color:var(--stone)">Not funded through escrow</div>';
@@ -1749,6 +1793,10 @@
       const cos = await Promise.all(hired.map(b => api('/api/changes/jobs/' + b.job_id).catch(() => null)));
       coByJob = {};
       hired.forEach((b, i) => { if (cos[i]) coByJob[b.job_id] = cos[i]; });
+      stagesByJob = {};
+      if (escrows.some(x => x.pay_plan === 'full_staged' || x.pay_plan === 'stages')) {
+        (await api('/api/stages/mine').catch(() => [])).forEach(s => { stagesByJob[s.job_id] = s; });
+      }
       render();
       api('/api/reviews/me').then(renderRep).catch(() => renderRep(null));
     } catch (err) {
