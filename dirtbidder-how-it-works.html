@@ -56,6 +56,9 @@
   .steps li ul { list-style: disc; margin: 0.2rem 0 0.5rem 1.2rem; }
   .steps li li { counter-increment: none; padding: 0 0 0.35rem 0; }
   .steps li li::before, .steps li li::after { display: none; }
+  .steps li ol { list-style: decimal; margin: 0.3rem 0 0.5rem 1.2rem; }
+  .steps .box { box-sizing: border-box; max-width: 100%; padding: 0.9rem 1rem; }
+  .box p { margin-bottom: 0.45rem; } .box p:last-child { margin-bottom: 0; }
   .steps li ul { list-style: disc; margin: 0.2rem 0 0.55rem 1.2rem; }
   .steps li ul li { counter-increment: none; padding: 0 0 0.3rem; }
   .steps li ul li::before, .steps li ul li::after { content: none; display: none; }
@@ -143,13 +146,20 @@
       </li>
       <li>
         <h3>Hire and pay, your way</h3>
-        <p>You'd normally hand a contractor a deposit with nothing protecting you. Here, <strong>the operator doesn't get your money until you say the work is done.</strong> When you hire, pick how to pay:</p>
-        <ul>
-          <li><strong>Pay all now.</strong> The bid plus the DirtBidder fee is held until the whole job is done.</li>
-          <li><strong>Pay all now, released in stages.</strong> Same total, but you release it to the operator one stage at a time as the work gets done.</li>
-          <li><strong>Pay in stages.</strong> Pay stage 1 to start, then pay each next stage before the operator starts it. You never have more money in than the work in front of you.</li>
-        </ul>
-        <p>Jobs under $10,000 have 2 stages (half and half). Jobs of $10,000 and up have 3 (about a third each). Jobs under $2,000 are paid all at once. The fee is the same total whichever way you pay.</p>
+        <p>You'd normally hand a contractor a deposit with nothing protecting you. Here, <strong>the operator doesn't get your money until you say the work is done.</strong></p>
+        <p>You can pay for the whole job at once, or <strong>pay in parts</strong> so you never have much money in at one time.</p>
+        <div class="box">
+          <p><strong>Example: a $6,000 pond, paid in parts</strong></p>
+          <ol>
+            <li>You pay $3,150 to start ($3,000 plus the $150 DirtBidder fee). The operator isn't paid yet. It's held.</li>
+            <li>The operator does the first half and taps “Stage done.” You get an email.</li>
+            <li>You look at the work and tap <strong>Release</strong>. Now the operator is paid for that half.</li>
+            <li>You pay the next $3,150. The operator finishes the job.</li>
+            <li>You look at the work and release the rest. Done.</li>
+          </ol>
+          <p>If something's wrong, tap <strong>Report a Problem</strong> instead of Release, and the money stays put while we sort it out.</p>
+        </div>
+        <p>Jobs under $10,000 are paid in 2 parts, and bigger jobs in 3. Jobs under $2,000 are paid all at once. The fee is the same either way. You can also pay it all up front and still release it in parts.</p>
         <p>Jobs up to $10,000 can be paid by card or bank. Jobs over $10,000 are paid by bank, which takes about 4 business days to clear. The operator is told to wait until it clears.</p>
       </li>
       <li>
@@ -201,12 +211,18 @@
       </li>
       <li>
         <h3>Get hired, with the money already there</h3>
-        <p>When a client picks you, the money is paid in <strong>before you move equipment</strong>. We email you "You're hired" and tell you how they're paying:</p>
-        <ul>
-          <li><strong>All now.</strong> The full bid is held. You're paid when the job is done.</li>
-          <li><strong>All now, released in stages.</strong> The full bid is held, and you're paid one stage at a time as you finish each one.</li>
-          <li><strong>In stages.</strong> Each stage is paid before you start it. <strong>Don't start a stage until your dashboard shows it's paid.</strong> We email you when it is.</li>
-        </ul>
+        <p>When a client picks you, the money is paid in <strong>before you move equipment</strong>. Some customers pay the whole job up front. Others pay in parts, so you get paid as you go. Your "You're hired" email tells you which.</p>
+        <div class="box">
+          <p><strong>Example: a $6,000 pond, paid in parts</strong></p>
+          <ol>
+            <li>The customer pays $3,000 before you start. You get an email, and your dashboard shows it's paid.</li>
+            <li>You do the first half of the job and tap <strong>Stage done</strong>.</li>
+            <li>The customer releases it, and $2,850 goes to your bank (the $3,000 minus the fee). If they do nothing for 72 hours, it's sent to you automatically.</li>
+            <li>The customer pays the next $3,000. You get another email saying it's paid.</li>
+            <li>You finish and tap <strong>Mark Job Complete</strong>. The last part goes to your bank the same way.</li>
+          </ol>
+          <p><strong>The one rule:</strong> don't start the next part of a job until your dashboard says it's paid. That way the money is always there before you do the work.</p>
+        </div>
         <p>If they paid by bank (required on jobs over $10,000), it takes about 4 business days to clear. Wait for our "payment cleared" email before you start.</p>
       </li>
       <li>
