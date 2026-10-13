@@ -53,6 +53,12 @@
   .steps li:last-child::after { display: none; }
   .steps h3 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--chalk); line-height: 1.15; margin-bottom: 0.3rem; }
   .steps p { margin-bottom: 0.45rem; }
+  .steps li ul { list-style: disc; margin: 0.2rem 0 0.5rem 1.2rem; }
+  .steps li li { counter-increment: none; padding: 0 0 0.35rem 0; }
+  .steps li li::before, .steps li li::after { display: none; }
+  .steps li ul { list-style: disc; margin: 0.2rem 0 0.55rem 1.2rem; }
+  .steps li ul li { counter-increment: none; padding: 0 0 0.3rem; }
+  .steps li ul li::before, .steps li ul li::after { content: none; display: none; }
   .steps p:last-child { margin-bottom: 0; }
   .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--success); border: 1px solid rgba(111,191,115,0.4); border-radius: 3px; padding: 0.05rem 0.4rem; margin-left: 0.4rem; vertical-align: 0.15em; }
 
@@ -136,8 +142,14 @@
         <p>An operator can change a bid until you hire, for example after seeing the site. You'll see the old price next to the new one. You never have to take the lowest bid, or any bid.</p>
       </li>
       <li>
-        <h3>Hire and pay into escrow</h3>
-        <p>Pick your operator and pay the bid plus the DirtBidder fee. <strong>The operator does not get this money yet.</strong> It's held until the work is done.</p>
+        <h3>Hire and pay, your way</h3>
+        <p>You'd normally hand a contractor a deposit with nothing protecting you. Here, <strong>the operator doesn't get your money until you say the work is done.</strong> When you hire, pick how to pay:</p>
+        <ul>
+          <li><strong>Pay all now.</strong> The bid plus the DirtBidder fee is held until the whole job is done.</li>
+          <li><strong>Pay all now, released in stages.</strong> Same total, but you release it to the operator one stage at a time as the work gets done.</li>
+          <li><strong>Pay in stages.</strong> Pay stage 1 to start, then pay each next stage before the operator starts it. You never have more money in than the work in front of you.</li>
+        </ul>
+        <p>Jobs under $10,000 have 2 stages (half and half). Jobs of $10,000 and up have 3 (about a third each). Jobs under $2,000 are paid all at once. The fee is the same total whichever way you pay.</p>
         <p>Jobs up to $10,000 can be paid by card or bank. Jobs over $10,000 are paid by bank, which takes about 4 business days to clear. The operator is told to wait until it clears.</p>
       </li>
       <li>
@@ -151,6 +163,7 @@
       <li>
         <h3>Release the payment</h3>
         <p>When the operator marks the job complete, you have <strong>72 hours</strong> to release the payment or report a problem. If you do neither, it releases on its own.</p>
+        <p>Paying in stages? It works the same for each stage: the operator marks the stage done, and you release it or report a problem within 72 hours.</p>
       </li>
       <li>
         <h3>Leave a review</h3>
@@ -188,7 +201,12 @@
       </li>
       <li>
         <h3>Get hired, with the money already there</h3>
-        <p>When a client picks you, they pay the full bid into escrow <strong>before you move equipment</strong>. We email you "You're hired."</p>
+        <p>When a client picks you, the money is paid in <strong>before you move equipment</strong>. We email you "You're hired" and tell you how they're paying:</p>
+        <ul>
+          <li><strong>All now.</strong> The full bid is held. You're paid when the job is done.</li>
+          <li><strong>All now, released in stages.</strong> The full bid is held, and you're paid one stage at a time as you finish each one.</li>
+          <li><strong>In stages.</strong> Each stage is paid before you start it. <strong>Don't start a stage until your dashboard shows it's paid.</strong> We email you when it is.</li>
+        </ul>
         <p>If they paid by bank (required on jobs over $10,000), it takes about 4 business days to clear. Wait for our "payment cleared" email before you start.</p>
       </li>
       <li>
@@ -206,6 +224,7 @@
       <li>
         <h3>Mark it complete and get paid</h3>
         <p>When you're done, tap <strong>Mark Job Complete</strong>. The client has <strong>72 hours</strong> to release the payment or report a problem. If they do neither, it releases to you automatically. Your bid minus the DirtBidder fee goes to your bank.</p>
+        <p>On a job paid in stages, tap <strong>Stage done</strong> after each stage. Same 72-hour rule, so you get paid as you go instead of waiting for the end. Use Mark Job Complete for the last stage.</p>
       </li>
       <li>
         <h3>Build your name</h3>
@@ -292,7 +311,9 @@
   <details class="for-client"><summary>Who can see my address?</summary><p>Nobody, until you decide. The public listing shows the town and ZIP. An operator sees the exact address only if you share it with them, or after you hire them and pay.</p></details>
   <details class="for-client"><summary>Does DirtBidder do the work or vouch for the operator?</summary><p>No. DirtBidder is a marketplace. The operator is an independent contractor you choose, and the agreement for the work is between the two of you. We hold the payment and settle disputes over it. Check reviews, ask questions, and ask about insurance before you hire.</p></details>
   <details class="for-operator"><summary>Can other operators see my bid?</summary><p>No. Bids are sealed. Only the client sees your price.</p></details>
-  <details class="for-operator"><summary>When do I actually get the money?</summary><p>When the client releases the payment, or 72 hours after you mark the job complete if they don't respond. It's sent to the bank account you set up under Earnings. How long your bank takes to show it is up to the bank.</p></details>
+  <details class="for-client"><summary>Do I have to pay the whole job up front?</summary><p>No. When you hire, you can pay all now, or pay in stages: stage 1 to start, and each next stage before the operator starts it. Either way, nothing is paid to the operator until you release it, or 72 hours after they say that part is done if you don't report a problem.</p></details>
+  <details class="for-operator"><summary>What if a client paying in stages doesn't pay the next one?</summary><p>Don't start a stage until your dashboard shows it's paid. You keep what you've already been paid for finished stages. If a client stops paying, message them, and email support@dirtbidder.com if it isn't sorted out.</p></details>
+  <details class="for-operator"><summary>When do I actually get the money?</summary><p>When the client releases the payment, or 72 hours after you mark the job (or a stage) complete if they don't respond. It's sent to the bank account you set up under Earnings. How long your bank takes to show it is up to the bank.</p></details>
   <details class="for-operator"><summary>What if I bid and then see the job is bigger than described?</summary><p>Before you're hired, update your bid. After you're hired, send a change request. Either way the client sees the new number and agrees to it before you do the extra work.</p></details>
   <details class="for-operator"><summary>How do I get my company featured?</summary><p>Turn on <strong>Free Shoutouts</strong> under Settings. After that, each job you finish through DirtBidder with a 4 or 5 star rating can earn a shoutout on our social media: your company name, the kind of job, the county and your stars. We never post the price, the client or the address, and we email you when it's up so you can share it. Turn it off any time.</p></details>
   <details class="for-client"><summary>Will DirtBidder post about my job?</summary><p>Only in one case, and never with your details. If you rate a finished job 4 or 5 stars, we may give the operator a public shoutout that names their company, the kind of job and the county. It never names you or shows your address, your town or what you paid.</p></details>
