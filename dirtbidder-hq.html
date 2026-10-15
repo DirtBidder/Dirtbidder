@@ -174,7 +174,7 @@
   const TAX_NOTE = `
     <div class="taxnote">
       <div class="short"><b>Short version:</b> DirtBidder gets filed with your own taxes on a Schedule C. <b>No S corp yet.</b></div>
-      <details ${'${'}TAXOPEN}>
+      <details>
         <summary>Read more</summary>
         <h4>How to file</h4>
         <ul>
@@ -297,7 +297,7 @@
           </div>
           <div class="card">
             <div class="card-head"><div class="card-title">Tax notes</div><span class="pill">Note to self</span></div>
-            <div class="card-body" id="taxBody">${TAX_NOTE.replace('${'}TAXOPEN}', taxOpen ? 'open' : '')}</div>
+            <div class="card-body" id="taxBody">${taxOpen ? TAX_NOTE.replace('<details>', '<details open>') : TAX_NOTE}</div>
           </div>
           <div class="card">
             <div class="card-head"><div class="card-title">Quick links</div></div>
