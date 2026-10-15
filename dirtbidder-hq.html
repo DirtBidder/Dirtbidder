@@ -91,6 +91,12 @@
   .wait .ok { color: var(--success); }
   .btn.solid { background: var(--amber); color: #1C1410; width: 100%; padding: 0.7rem 0.85rem; font-size: 0.85rem; white-space: normal; line-height: 1.25; }
   .wait-note { font-size: 0.8rem; color: var(--stone); margin-top: 0.5rem; line-height: 1.4; }
+  .taxnote .short { font-size: 0.92rem; line-height: 1.45; color: var(--chalk); }
+  .taxnote summary { cursor: pointer; margin-top: 0.6rem; color: var(--amber); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.85rem; }
+  .taxnote h4 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--chalk); margin: 0.9rem 0 0.3rem; }
+  .taxnote ul { padding-left: 1.1rem; }
+  .taxnote li { font-size: 0.88rem; line-height: 1.45; color: var(--dust); margin-bottom: 0.3rem; }
+  .taxnote .fine { font-size: 0.78rem; color: var(--stone); margin-top: 0.8rem; }
   .empty { color: var(--stone); padding: 1.5rem 0; text-align: center; font-size: 0.9rem; }
   .err { color: var(--error); padding: 1rem; }
   @media (max-width: 860px) {
@@ -162,6 +168,36 @@
     { ic: '👍', t: 'Facebook page', s: 'DirtBidder on Facebook', u: 'https://www.facebook.com/share/19SidpGE2d/' },
     { ic: '💻', t: 'GitHub', s: 'Code', u: 'https://github.com/DirtBidder' }
   ];
+
+  // Tax notes card. Stays open across the 1-minute refresh once tapped open.
+  let taxOpen = false;
+  const TAX_NOTE = `
+    <div class="taxnote">
+      <div class="short"><b>Short version:</b> DirtBidder gets filed with your own taxes on a Schedule C. <b>No S corp yet.</b></div>
+      <details ${'${'}TAXOPEN}>
+        <summary>Read more</summary>
+        <h4>How to file</h4>
+        <ul>
+          <li>The LLC counts as you. Add a <b>Schedule C</b> to your normal tax return, next to your W-2 job.</li>
+          <li>On profit you pay about <b>15.3%</b> self-employment tax, plus regular tax. Iowa is a flat 3.8%.</li>
+          <li>Due <b>April 15</b>. First year is 2026.</li>
+          <li>A loss (likely in year one) can lower the tax on your W-2 pay.</li>
+        </ul>
+        <h4>Keep it clean</h4>
+        <ul>
+          <li>Only <b>your fees</b> are income. Escrow money paid out to operators is not.</li>
+          <li>Stripe may send a 1099-K showing the full amount, so keep records that split fees from payouts.</li>
+          <li>Pay every business cost from Mercury and save the receipts.</li>
+        </ul>
+        <h4>S corp?</h4>
+        <ul>
+          <li><b>Not yet.</b> It only saves money with steady profit of about <b>$40K–$60K a year</b>.</li>
+          <li>It costs more: payroll for yourself plus an extra tax return (about $1K–$2K a year).</li>
+          <li>When it's time: file IRS <b>Form 2553 by March 15</b>. You keep the same LLC.</li>
+        </ul>
+        <div class="fine">Not a CPA. Have one check your first return.</div>
+      </details>
+    </div>`;
 
   const FEED = {
     signup: (a) => ['👤', `<b>${esc((a.who || '').trim() || 'Someone (no name given)')}</b> joined as ${a.detail === 'operator' ? 'an operator' : 'a client'}`],
@@ -260,6 +296,10 @@
             </div>
           </div>
           <div class="card">
+            <div class="card-head"><div class="card-title">Tax notes</div><span class="pill">Note to self</span></div>
+            <div class="card-body" id="taxBody">${TAX_NOTE.replace('${'}TAXOPEN}', taxOpen ? 'open' : '')}</div>
+          </div>
+          <div class="card">
             <div class="card-head"><div class="card-title">Quick links</div></div>
             <div class="card-body links">
               ${LINKS.map(l => `<a class="link${l.primary ? ' primary' : ''}" href="${l.u}"${/^https?:/.test(l.u) ? ' target="_blank" rel="noopener"' : ''}><span class="ic">${l.ic}</span><span><b>${l.t}</b><small>${l.s}</small></span></a>`).join('')}
@@ -274,6 +314,8 @@
           </div>
         </div>
       </div>`;
+    const tax = document.querySelector('#taxBody details');
+    if (tax) tax.addEventListener('toggle', () => { taxOpen = tax.open; });
     renderTasks();
     renderWait();
     renderBids();
