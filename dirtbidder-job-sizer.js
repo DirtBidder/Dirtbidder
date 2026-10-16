@@ -1,5 +1,5 @@
 // "Job sizer": simple fill-in-the-blanks forms with a picture for the most common jobs (pond, field tile,
-// driveway / road, building pad, ditch cleaning). The client types a few measurements and picks answers; the page
+// driveway / road, building pad, ditch cleaning, quarry overburden stripping). The client types a few measurements and picks answers; the page
 // works out the dirt (or gravel) and writes a clean summary that goes at the top of the job description.
 // Used by dirtbidder-post-job.html: JobSizer.render(jobTypeName), JobSizer.summary(), JobSizer.title().
 (function () {
@@ -50,7 +50,16 @@
       `<path d="M125,70 L195,70 L180,100 L140,100 Z" fill="rgba(139,94,60,0.55)"/>` + small(160, 92, 'silt') +
       dim(110, 30, 210, 30) + txt(160, 24, 'WIDTH AT TOP') +
       dim(222, 72, 222, 100) + txt(228, 90, 'SILT TO DIG OUT', 'start') +
-      small(160, 128, 'Also tell us how many feet of ditch'), 135)
+      small(160, 128, 'Also tell us how many feet of ditch'), 135),
+    strip: svg(
+      small(160, 14, 'FROM THE SIDE: DIRT ON TOP OF THE ROCK') +
+      // rock below, dirt layer on top, cut edge stepped back in benches with a slope
+      `<path d="M10,110 L310,110 L310,150 L10,150 Z" fill="rgba(168,152,135,0.35)" stroke="${STONE}" stroke-width="1.5"/>` + small(200, 136, 'LIMESTONE / GYPSUM / ROCK') +
+      `<path d="M150,40 L310,40 L310,110 L208,110 L196,85 L182,85 L170,60 L160,60 Z" fill="rgba(139,94,60,0.55)" stroke="${DUST}" stroke-width="2"/>` +
+      `<line x1="10" y1="110" x2="150" y2="110" stroke="${DUST}" stroke-width="2" stroke-dasharray="5 3"/>` + small(80, 104, 'stripped, rock showing') +
+      dim(300, 44, 300, 106) + txt(294, 80, 'DEPTH', 'end') +
+      small(162, 56, 'slope', 'end') + small(186, 82, 'bench', 'end') +
+      dim(12, 32, 148, 32) + txt(80, 52, 'AREA TO STRIP'), 155)
   };
 
   const choice = (id, label, opts) => ({ id, label, type: 'select', opts });
@@ -140,6 +149,37 @@
         return { line: `About ${fmt(cy)} cubic yards of silt to dig out`, sub: `${fmt(v.len)} feet of ditch`, cy };
       },
       title: v => v.len ? `Ditch cleaning, ${fmt(v.len)} ft` : 'Ditch cleaning'
+    },
+    strip: {
+      types: ['Overburden Stripping'], name: 'stripping job', pic: 'strip',
+      tip: 'Depth is how much dirt sits on top of the rock, on average. If the depth changes a lot, put the average here and the shallow and deep spots in the description.',
+      fields: [
+        num('len', 'Length to strip', 'e.g. 600'), num('wid', 'Width to strip', 'e.g. 300'), num('dep', 'Average dirt depth over the rock', 'e.g. 15'),
+        choice('rock', 'What’s under the dirt?', ['Limestone', 'Gypsum', 'Sand and gravel', 'Coal', 'Other rock', 'Not sure']),
+        choice('dirt', 'What kind of dirt?', ['Clay', 'Topsoil and clay', 'Sand or gravel', 'Clay with rocks or boulders', 'Mixed or not sure']),
+        choice('slope', 'Slope on the edges of the cut', ['1 to 1', '1.5 to 1', '2 to 1', '3 to 1', 'Straight down, no slope', 'Not sure']),
+        choice('bench', 'Benches in the cut?', ['No benches', '1 bench', '2 benches', '3 or more benches', 'Not sure']),
+        num('bwid', 'Bench width (if any)', 'e.g. 20'),
+        choice('topsoil', 'Save the topsoil in its own pile?', ['Yes, keep it separate', 'No, it all goes together', 'Not sure']),
+        choice('where', 'Where does the dirt go?', ['Stockpile on site', 'Build a berm', 'Backfill a mined-out area', 'Haul it off site', 'Not sure']),
+        num('haul', 'About how far to haul it', 'e.g. 1,500'),
+        choice('trees', 'Trees or brush to clear first?', ['None', 'A few', 'A lot']),
+        choice('water', 'Water or wet ground?', ['Dry', 'Some wet spots', 'Needs pumping', 'Not sure'])
+      ],
+      calc: v => {
+        if (!v.len || !v.wid || !v.dep) return v.len && v.wid ? { line: `${(v.len * v.wid / 43560).toFixed(2)} acres to strip` } : null;
+        const ratio = { '1 to 1': 1, '1.5 to 1': 1.5, '2 to 1': 2, '3 to 1': 3 }[v.slope] || 0;
+        const benches = { '1 bench': 1, '2 benches': 2, '3 or more benches': 3 }[v.bench] || 0;
+        const edge = 2 * (v.len + v.wid);
+        // Main block, plus the wedge the sloped edges add, plus the shelf each bench cuts back
+        const cy = (v.len * v.wid * v.dep + edge * v.dep * v.dep * ratio / 2 + edge * benches * (v.bwid || 0) * v.dep / 2) / 27;
+        return {
+          line: `About ${fmt(cy)} cubic yards of dirt to strip`,
+          sub: `${(v.len * v.wid / 43560).toFixed(2)} acres of rock uncovered · about ${fmt(cy * 1.25)} cubic yards once it’s dug loose · about ${fmt(cy * 1.25 / 20)} truckloads (20-yard loads)`,
+          cy
+        };
+      },
+      title: v => v.len && v.wid ? `Overburden stripping, ${(v.len * v.wid / 43560).toFixed(1)} acres${v.dep ? ', ' + fmt(v.dep) + ' ft deep' : ''}${v.rock && !/Not sure|Other/.test(v.rock) ? ' (' + v.rock.toLowerCase() + ')' : ''}` : 'Overburden stripping'
     }
   };
 
