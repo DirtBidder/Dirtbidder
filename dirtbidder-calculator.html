@@ -181,7 +181,7 @@
 <div class="main">
   <div class="topbar">
     <div class="topbar-title" role="heading" aria-level="1">Earthwork Calculators</div>
-    <div style="font-size:0.8rem;color:var(--stone)">7 calculators · Free for all operators</div>
+    <div style="font-size:0.8rem;color:var(--stone)">8 calculators · Free for all operators</div>
   </div>
 
   <!-- TABS -->
@@ -193,6 +193,7 @@
     <button class="calc-tab" onclick="showCalc('pond', this)">💧 Pond Volume</button>
     <button class="calc-tab" onclick="showCalc('compaction', this)">🔧 Compaction</button>
     <button class="calc-tab" onclick="showCalc('timeest', this)">📅 Time Estimate</button>
+    <button class="calc-tab" onclick="showCalc('strip', this)">⛰ Stripping</button>
   </div>
 
   <div class="content" role="main" id="dbMain">
@@ -200,7 +201,7 @@
     <!-- ── 1. CUT & FILL ── -->
     <div class="calc-section active" id="calc-cutfill">
       <div class="section-header">
-        <div class="section-eyebrow">Calculator 1 of 7</div>
+        <div class="section-eyebrow">Calculator 1 of 8</div>
         <div class="section-title" role="heading" aria-level="2">Cut &amp; <span>Fill</span></div>
         <div class="section-sub">Calculate how much dirt needs to move based on site dimensions. Helps you estimate haul-off volume and fill requirements.</div>
       </div>
@@ -267,7 +268,7 @@
     <!-- ── 2. HAUL OFF ── -->
     <div class="calc-section" id="calc-hauloff">
       <div class="section-header">
-        <div class="section-eyebrow">Calculator 2 of 7</div>
+        <div class="section-eyebrow">Calculator 2 of 8</div>
         <div class="section-title" role="heading" aria-level="2">Haul Off &amp; <span>Truck Loads</span></div>
         <div class="section-sub">How many dump truck loads to remove spoils from the site. Price your haul-off accurately.</div>
       </div>
@@ -340,7 +341,7 @@
     <!-- ── 3. JOB COST ── -->
     <div class="calc-section" id="calc-jobcost">
       <div class="section-header">
-        <div class="section-eyebrow">Calculator 3 of 7</div>
+        <div class="section-eyebrow">Calculator 3 of 8</div>
         <div class="section-title" role="heading" aria-level="2">Job Cost <span>Estimator</span></div>
         <div class="section-sub">Calculate your minimum bid price based on real costs — equipment, fuel, labor, overhead, and profit margin.</div>
       </div>
@@ -439,7 +440,7 @@
     <!-- ── 4. HOURLY RATE ── -->
     <div class="calc-section" id="calc-hourlyrate">
       <div class="section-header">
-        <div class="section-eyebrow">Calculator 4 of 7</div>
+        <div class="section-eyebrow">Calculator 4 of 8</div>
         <div class="section-title" role="heading" aria-level="2">Hourly <span>Rate Builder</span></div>
         <div class="section-sub">What should you charge per hour? Build your rate from the ground up based on your real costs.</div>
       </div>
@@ -522,7 +523,7 @@
     <!-- ── 5. POND VOLUME ── -->
     <div class="calc-section" id="calc-pond">
       <div class="section-header">
-        <div class="section-eyebrow">Calculator 5 of 7</div>
+        <div class="section-eyebrow">Calculator 5 of 8</div>
         <div class="section-title" role="heading" aria-level="2">Pond <span>Volume</span></div>
         <div class="section-sub">Calculate cubic yards to excavate for a pond based on shape and depth. One of the most common earthwork jobs on DirtBidder.</div>
       </div>
@@ -596,7 +597,7 @@
     <!-- ── 6. COMPACTION ── -->
     <div class="calc-section" id="calc-compaction">
       <div class="section-header">
-        <div class="section-eyebrow">Calculator 6 of 7</div>
+        <div class="section-eyebrow">Calculator 6 of 8</div>
         <div class="section-title" role="heading" aria-level="2">Compaction <span>Factor</span></div>
         <div class="section-sub">How much does excavated dirt swell and compact? Use this to accurately price fill work and avoid leaving money on the table.</div>
       </div>
@@ -667,7 +668,7 @@
     <!-- ── 7. TIME ESTIMATE ── -->
     <div class="calc-section" id="calc-timeest">
       <div class="section-header">
-        <div class="section-eyebrow">Calculator 7 of 7</div>
+        <div class="section-eyebrow">Calculator 7 of 8</div>
         <div class="section-title" role="heading" aria-level="2">Time <span>Estimator</span></div>
         <div class="section-sub">How many days will a job take? Set a realistic timeline before you submit your bid.</div>
       </div>
@@ -758,6 +759,16 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ── 8. OVERBURDEN STRIPPING (same form clients see on Post a Job) ── -->
+    <div class="calc-section" id="calc-strip">
+      <div class="section-header">
+        <div class="section-eyebrow">Calculator 8 of 8</div>
+        <div class="section-title" role="heading" aria-level="2">Overburden <span>Stripping</span></div>
+        <div class="section-sub">Dirt on top of limestone, gypsum or other rock: works out bank yards, loose yards, acres uncovered and truckloads, counting edge slope and benches. This is the same form clients fill in when they post a stripping job.</div>
+      </div>
+      <div class="card"><div class="card-body" id="jobSizer"></div></div>
     </div>
 
   </div>
@@ -1010,5 +1021,23 @@ try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-b
 </script>
 <script src="dirtbidder-pixel.js"></script>
 <script src="dirtbidder-a11y.js"></script>
+<script src="dirtbidder-job-sizer.js"></script>
+<script>
+  if (window.JobSizer) JobSizer.render('Overburden Stripping');
+  // dirtbidder-calculator.html#strip opens straight to the stripping calculator
+  if (location.hash === '#strip') showCalc('strip', document.querySelector(".calc-tab[onclick*=\"'strip'\"]"));
+</script>
+<style>
+  #jobSizer .form-card-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--chalk); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(196,168,130,0.08); }
+  #jobSizer .js-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.9rem 1rem; }
+  @media (max-width: 600px) { #jobSizer .js-grid { grid-template-columns: 1fr 1fr; } }
+  #jobSizer .field { display: flex; flex-direction: column; gap: 0.4rem; }
+  #jobSizer label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dust); }
+  #jobSizer input, #jobSizer select { width: 100%; background: var(--clay); border: 1.5px solid rgba(196,168,130,0.18); color: var(--chalk); font-family: 'Barlow', sans-serif; font-size: 16px; padding: 0.7rem 0.9rem; border-radius: 3px; outline: none; }
+  #jobSizer input:focus, #jobSizer select:focus { border-color: var(--amber); }
+  #jobSizer select option { background: var(--dig); }
+  /* keeps the scrolling tab bar from stretching the page wider than a phone */
+  .main { min-width: 0; }
+</style>
 </body>
 </html>
