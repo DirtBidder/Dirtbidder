@@ -158,8 +158,8 @@
         choice('rock', 'What’s under the dirt?', ['Limestone', 'Gypsum', 'Sand and gravel', 'Coal', 'Other rock', 'Not sure']),
         choice('dirt', 'What kind of dirt?', ['Clay', 'Topsoil and clay', 'Sand or gravel', 'Clay with rocks or boulders', 'Mixed or not sure']),
         choice('slope', 'Slope on the edges of the cut', ['1 to 1', '1.5 to 1', '2 to 1', '3 to 1', 'Straight down, no slope', 'Not sure']),
-        choice('bench', 'Benches in the cut?', ['No benches', '1 bench', '2 benches', '3 or more benches', 'Not sure']),
-        num('bwid', 'Bench width (if any)', 'e.g. 20'),
+        num('bench', 'How many benches (0 if none)', 'e.g. 4', 'count'),
+        num('bwid', 'Bench width', 'e.g. 20'),
         choice('topsoil', 'Save the topsoil in its own pile?', ['Yes, keep it separate', 'No, it all goes together', 'Not sure']),
         choice('where', 'Where does the dirt go?', ['Stockpile on site', 'Build a berm', 'Backfill a mined-out area', 'Haul it off site', 'Not sure']),
         num('haul', 'About how far to haul it', 'e.g. 1,500'),
@@ -169,13 +169,14 @@
       calc: v => {
         if (!v.len || !v.wid || !v.dep) return v.len && v.wid ? { line: `${(v.len * v.wid / 43560).toFixed(2)} acres to strip` } : null;
         const ratio = { '1 to 1': 1, '1.5 to 1': 1.5, '2 to 1': 2, '3 to 1': 3 }[v.slope] || 0;
-        const benches = { '1 bench': 1, '2 benches': 2, '3 or more benches': 3 }[v.bench] || 0;
+        const benches = Math.min(Math.round(v.bench || 0), 50);
         const edge = 2 * (v.len + v.wid);
         // Main block, plus the wedge the sloped edges add, plus the shelf each bench cuts back
         const cy = (v.len * v.wid * v.dep + edge * v.dep * v.dep * ratio / 2 + edge * benches * (v.bwid || 0) * v.dep / 2) / 27;
+        const note = v.bwid && !benches ? ' · bench width not counted: add how many benches' : '';
         return {
           line: `About ${fmt(cy)} cubic yards of dirt to strip`,
-          sub: `${(v.len * v.wid / 43560).toFixed(2)} acres of rock uncovered · about ${fmt(cy * 1.25)} cubic yards once it’s dug loose · about ${fmt(cy * 1.25 / 20)} truckloads (20-yard loads)`,
+          sub: `${(v.len * v.wid / 43560).toFixed(2)} acres of rock uncovered · about ${fmt(cy * 1.25)} cubic yards once it’s dug loose · about ${fmt(cy * 1.25 / 20)} truckloads (20-yard loads)${note}`,
           cy
         };
       },
@@ -211,7 +212,7 @@
     current = guideFor(type);
     if (!current) { box.style.display = 'none'; box.innerHTML = ''; return; }
     const fieldHtml = current.fields.map(f => f.type === 'num'
-      ? `<div class="field"><label for="js_${f.id}">${f.label} (${f.unit === 'in' ? 'inches' : 'feet'})</label><input type="text" inputmode="decimal" id="js_${f.id}" placeholder="${f.hint}" autocomplete="off"></div>`
+      ? `<div class="field"><label for="js_${f.id}">${f.label}${f.unit === 'count' ? '' : f.unit === 'in' ? ' (inches)' : ' (feet)'}</label><input type="text" inputmode="decimal" id="js_${f.id}" placeholder="${f.hint}" autocomplete="off"></div>`
       : `<div class="field"><label for="js_${f.id}">${f.label}</label><select id="js_${f.id}"><option value="">Pick one…</option>${f.opts.map(o => `<option>${o}</option>`).join('')}</select></div>`).join('');
     box.innerHTML = `<div class="form-card-title" role="heading" aria-level="2">Size Up Your ${current.name.replace(/\b\w/g, c => c.toUpperCase())} <span style="font-weight:600;color:var(--stone);text-transform:none;letter-spacing:0">(optional, gets better bids)</span></div>
       ${PICS[current.pic]}
@@ -232,7 +233,7 @@
     current.fields.forEach(f => {
       const val = v[f.id];
       if (!val) return;
-      lines.push(f.type === 'num' ? `${f.label}: ${fmt(val)} ${f.unit === 'in' ? 'inches' : 'feet'}` : `${f.label.replace(/\?$/, '')}: ${val}`);
+      lines.push(f.type === 'num' ? `${f.label.replace(/ \(0 if none\)$/, '')}: ${fmt(val)}${f.unit === 'count' ? '' : f.unit === 'in' ? ' inches' : ' feet'}` : `${f.label.replace(/\?$/, '')}: ${val}`);
     });
     if (!lines.length) return '';
     const r = current.calc(v);
