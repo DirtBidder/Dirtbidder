@@ -1139,6 +1139,7 @@
     if (st === 'in_progress') return { label: 'In Progress', cls: 'progress' };
     if (st === 'funding') return { label: 'Payment Clearing', cls: 'hired' };
     if (st === 'hired') return { label: 'Hired', cls: 'hired' };
+    if (job.bids_paused && (st === 'open' || st === 'test')) return { label: 'Bids Paused', cls: 'bidding' };
     if (job.pending_bid_count > 0) return { label: 'Bidding', cls: 'bidding' };
     return { label: st === 'test' ? 'Open (test)' : 'Open', cls: 'open' };
   }
@@ -1266,6 +1267,11 @@
       const nPhotos = Array.isArray(job.photos) ? job.photos.length : 0;
       addr += `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();addJobDetails(${job.id})">+ Add details for bidders</a>
         <span style="color:var(--stone)"> · </span><a href="#" id="jp-${job.id}" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();pickJobPhotos(${job.id})">📷 Add photos${nPhotos ? ' (' + nPhotos + ' so far)' : ''}</a></div>`;
+      // On/off switch for new bids: the job stays up for the client and they can still hire from the bids they have
+      addr += job.bids_paused
+        ? `<div class="job-note" style="color:var(--amber)">Not taking new bids right now. Operators who haven't bid can't see this job. You can still hire from the bids you have.</div>
+           <button class="rate-btn" onclick="event.stopPropagation();setBidsPaused(${job.id}, false)">Start taking bids again</button>`
+        : `<button class="rate-btn" style="border-color:var(--amber);color:var(--amber)" onclick="event.stopPropagation();setBidsPaused(${job.id}, true)">Pause new bids</button>`;
       addr += `<button class="rate-btn" style="border-color:var(--stone);color:var(--stone)" onclick="event.stopPropagation();closeJob(${job.id})">Close Job</button>`;
     }
     if (job.status === 'completed' && job.hired_operator_id) {
@@ -1743,6 +1749,13 @@
       closeReview(); render();
     } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
     btn.disabled = false;
+  }
+
+  async function setBidsPaused(jobId, paused) {
+    const job = jobs.find(j => j.id === jobId);
+    if (paused && !confirm(`Stop taking new bids on "${job ? job.title : 'this job'}"?\n\nThe job stays up for you and you keep the bids you have, so you can still hire one. Operators who haven't bid won't see it or be able to message you about it. You can turn bids back on anytime.`)) return;
+    try { await api('/api/jobs/' + jobId + '/bids-paused', { method: 'POST', body: JSON.stringify({ paused }) }); if (job) job.bids_paused = paused; await load(); }
+    catch (err) { alert(err.message); }
   }
 
   async function closeJob(jobId) {
