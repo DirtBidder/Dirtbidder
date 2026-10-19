@@ -195,6 +195,12 @@
     margin-bottom: 2.5rem;
   }
 
+  .hero-watch { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; margin: 1.25rem 0 0; position: relative; }
+  .hero-watch a { display: inline-flex; align-items: center; gap: 0.55rem; color: var(--chalk); text-decoration: none; font-weight: 600; font-size: 0.95rem;
+    padding: 0.55rem 0.95rem 0.55rem 0.55rem; border: 1px solid rgba(242,237,230,0.25); border-radius: 999px; background: rgba(28,20,16,0.55); }
+  .hero-watch a:hover { border-color: var(--amber); }
+  .hero-watch .play { width: 30px; height: 30px; border-radius: 50%; background: var(--amber); color: var(--soil); display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; padding-left: 2px; flex-shrink: 0; }
+  .hero-watch small { color: var(--dust); font-weight: 500; font-size: 0.82rem; }
   .hero-ctas {
     display: flex;
     gap: 1rem;
@@ -818,6 +824,10 @@
       <a href="dirtbidder-post-job.html" class="btn-primary">Post a Job</a>
       <a href="dirtbidder-register.html?role=operator" class="btn-secondary">I'm an Operator</a>
     </div>
+    <div class="hero-watch">
+      <a href="videos/dirtbidder-client-demo.mp4" data-demo="client"><span class="play" aria-hidden="true">▶</span> Watch how it works <small>for landowners · 2 min</small></a>
+      <a href="videos/dirtbidder-operator-demo.mp4" data-demo="operator"><span class="play" aria-hidden="true">▶</span> Watch how it works <small>for operators · 1 min</small></a>
+    </div>
     <div class="hero-stats">
       <div>
         <div class="stat-num">5<span>%</span></div>
@@ -1114,5 +1124,6 @@ try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-b
 </script>
 <script src="dirtbidder-pixel.js"></script>
 <script src="dirtbidder-a11y.js"></script>
+<script src="dirtbidder-demo-video.js"></script>
 </body>
 </html>

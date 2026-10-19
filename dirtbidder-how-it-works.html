@@ -65,6 +65,11 @@
   .steps p:last-child { margin-bottom: 0; }
   .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--success); border: 1px solid rgba(111,191,115,0.4); border-radius: 3px; padding: 0.05rem 0.4rem; margin-left: 0.4rem; vertical-align: 0.15em; }
 
+  .demo-thumb { display: flex; gap: 0.9rem; align-items: center; text-decoration: none; color: var(--dust); background: var(--dig); border: 1px solid rgba(232,137,42,0.35); border-radius: 6px; padding: 0.6rem; margin: 0.5rem 0 1.25rem; box-sizing: border-box; max-width: 100%; }
+  .demo-thumb img { width: 64px; height: auto; aspect-ratio: 390/844; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+  .demo-thumb span { font-size: 0.9rem; line-height: 1.4; }
+  .demo-thumb b { display: block; color: var(--amber); font-size: 1.02rem; margin-bottom: 0.15rem; }
+  .demo-thumb:hover { border-color: var(--amber); }
   .box { background: var(--dig); border-left: 3px solid var(--amber); border-radius: 3px; padding: 1rem 1.25rem; margin: 1rem 0; }
   .box p:last-child, .box ul:last-child { margin-bottom: 0; }
   ul.plain { padding-left: 1.2rem; margin-bottom: 0.8rem; }
@@ -121,6 +126,10 @@
   <!-- ───────── CLIENT STEPS ───────── -->
   <section class="for-client" aria-labelledby="tab-client">
     <h2 id="steps">Step by step, for clients</h2>
+    <a class="demo-thumb" href="videos/dirtbidder-client-demo.mp4" data-demo="client">
+      <img src="videos/dirtbidder-client-poster.jpg" alt="" width="390" height="844" loading="lazy">
+      <span><b>▶ Watch it in 2 minutes</b>A pond job posted start to finish: the question, sharing the location, the bid, and paying in 2 stages.</span>
+    </a>
     <ol class="steps">
       <li>
         <h3>Post your job <span class="tag">Free</span></h3>
@@ -186,6 +195,10 @@
   <!-- ───────── OPERATOR STEPS ───────── -->
   <section class="for-operator" aria-labelledby="tab-operator">
     <h2 id="steps-op">Step by step, for operators</h2>
+    <a class="demo-thumb" href="videos/dirtbidder-operator-demo.mp4" data-demo="operator">
+      <img src="videos/dirtbidder-operator-poster.jpg" alt="" width="390" height="844" loading="lazy">
+      <span><b>▶ Watch it in 1 minute</b>Find a job, ask a question, see the GPS pin before you bid, get hired, and get paid stage by stage.</span>
+    </a>
     <ol class="steps">
       <li>
         <h3>Sign up <span class="tag">Free</span></h3>
@@ -410,5 +423,6 @@ try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-b
 </script>
 <script src="dirtbidder-pixel.js"></script>
 <script src="dirtbidder-a11y.js"></script>
+<script src="dirtbidder-demo-video.js"></script>
 </body>
 </html>
