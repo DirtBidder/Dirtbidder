@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DirtBidder — Payments & Escrow</title>
+<title>DirtBidder — Payments & Held Funds</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -209,7 +209,7 @@
     <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📊</span> Overview</div>
     <div class="nav-item" onclick="window.location='dirtbidder-client-dashboard.html'"><span class="nav-icon">📋</span> My Jobs</div>
     <div class="nav-item" onclick="window.location='dirtbidder-bidding.html'"><span class="nav-icon">💰</span> Bids Received <span class="nav-badge">5</span></div>
-    <div class="nav-item active"><span class="nav-icon">🏦</span> Payments & Escrow</div>
+    <div class="nav-item active"><span class="nav-icon">🏦</span> Payments & Held Funds</div>
     <div class="nav-label" style="margin-top:0.5rem">Account</div>
     <div class="nav-item" onclick="window.location='dirtbidder-post-job.html'"><span class="nav-icon">➕</span> Post a Job</div>
     <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
@@ -222,7 +222,7 @@
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title">Payments & Escrow</div>
+    <div class="topbar-title">Payments & Held Funds</div>
     <div style="font-size:0.8rem;color:var(--stone);display:flex;align-items:center;gap:0.5rem">
       <span style="width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block"></span>
       Secured by Stripe
@@ -231,7 +231,7 @@
 
   <!-- TABS -->
   <div class="view-tabs">
-    <button class="view-tab active" onclick="showTab('escrow', this)">Active Escrow</button>
+    <button class="view-tab active" onclick="showTab('escrow', this)">Money Held</button>
     <button class="view-tab" onclick="showTab('history', this)">Payment History</button>
     <button class="view-tab" onclick="showTab('howit', this)">How It Works</button>
     <button class="view-tab" onclick="showTab('stripe', this)">Stripe Account</button>
@@ -239,12 +239,12 @@
 
   <div class="content">
 
-    <!-- ── ACTIVE ESCROW ── -->
+    <!-- ── MONEY HELD ── -->
     <div class="section-view active" id="tab-escrow">
 
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-label">Held in Escrow</div>
+          <div class="stat-label">Held Safely</div>
           <div class="stat-value">$<span>8,500</span></div>
           <div class="stat-change neutral">1 active job</div>
         </div>
@@ -265,11 +265,11 @@
         </div>
       </div>
 
-      <!-- ACTIVE ESCROW HOLD -->
+      <!-- MONEY HELD HOLD -->
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="card-title">🔒 Active Escrow — 1 Job</div>
+            <div class="card-title">🔒 Money Held — 1 Job</div>
             <div class="card-sub">Funds held by Stripe until you release them</div>
           </div>
         </div>
@@ -305,7 +305,7 @@
               <div class="breakdown-row"><span>Job Value (agreed bid)</span><span>$8,500.00</span></div>
               <div class="breakdown-row fee"><span>Client platform fee (5%)</span><span style="color:var(--stone)">Already included</span></div>
               <div class="breakdown-row fee"><span>Operator platform fee (5%)</span><span>−$425.00</span></div>
-              <div class="breakdown-row escrow-hold"><span>🔒 Currently held in Stripe escrow</span><span>$8,500.00</span></div>
+              <div class="breakdown-row escrow-hold"><span>🔒 Currently held by DirtBidder through Stripe</span><span>$8,500.00</span></div>
               <div class="breakdown-row total"><span>Operator receives on release</span><span style="color:var(--success)">$8,075.00</span></div>
               <div class="breakdown-row total"><span>DirtBidder platform revenue</span><span style="color:var(--amber)">$850.00 (10%)</span></div>
             </div>
@@ -433,7 +433,7 @@
     <!-- ── HOW IT WORKS ── -->
     <div class="section-view" id="tab-howit">
       <div class="card">
-        <div class="card-header"><div class="card-title">How DirtBidder Escrow Works</div></div>
+        <div class="card-header"><div class="card-title">How DirtBidder Holds Payments</div></div>
 
         <!-- FLOW DIAGRAM -->
         <div class="flow-diagram">
@@ -452,12 +452,12 @@
           <div class="flow-step">
             <div class="flow-icon done">💳</div>
             <div class="flow-label">Pay Stripe</div>
-            <div class="flow-sub">Funds go to escrow — not operator yet</div>
+            <div class="flow-sub">Funds are held, not paid to the operator yet</div>
           </div>
           <div class="flow-arrow flow-active">→</div>
           <div class="flow-step">
             <div class="flow-icon active">🔒</div>
-            <div class="flow-label">Escrow Hold</div>
+            <div class="flow-label">Held</div>
             <div class="flow-sub">Stripe holds funds during the job</div>
           </div>
           <div class="flow-arrow" style="color:rgba(196,168,130,0.3)">→</div>
@@ -480,7 +480,7 @@
             <div>
               <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--amber);margin-bottom:1rem">Your Protections as a Client</div>
               <div style="display:flex;flex-direction:column;gap:0.6rem">
-                <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> Money never leaves escrow until YOU release it</div>
+                <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> Money is never paid out until YOU release it</div>
                 <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> 72-hour dispute window after job is marked complete</div>
                 <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> DirtBidder reviews all disputes within 5 business days</div>
                 <div style="display:flex;gap:0.6rem;font-size:0.83rem;color:var(--dust)"><span style="color:var(--success)">✓</span> Partial refunds available for incomplete work</div>
@@ -506,10 +506,10 @@
 
       <div class="card" style="background:rgba(232,137,42,0.04);border-color:rgba(232,137,42,0.15)">
         <div class="card-header" style="border-color:rgba(232,137,42,0.15)">
-          <div class="card-title" style="color:var(--amber)">Why No Escrow License Is Required</div>
+          <div class="card-title" style="color:var(--amber)">Why No Escrow or Money Transmitter License Is Required</div>
         </div>
         <div style="padding:1.5rem;font-size:0.85rem;color:var(--dust);line-height:1.7">
-          DirtBidder uses <strong style="color:var(--chalk)">Stripe Connect</strong> — a licensed money transmitter in all 50 U.S. states — to hold and transfer all funds. DirtBidder itself never holds, stores, or transmits your money directly. We act as an escrow administrator: we instruct Stripe when to hold, release, or refund funds based on job status and disputes. This is the same model used by Airbnb, Uber, Fiverr, and thousands of other marketplaces. DirtBidder LLC does not need a broker's license, escrow license, or money transmitter license to operate this system.
+          DirtBidder uses <strong style="color:var(--chalk)">Stripe Connect</strong> — a licensed money transmitter in all 50 U.S. states — to hold and transfer all funds. DirtBidder itself never holds, stores, or transmits your money directly. We act as the marketplace operator: we instruct Stripe when to hold, release, or refund funds based on job status and disputes. This is the same model used by Airbnb, Uber, Fiverr, and thousands of other marketplaces. DirtBidder LLC does not need a broker's license, escrow license, or money transmitter license to operate this system.
         </div>
       </div>
     </div>
@@ -582,7 +582,7 @@
     </div>
     <div class="modal-body">
       <div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:3px;padding:0.85rem 1rem;margin-bottom:1.25rem;font-size:0.82rem;color:var(--dust);line-height:1.5">
-        ⚠ Filing a dispute freezes escrow funds. DirtBidder will review your case and respond within <strong style="color:var(--chalk)">5 business days</strong>. Please only file if you have a genuine issue with the completed work.
+        ⚠ Filing a dispute freezes held funds. DirtBidder will review your case and respond within <strong style="color:var(--chalk)">5 business days</strong>. Please only file if you have a genuine issue with the completed work.
       </div>
       <div style="font-size:0.82rem;color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem" id="disputeJobLabel">Job: Pond Excavation — 2 Acres</div>
       <label class="modal-label">Reason for Dispute</label>
@@ -634,7 +634,7 @@
   }
 
   function completePayment() {
-    alert('💳 Stripe payment page will open here.\n\nYour card on file (Visa •••• 4242) will be charged $4,410.\nFunds go directly into Stripe escrow — Smith Excavating LLC is notified to begin work.');
+    alert('💳 Stripe payment page will open here.\n\nYour card on file (Visa •••• 4242) will be charged $4,410.\nFunds are held by DirtBidder through Stripe — Smith Excavating LLC is notified to begin work.');
   }
 
   function openDispute(job, op) {
@@ -648,7 +648,7 @@
 
   function submitDispute() {
     closeDispute();
-    alert('⚠ Dispute filed!\n\nEscrow funds are now frozen. DirtBidder will review your case and contact both you and the operator within 5 business days.\n\nYou\'ll receive an email confirmation shortly.');
+    alert('⚠ Dispute filed!\n\nHeld funds are now frozen. DirtBidder will review your case and contact both you and the operator within 5 business days.\n\nYou\'ll receive an email confirmation shortly.');
   }
 
   function downloadCSV() {

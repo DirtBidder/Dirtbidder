@@ -445,7 +445,7 @@
     <button class="db-chip" onclick="quickReply('What is the platform fee?')">What is the fee?</button>
     <button class="db-chip" onclick="quickReply('How do I become an operator?')">Become an operator</button>
     <button class="db-chip" onclick="quickReply('What equipment types are on the platform?')">Equipment types</button>
-    <button class="db-chip" onclick="quickReply('How does escrow work?')">How does escrow work?</button>
+    <button class="db-chip" onclick="quickReply('How are payments held?')">How are payments held?</button>
   </div>
 
   <!-- INPUT -->
@@ -479,7 +479,7 @@
     },
     {
       patterns: ['escrow','payment work','how do i pay','pay','money','funds','stripe'],
-      answer: `Payments are handled securely through <strong>Stripe escrow</strong>:\n\n🔒 <strong>Step 1:</strong> You pay when you hire an operator — funds go to Stripe escrow (not the operator yet)\n\n🚜 <strong>Step 2:</strong> Operator completes the job\n\n✅ <strong>Step 3:</strong> You confirm completion and release payment\n\n💸 <strong>Step 4:</strong> Operator gets paid within 2 business days\n\nYour money never moves until YOU say so. If there's a dispute, DirtBidder reviews it within 5 business days.`
+      answer: `Payments are handled securely through <strong>held funds through Stripe</strong>:\n\n🔒 <strong>Step 1:</strong> You pay when you hire an operator — funds are held by DirtBidder through Stripe (not the operator yet)\n\n🚜 <strong>Step 2:</strong> Operator completes the job\n\n✅ <strong>Step 3:</strong> You confirm completion and release payment\n\n💸 <strong>Step 4:</strong> Operator gets paid within 2 business days\n\nYour money never moves until YOU say so. If there's a dispute, DirtBidder reviews it within 5 business days.`
     },
     {
       patterns: ['operator','become operator','run equipment','equipment operator','contractor','how do i become'],
@@ -495,7 +495,7 @@
     },
     {
       patterns: ['dispute','problem','issue','bad job','not happy','incomplete','wrong'],
-      answer: `If there's a problem with a job, here's what to do:\n\n1. First, message the operator through the app and try to resolve it\n2. If unresolved within 48 hours, file a formal dispute\n3. DirtBidder reviews your case within <strong>5 business days</strong>\n4. Funds stay frozen in escrow during the dispute\n\nWe look at photos, messages, and the original job description to make a fair decision.\n\nImportant: Don't release payment until you're satisfied with the work!`
+      answer: `If there's a problem with a job, here's what to do:\n\n1. First, message the operator through the app and try to resolve it\n2. If unresolved within 48 hours, file a formal dispute\n3. DirtBidder reviews your case within <strong>5 business days</strong>\n4. Funds stay frozen during the dispute\n\nWe look at photos, messages, and the original job description to make a fair decision.\n\nImportant: Don't release payment until you're satisfied with the work!`
     },
     {
       patterns: ['insurance','license','licensed','insured','certification','require'],
@@ -535,7 +535,7 @@
     },
     {
       patterns: ['safe','secure','trust','legitimate','scam','real'],
-      answer: `DirtBidder is built with security at every step:\n\n🔒 <strong>Escrow payments</strong> — your money is held by Stripe (licensed in all 50 states) until you release it\n\n🔒 <strong>Sealed bids</strong> — operators can't see each other's prices\n\n✅ <strong>Verified operators</strong> — insurance and license confirmation required\n\n⭐ <strong>Reviews</strong> — only real completed jobs can leave reviews\n\n📋 <strong>Terms of Service</strong> — binding arbitration protects both parties\n\nDirtBidder LLC is a registered US company.`
+      answer: `DirtBidder is built with security at every step:\n\n🔒 <strong>Held payments</strong> — your money is held by Stripe (licensed in all 50 states) until you release it\n\n🔒 <strong>Sealed bids</strong> — operators can't see each other's prices\n\n✅ <strong>Verified operators</strong> — insurance and license confirmation required\n\n⭐ <strong>Reviews</strong> — only real completed jobs can leave reviews\n\n📋 <strong>Terms of Service</strong> — binding arbitration protects both parties\n\nDirtBidder LLC is a registered US company.`
     },
     {
       patterns: ['cancel','cancellation','refund','change mind'],
@@ -668,7 +668,7 @@
       qr.innerHTML = `
         <button class="db-chip" onclick="quickReply('What is the platform fee?')">What is the fee?</button>
         <button class="db-chip" onclick="quickReply('How does bidding work?')">How does bidding work?</button>
-        <button class="db-chip" onclick="quickReply('How does escrow work?')">How does escrow work?</button>
+        <button class="db-chip" onclick="quickReply('How are payments held?')">How are payments held?</button>
         <button class="db-chip" onclick="quickReply('Is it free to post a job?')">Free to post?</button>`;
     } else if (context.includes('pay') || context.includes('escrow') || context.includes('fee')) {
       qr.innerHTML = `
@@ -679,7 +679,7 @@
     } else if (context.includes('bid') || context.includes('job')) {
       qr.innerHTML = `
         <button class="db-chip" onclick="quickReply('What types of jobs can I post?')">Job types?</button>
-        <button class="db-chip" onclick="quickReply('How does escrow work?')">How does escrow work?</button>
+        <button class="db-chip" onclick="quickReply('How are payments held?')">How are payments held?</button>
         <button class="db-chip" onclick="quickReply('Can I message an operator before hiring?')">Message before hiring?</button>
         <button class="db-chip" onclick="quickReply('How do I leave a review?')">How do reviews work?</button>`;
     } else {
@@ -687,7 +687,7 @@
       qr.innerHTML = `
         <button class="db-chip" onclick="quickReply('How do I sign up?')">How to sign up</button>
         <button class="db-chip" onclick="quickReply('What is the platform fee?')">Platform fee</button>
-        <button class="db-chip" onclick="quickReply('How does escrow work?')">Escrow</button>
+        <button class="db-chip" onclick="quickReply('How are payments held?')">Held payments</button>
         <button class="db-chip" onclick="quickReply('Contact support')">Contact support</button>`;
     }
   }

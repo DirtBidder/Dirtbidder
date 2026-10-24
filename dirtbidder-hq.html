@@ -185,7 +185,7 @@
         </ul>
         <h4>Keep it clean</h4>
         <ul>
-          <li>Only <b>your fees</b> are income. Escrow money paid out to operators is not.</li>
+          <li>Only <b>your fees</b> are income. Held money paid out to operators is not.</li>
           <li>Stripe may send a 1099-K showing the full amount, so keep records that split fees from payouts.</li>
           <li>Pay every business cost from Mercury and save the receipts.</li>
         </ul>
@@ -203,7 +203,7 @@
     signup: (a) => ['👤', `<b>${esc((a.who || '').trim() || 'Someone (no name given)')}</b> joined as ${a.detail === 'operator' ? 'an operator' : 'a client'}`],
     job: (a) => ['📋', `<b>${esc(a.who)}</b> posted <i>${esc(a.detail)}</i>`],
     bid: (a) => ['💰', `<b>${esc(a.who)}</b> bid on <i>${esc(a.detail)}</i>`],
-    payment: (a) => ['🔒', `<b>${esc(a.who)}</b> paid into escrow for <i>${esc(a.detail)}</i>`],
+    payment: (a) => ['🔒', `<b>${esc(a.who)}</b> paid through DirtBidder for <i>${esc(a.detail)}</i>`],
     dispute: (a) => ['⚠️', `<b>${esc(a.who)}</b> reported a problem on <i>${esc(a.detail)}</i>`]
   };
 
@@ -246,7 +246,7 @@
       <div class="sec">Money</div>
       <div class="tiles">
         ${tile('Fees earned', money(m.fees_earned), m.fees_pending ? money(m.fees_pending) + ' more once held jobs finish' : 'From finished jobs', { money: true })}
-        ${tile('In escrow now', money(m.in_escrow), m.frozen ? `<span class="warn">${m.frozen} frozen in a dispute</span>` : 'Held for jobs in progress', { money: true })}
+        ${tile('Held now', money(m.in_escrow), m.frozen ? `<span class="warn">${m.frozen} frozen in a dispute</span>` : 'Held for jobs in progress', { money: true })}
         ${tile('Paid to operators', money(m.paid_to_operators), money(m.job_value_done) + ' of finished work')}
         ${tile('Needs you', needs.length ? needs.length : '✓', needs.length ? needs.join(' · ') : 'No open disputes or flags', { href: 'dirtbidder-admin.html' })}
       </div>
@@ -272,7 +272,7 @@
         ${mini('Visitors', d.weekly, 'visitors', num)}
         ${mini('Sign-ups', d.weekly, 'signups', num)}
         ${mini('Jobs posted', d.weekly, 'jobs', num)}
-        ${mini('Paid into escrow', d.weekly, 'paid_in', short)}
+        ${mini('Paid through DirtBidder', d.weekly, 'paid_in', short)}
       </div></div>
 
       <div class="grid2" style="margin-top:0.75rem">

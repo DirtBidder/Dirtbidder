@@ -203,7 +203,7 @@
         ${u.rules_ack_at ? `<div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">✓ Agreed to keep jobs on DirtBidder · ${when(u.rules_ack_at)}</div>` : ''}
         ${u.role === 'operator' ? `<div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">${u.feature_ok === 'true' ? `📣 Said OK to shoutouts${u.feature_ok_at ? ' · ' + when(u.feature_ok_at) : ''}` : u.feature_ok === 'false' ? '📣 Said no to shoutouts' : '📣 Hasn’t answered about shoutouts yet'}</div>` : ''}
         <div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">${u.terms_version ? `Terms: agreed to the ${esc(u.terms_version)} version${u.terms_accepted_at ? ' · ' + when(u.terms_accepted_at) : ''}` : 'Terms: no agreement on record'}</div>${u.role === 'operator' ? `<div style="font-size:0.82rem;margin-bottom:0.3rem;color:var(--stone)">${u.lien_ack_at ? 'Lien deadlines: confirmed they’re responsible · ' + when(u.lien_ack_at) : 'Lien deadlines: not confirmed yet'}</div>` : ''}
-        <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.6rem">${stats}${u.disputes ? ` · <span style="color:var(--error)">${u.disputes} dispute${u.disputes === 1 ? '' : 's'}</span>` : ''}${warns.length ? ` · <span style="color:var(--amber)">${warns.length} warning${warns.length === 1 ? '' : 's'}</span>` : ''}${u.money_held ? ` · <span style="color:var(--amber)">${u.money_held} payment${u.money_held === 1 ? '' : 's'} in escrow</span>` : ''}</div>
+        <div style="font-size:0.85rem;color:var(--dust);margin-bottom:0.6rem">${stats}${u.disputes ? ` · <span style="color:var(--error)">${u.disputes} dispute${u.disputes === 1 ? '' : 's'}</span>` : ''}${warns.length ? ` · <span style="color:var(--amber)">${warns.length} warning${warns.length === 1 ? '' : 's'}</span>` : ''}${u.money_held ? ` · <span style="color:var(--amber)">${u.money_held} payment${u.money_held === 1 ? '' : 's'} held</span>` : ''}</div>
         <div style="font-size:0.82rem;color:var(--stone);margin-bottom:0.7rem">${/\+(test|op)\d*@/i.test(u.email || '') ? 'Test account — left out of the HQ numbers.'
           : `${u.internal ? '🏠 Your own account — left out of the HQ numbers.' : 'Counted in the HQ numbers.'}
           <a href="#" style="color:var(--amber)" onclick="event.preventDefault();setInternal(${u.id}, ${!u.internal})">${u.internal ? 'Count it' : 'This one is mine — don’t count it'}</a>`}</div>
@@ -249,7 +249,7 @@
     const reason = document.getElementById('sus-' + id).value.trim();
     if (!reason) { alert('Write a short reason first.'); return; }
     let msg = `Suspend ${u.company_name || u.name || u.email}?\n\nThey'll get an email with your reason, be signed out, and can't sign in. Their open jobs come down and their pending bids are pulled.`;
-    if (u.money_held) msg += `\n\nThey have ${u.money_held} payment(s) in escrow. Those are NOT touched — handle them on the Paid Jobs or Disputes tab.`;
+    if (u.money_held) msg += `\n\nThey have ${u.money_held} payment(s) held. Those are NOT touched — handle them on the Paid Jobs or Disputes tab.`;
     if (!confirm(msg + '\n\nYou can restore them later.')) return;
     btn.disabled = true;
     try { await api('/api/admin/users/' + id + '/suspend', { method: 'POST', body: JSON.stringify({ reason }) }); await loadUsers(); }
@@ -528,10 +528,10 @@
       return;
     }
     document.getElementById('tabSub').textContent = tab === 'held'
-      ? 'Jobs that are paid and in escrow, with no dispute. Cancel one here if both sides agreed to call it off.'
+      ? 'Jobs that are paid and held, with no dispute. Cancel one here if both sides agreed to call it off.'
       : 'Clients who reported a problem. Their payment is frozen until you decide.';
     if (tab === 'held') {
-      document.getElementById('list').innerHTML = escrows.length ? escrows.map(heldCard).join('') : '<div class="empty">No paid jobs in escrow right now.</div>';
+      document.getElementById('list').innerHTML = escrows.length ? escrows.map(heldCard).join('') : '<div class="empty">No paid jobs being held right now.</div>';
       return;
     }
     const list = disputes.filter(d => tab === 'open' ? d.status === 'open' : d.status !== 'open');

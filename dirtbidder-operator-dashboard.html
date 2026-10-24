@@ -1197,7 +1197,7 @@
     </div>
     <div class="modal-body">
       <div class="modal-job-title" id="coJobTitle"></div>
-      <div style="font-size:0.82rem;color:var(--dust);margin-bottom:1rem">Hit rock, more tile than planned, extra loads? Ask the client for more here. They approve it and pay the extra into escrow before you do the added work. It's released to you with the rest of the job.</div>
+      <div style="font-size:0.82rem;color:var(--dust);margin-bottom:1rem">Hit rock, more tile than planned, extra loads? Ask the client for more here. They approve it and pay the extra through DirtBidder before you do the added work. It's released to you with the rest of the job.</div>
       <div id="coError" role="alert" style="display:none;color:var(--error);font-size:0.8rem;margin-bottom:0.75rem"></div>
       <div class="modal-field">
         <label class="modal-label" for="coAmount">Extra Amount ($)</label>
@@ -1474,7 +1474,7 @@
     }
     const all = escrows.filter(x => x.job_id === b.job_id);
     const e = all.find(x => !x.change_order_id) || all[0];
-    if (!e) return '<div style="font-size:0.9rem;color:var(--stone)">Not funded through escrow</div>';
+    if (!e) return '<div style="font-size:0.9rem;color:var(--stone)">Not paid through DirtBidder</div>';
     const same = all.filter(x => x.status === e.status);
     const out = '$' + same.reduce((n, x) => n + Number(x.operator_payout), 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (e.status === 'processing') return `<div style="font-size:0.9rem;color:var(--amber)">⏳ Bank payment clearing — don't start yet</div>`;
@@ -1501,7 +1501,7 @@
     const list = (coByJob[b.job_id] || {}).change_orders || [];
     const open = list.find(c => c.status === 'pending' || c.status === 'paying');
     const rows = list.slice().reverse().map(c => {
-      const st = { pending: ['⏳ Waiting on client', 'var(--amber)'], paying: ['⏳ Client is paying', 'var(--amber)'], paid: ['✓ Approved & paid into escrow', 'var(--success)'], processing: ['⏳ Approved — bank payment clearing', 'var(--amber)'], approved: ['✓ Approved', 'var(--success)'], declined: ['✕ Declined', 'var(--error)'], withdrawn: ['Withdrawn', 'var(--stone)'] }[c.status] || [c.status, 'var(--stone)'];
+      const st = { pending: ['⏳ Waiting on client', 'var(--amber)'], paying: ['⏳ Client is paying', 'var(--amber)'], paid: ['✓ Approved & paid through DirtBidder', 'var(--success)'], processing: ['⏳ Approved — bank payment clearing', 'var(--amber)'], approved: ['✓ Approved', 'var(--success)'], declined: ['✕ Declined', 'var(--error)'], withdrawn: ['Withdrawn', 'var(--stone)'] }[c.status] || [c.status, 'var(--stone)'];
       return `<div style="padding:0.6rem 0;border-top:1px solid rgba(196,168,130,0.1)">
         <div style="display:flex;justify-content:space-between;gap:0.75rem"><strong style="color:var(--chalk)">+ ${money(c.amount)}</strong><span style="font-size:0.8rem;color:${st[1]}">${st[0]}</span></div>
         <div style="font-size:0.83rem;color:var(--dust);margin-top:0.2rem">${esc(c.reason)}</div>

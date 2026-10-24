@@ -745,7 +745,7 @@
     <!-- ACCEPTED BANNER -->
     <div class="accepted-banner" id="acceptedBanner">
       <div class="accepted-title">✓ Bid Accepted — Job Hired!</div>
-      <div class="accepted-sub">Payment has been collected and held in Stripe escrow. The operator has been notified and will contact you shortly to confirm the start date.</div>
+      <div class="accepted-sub">Payment has been collected and held by DirtBidder through Stripe. The operator has been notified and will contact you shortly to confirm the start date.</div>
     </div>
 
     <!-- CARDS VIEW -->
@@ -1214,7 +1214,7 @@
   }
 
   function acceptBid(btn, opName, price) {
-    if (!confirm(`Accept ${opName}'s bid of ${price}?\n\nPayment will be collected and held in Stripe escrow until the job is complete. The operator will be notified immediately.`)) return;
+    if (!confirm(`Accept ${opName}'s bid of ${price}?\n\nPayment will be collected and held by DirtBidder through Stripe until the job is complete. The operator will be notified immediately.`)) return;
 
     // Disable all accept buttons
     document.querySelectorAll('.btn-accept').forEach(b => {
@@ -1247,11 +1247,11 @@
     document.getElementById('acceptedBanner').classList.add('visible');
     document.getElementById('acceptedBanner').innerHTML = `
       <div class="accepted-title">✓ Bid Accepted — ${opName} Hired!</div>
-      <div class="accepted-sub">${price} collected and held in Stripe escrow. ${opName} has been notified and will contact you shortly. Funds release when you confirm the job is complete.</div>
+      <div class="accepted-sub">${price} collected and held by DirtBidder through Stripe. ${opName} has been notified and will contact you shortly. Funds release when you confirm the job is complete.</div>
     `;
 
     window.scrollTo(0, 0);
-    alert(`✓ ${opName} has been hired!\n\nPayment of ${price} is now held in Stripe escrow.\n\nThey'll reach out to confirm the start date. You release payment only after the job is done to your satisfaction.`);
+    alert(`✓ ${opName} has been hired!\n\nPayment of ${price} is now held by DirtBidder through Stripe.\n\nThey'll reach out to confirm the start date. You release payment only after the job is done to your satisfaction.`);
   }
 
   function declineBid(btn) {
