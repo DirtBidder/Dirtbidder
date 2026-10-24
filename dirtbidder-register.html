@@ -704,7 +704,7 @@
           </div>
           <div class="field">
             <label for="email">Email Address</label>
-            <input type="email" id="email" autocomplete="email" placeholder="john@example.com" />
+            <input type="email" id="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="john@example.com" oninput="document.getElementById('emailError').classList.remove('visible')" />
             <span class="field-error" id="emailError" role="alert">Please enter a valid email</span>
           </div>
           <div class="field">
@@ -1009,7 +1009,7 @@
 
   function goToStep(step) {
     if (step === 3 && currentStep === 2) {
-      const email = document.getElementById('email').value;
+      const email = document.getElementById('email').value.trim();
       const pw = document.getElementById('password').value;
       const confirmPw = document.getElementById('confirmPw').value;
 
@@ -1123,7 +1123,7 @@
   async function submitSignup() {
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
     const phone = document.getElementById('phone').value;
     const password = document.getElementById('password').value;
     const profile = collectProfileData();
