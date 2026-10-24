@@ -20,7 +20,7 @@
   .summary strong { color: var(--chalk); }
   h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--chalk); margin: 2rem 0 0.6rem; scroll-margin-top: 1rem; }
   p, li { font-size: 0.95rem; margin-bottom: 0.7rem; }
-  ul { padding-left: 1.25rem; }
+  ul, ol { padding-left: 1.25rem; }
   strong { color: var(--chalk); font-weight: 600; }
   a { color: var(--amber); }
   table { width: 100%; border-collapse: collapse; margin: 0.5rem 0 1rem; font-size: 0.9rem; }
@@ -30,144 +30,985 @@
   .toc a { color: var(--dust); text-decoration: none; display: block; padding: 0.15rem 0; }
   .toc a:hover { color: var(--amber); }
   @media (max-width: 560px) { .toc { columns: 1; } h1 { font-size: 1.9rem; } }
+  .toc-part { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; text-transform: uppercase; color: var(--amber); font-size: 0.9rem; letter-spacing: 0.04em; margin: 0.9rem 0 0.3rem; }
+  h2.part { font-size: 1.6rem; color: var(--amber); border-top: 1px solid rgba(232,137,42,0.25); padding-top: 1.4rem; margin-top: 2.6rem; }
+  ul ul { margin-top: 0.5rem; }
 </style>
 </head>
 <body>
 <nav><a class="logo" href="index.html"><span>Dirt</span>Bidder</a><a class="back" href="javascript:history.length>1?history.back():location.href='index.html'">← Back</a></nav>
 <main>
   <h1>Terms of Service</h1>
-  <div class="updated">Last updated October 6, 2026 · DirtBidder LLC, Gilmore City, Iowa</div>
+  <div class="updated">Version 1.0 · Effective October 24, 2026 · DirtBidder LLC, Gilmore City, Iowa</div>
 
-  <div class="summary">
-    <strong>The short version:</strong> DirtBidder is a marketplace. Clients post earthwork jobs, operators bid, and payment is held in escrow through Stripe until the work is done. DirtBidder is not a contractor and doesn't do the work. The client and the operator make their own agreement. We charge a fee on each side (5% or less), and we step in to decide disputes over escrowed money. The full terms below control.
-  </div>
+  <div class="summary"><p style="margin:0"><strong>The short version:</strong> DirtBidder LLC operates
+dirtbidder.com, a marketplace where people who need earthwork done can
+describe a job and receive sealed bids from excavation and site
+preparation contractors. We are a marketplace, not a contractor. We do
+not perform earthwork, we do not supervise it, and we do not guarantee
+it. When a job is hired through the Site, the contract for the work
+itself is between the two users, and our role is to run the Site, hold
+the payment until the job is done, and decide how held money is divided
+if the users cannot agree.</p><p style="margin:0.6rem 0 0">These Terms are in two parts. Part A is the agreement between you and
+us. Part B is the agreement between a Client and an Operator for the
+work itself, and we are not a party to it.</p></div>
 
-  <div class="toc">
-    <a href="#s1">1. Who we are</a><a href="#s2">2. Accounts</a><a href="#s3">3. Posting jobs</a><a href="#s4">4. Bidding</a>
-    <a href="#s5">5. Operator responsibilities</a><a href="#s6">6. Client responsibilities</a><a href="#s7">7. Fees</a><a href="#s8">8. Payment & escrow</a>
-    <a href="#s9">9. Completion & release</a><a href="#s10">10. Disputes</a><a href="#s11">11. Cancellations & refunds</a><a href="#s12">12. Staying on the platform</a>
-    <a href="#s13">13. Reviews & badges</a><a href="#s14">14. Prohibited conduct</a><a href="#s15">15. Disclaimers</a><a href="#s16">16. Limits of liability</a>
-    <a href="#s17">17. Indemnity</a><a href="#s18">18. Ending your account</a><a href="#s19">19. Governing law</a><a href="#s20">20. Changes & contact</a>
-  </div>
+<div class="toc-part">Part A: Your Agreement With DirtBidder</div><div class="toc"><a href="#s1">1. These Terms</a><a href="#s2">2. Accounts</a><a href="#s3">3. Posting a Job</a><a href="#s4">4. Bidding and Hiring</a><a href="#s5">5. What We Do and Do Not Do</a><a href="#s6">6. Fees</a><a href="#s7">7. Payments and Held Funds</a><a href="#s8">8. Paying in Stages</a><a href="#s9">9. Completion and Release</a><a href="#s10">10. Change Requests</a><a href="#s11">11. Disputes Over Held Funds</a><a href="#s12">12. Canceling</a><a href="#s13">13. Keeping Jobs on the Site</a><a href="#s14">14. Messages</a><a href="#s15">15. Contact Information</a><a href="#s16">16. Reviews, Badges and Promotion</a><a href="#s17">17. Public Bid Board</a><a href="#s18">18. Referrals and Recommendations</a><a href="#s19">19. Your Content</a><a href="#s20">20. Things You Must Not Do</a><a href="#s21">21. Suspension and Closing Accounts</a><a href="#s22">22. Disclaimers</a><a href="#s23">23. Limit on Our Liability</a><a href="#s24">24. Indemnity</a><a href="#s25">25. Disputes With Us</a><a href="#s26">26. Changes to These Terms</a><a href="#s27">27. General</a></div><div class="toc-part">Part B: Terms Between Client and Operator</div><div class="toc"><a href="#sb1">B.1 What This Part Is</a><a href="#sb2">B.2 When the Job Contract Forms</a><a href="#sb3">B.3 The Scope of Work</a><a href="#sb4">B.4 Changes to the Work</a><a href="#sb5">B.5 Schedule, Weather and Delays</a><a href="#sb6">B.6 Site Access and What the Client Must Disclose</a><a href="#sb7">B.7 Utility Locates and Permits</a><a href="#sb8">B.8 Unexpected Site Conditions</a><a href="#sb9">B.9 Material, Spoil and Haul-Off</a><a href="#sb10">B.10 Safety, Licensing and Compliance</a><a href="#sb11">B.11 Insurance</a><a href="#sb12">B.12 Damage and Repair</a><a href="#sb13">B.13 Workmanship Warranty</a><a href="#sb14">B.14 Payment, Release and Lien Rights</a><a href="#sb15">B.15 Stopping or Ending a Job</a><a href="#sb16">B.16 Responsibility Between the Client and the Operator</a><a href="#sb17">B.17 Disputes Between the Client and the Operator</a></div>
 
-  <h2 id="s1">1. Who we are and what DirtBidder does</h2>
-  <p>DirtBidder LLC ("DirtBidder," "we," "us") runs the website dirtbidder.com (the "Service"). The Service lets people who need earthwork done ("Clients") post jobs and lets equipment operators and contractors ("Operators") bid on them.</p>
-  <p><strong>DirtBidder is a marketplace, not a contractor.</strong> We don't perform, supervise, direct or guarantee any work. We don't employ Operators, and Operators are not our agents. When a Client accepts a bid, the agreement for the work is between the Client and the Operator. Our role is to host the listing, carry the bids, hold payment in escrow through our payment processor, and decide disputes about escrowed funds as described below.</p>
-  <p>By creating an account or using the Service, you agree to these Terms and to our <a href="dirtbidder-privacy.html">Privacy Policy</a>. If you don't agree, don't use the Service.</p>
+<h2 class="part" id="part-a">Part A: Your Agreement With DirtBidder</h2>
+<h2 id="s1">1. These Terms</h2>
+<ul>
+<li><p>These Terms are a contract between you and DirtBidder LLC, an Iowa
+limited liability company. In them, “we,” “us,” and “our” mean
+DirtBidder LLC, “you” and “your” mean the person or business using the
+Site, and the “Site” means dirtbidder.com and the services we provide
+through it. A “Client” is a user who posts a job. An “Operator” is a
+user who bids on one. A “job” is a posted project, and a job is “hired”
+when a Client has accepted a bid on it and funded the first payment.</p></li>
+<li><p>By creating an account or using the Site, you accept these Terms and
+our Privacy Policy. If you do not accept them, do not use the Site.</p></li>
+<li><p>Part B sets out the terms that apply between a Client and an
+Operator. It forms a contract between those two users and does not give
+either of them a claim against us. If anything in Part B conflicts with
+Part A about our role or our responsibility, Part A controls. If
+anything on our marketing pages, help pages, or the How It Works page
+conflicts with these Terms, these Terms control.</p></li>
+</ul>
+<h2 id="s2">2. Accounts</h2>
+<ul>
+<li><p>You must be at least 18 and able to enter a binding contract.</p></li>
+<li><p>If you sign up for a business, you confirm that you are authorized to
+bind it, and these Terms bind both you and that business.</p></li>
+<li><p>Your information must be accurate and you must keep it current.</p></li>
+<li><p>You are responsible for everything that happens under your account,
+including anything done by someone you let use it, so keep your password
+to yourself and tell us promptly if you think your account has been
+compromised.</p></li>
+<li><p>One person or business may hold one account. Do not open a second
+account to get around a suspension, to bid on your own job, to review
+yourself, or to make a job or an Operator look more popular than it
+is.</p></li>
+</ul>
+<h2 id="s3">3. Posting a Job</h2>
+<ul>
+<li><p>A job post must honestly describe the site, the scope, the access,
+and any hazards you know about. You must own the property or have the
+owner’s permission for the work, and you are responsible for having the
+authority you claim.</p></li>
+<li><p>Until you hire an Operator, bidders see only the town and ZIP code of
+the site. You may share the exact location with one or more bidders
+through the message thread, and you may stop sharing it at any time.
+Once you hire an Operator and fund the first payment, contact details
+and the exact address become visible to that Operator.</p></li>
+</ul>
+<h2 id="s4">4. Bidding and Hiring</h2>
+<ul>
+<li><p>A bid is the Operator’s offer to perform the described work for a
+stated price, on a stated timeline, with stated equipment. Bids are
+sealed, so other Operators cannot see them. An Operator may revise a bid
+until the Client hires, and a Client is never obliged to accept a
+bid.</p></li>
+<li><p>When a Client accepts a bid and funds the first payment, a contract
+forms between the Client and the Operator at that price, on the terms of
+the bid and Part B. We are not a party to that contract.</p></li>
+<li><p>Scope and price changes are made through a change request, as section
+10 describes. The money we hold covers only the accepted bid and any
+approved and funded change request.</p></li>
+</ul>
+<h2 id="s5">5. What We Do and Do Not Do</h2>
+<ul>
+<li><p>We provide the Site, the messaging system, the payment and holding
+mechanics described in sections 7 to 9, and the dispute decision
+described in section 11. That is the whole of our role.</p></li>
 
-  <h2 id="s2">2. Accounts</h2>
-  <ul>
-    <li>You must be at least 18 and able to form a binding contract. If you sign up for a business, you confirm you're authorized to bind it.</li>
-    <li>Give accurate information and keep it current. You're responsible for everything done under your account, so keep your password private.</li>
-    <li>One person or business per account. Don't create accounts to get around a suspension or to review yourself.</li>
-  </ul>
+<li><p>We do not verify users. We do not check whether an Operator holds the
+licenses, registrations, bonds, or insurance that the law requires, and
+we do not collect or review certificates of insurance. We do not inspect
+work, assess quality, confirm that a job was finished, or supervise
+anyone. Badges and reviews are generated from activity on the Site and
+are not our endorsement or our assessment of anyone’s competence, safety
+record, or financial standing.</p></li>
 
-  <h2 id="s3">3. Posting jobs</h2>
-  <ul>
-    <li>Describe the job honestly, including the site, the scope, access, known hazards, and anything a reasonable Operator would need to price the work.</li>
-    <li>You must own the property or have the owner's permission for the work.</li>
-    <li>The exact site address you enter is kept private. It's shared with the Operator you hire and pay, and with any Operator you choose to share it with before hiring so they can look at the site. Other bidders see only the general location.</li>
-  </ul>
+<li><p>We also play no part in lien rights. We do not give any notice, make
+any filing or posting on any registry, track any deadline, or warn
+anyone that one is approaching, and B.14 says so in more detail. Those
+are the users’ own responsibility, and missing one can cost an Operator
+its lien rights or expose a Client who has already paid.</p></li>
 
-  <h2 id="s4">4. Bidding</h2>
-  <ul>
-    <li>Bids are sealed. Operators can't see each other's amounts.</li>
-    <li>A bid is an offer to do the described work for the stated price. When a Client accepts a bid and pays into escrow, the Client and the Operator have an agreement for that work at that price, on the terms in the job post and the bid.</li>
-    <li>Clients aren't required to accept any bid, including the lowest.</li>
-    <li>Changes to scope or price after hiring must be agreed by both sides. The escrowed amount covers only the accepted bid.</li>
-  </ul>
+<li><p>Before you hire, check the Operator’s reviews, ask questions, and ask
+for proof of licensing and insurance. Before you bid, satisfy yourself
+about the site and the scope.</p></li>
+</ul>
+<h2 id="s6">6. Fees</h2>
+<ul>
+<li><p>Posting, bidding, and messaging are free. A fee is charged only when
+a job is hired and paid, and both the Client and the Operator pay one.
+The Client’s fee is added at checkout. The Operator’s fee is deducted
+from the payout.</p></li>
+<li><p>The fee is banded, which means each rate applies only to the part of
+the job price that falls within that band, not to the whole price. The
+rate is 5% on the first $10,000 of the job price, 3% on the portion from
+$10,000 to $100,000, 2% on the portion from $100,000 to $500,000, and 1%
+on the portion above $500,000.</p>
+<ul>
+<li><p>To take a worked example, a $6,000 job paid in two stages of $3,000
+means the Client pays $3,150 at each stage, including a $150 fee, and
+the Operator receives $2,850 at each stage after its own $150 fee.</p></li>
+</ul></li>
+<li><p>We may change our fees, and a change applies only to jobs hired after
+it takes effect. A job already hired keeps the fees that applied when it
+was hired.</p></li>
+<li><p>We may also offer discounts, waivers, credits, or other promotions
+from time to time. The published terms of a particular promotion govern
+it and control over this section for that promotion. No one is entitled
+to a promotion, a promotion may be limited in time or in the number of
+jobs it covers, and we may change or withdraw one at any time for jobs
+not yet hired.</p></li>
+</ul>
+<h2 id="s7">7. Payments and Held Funds</h2>
+<ul>
+<li><p>All payments and payouts are processed by Stripe, and by using the
+Site you also agree to Stripe’s terms. We do not store full card or bank
+account numbers.</p></li>
 
-  <h2 id="s5">5. Operator responsibilities</h2>
-  <ul>
-    <li>You are an independent business. You decide how to do the work and supply your own equipment, labor, fuel and materials unless the job says otherwise.</li>
-    <li>You're responsible for any licenses, registrations and insurance required where you work, and for carrying adequate liability coverage.</li>
-    <li>Before digging, you're responsible for utility locates (call 811) and for any permits the work requires, unless you and the Client agree in writing that the Client will handle them.</li>
-    <li>You're responsible for safe operation, for your crew, and for complying with safety, environmental and erosion-control rules.</li>
-    <li>You're responsible for your own taxes. Payouts are made through Stripe, which may collect tax information from you.</li>
-  </ul>
+<li><p>When a Client funds a payment, the money is held until it is released
+under section 9 or resolved under section 11. We refer to this as “held
+funds.” Held funds are not an escrow arrangement, we are not acting as
+an escrow agent, trustee, or fiduciary, and we do not hold the money in
+trust for either user. Held funds earn no interest, and no user is
+entitled to interest on them.</p></li>
 
-  <h2 id="s6">6. Client responsibilities</h2>
-  <ul>
-    <li>Give the Operator safe, legal access to the site at the agreed times.</li>
-    <li>Tell the Operator about anything you know of that affects the work, such as buried lines, septic systems, drain tile, wells, property lines and easements.</li>
-    <li>Review the work promptly when the Operator marks it complete, and release payment or report a problem in good faith.</li>
-  </ul>
+<li><p>A single payment of $10,000 or less may be made by card or bank
+transfer. Any single payment over $10,000 must be made by bank transfer,
+which usually takes about four (4) business days to clear. This applies
+payment by payment, not to the job as a whole, so a staged job may have
+some stages paid by card and others by bank transfer. An Operator should
+not move equipment or begin work until the Site shows the payment
+cleared.</p></li>
 
-  <h2 id="s7">7. Fees</h2>
-  <p>Posting a job and bidding are free. When a job is paid, DirtBidder charges a service fee to <strong>both</strong> the Client and the Operator. The fee is calculated in brackets, like income tax brackets, so larger jobs pay a lower overall rate:</p>
-  <table>
-    <tr><th>Portion of the job price</th><th>Fee on that portion (each side)</th></tr>
-    <tr><td>First $10,000</td><td>5%</td></tr>
-    <tr><td>$10,000 – $100,000</td><td>3%</td></tr>
-    <tr><td>$100,000 – $500,000</td><td>2%</td></tr>
-    <tr><td>Over $500,000</td><td>1%</td></tr>
-  </table>
-  <p>The Client's fee is added at checkout. The Operator's fee is subtracted from the payout. Both are shown before anyone pays. We may change fees for future jobs with notice. Changes never apply to a job that's already been paid into escrow.</p>
+<li><p>An Operator must complete a Stripe payout account before it can be
+paid. Until it does, any payout due to it is held. Payouts usually reach
+an Operator’s bank within about two (2) business days after release,
+though the timing depends on the bank.</p></li>
 
-  <h2 id="s8">8. Payment and escrow</h2>
-  <ul>
-    <li>Payments are processed by Stripe, Inc. By paying or receiving payouts you also agree to Stripe's terms. DirtBidder never sees or stores your full card or bank numbers.</li>
-    <li>When a Client hires an Operator, the Client pays the bid amount plus the Client fee. That money is held, and not paid to the Operator, until it's released as described in section 9 or decided as described in section 10.</li>
-    <li>Escrowed money earns no interest for either party.</li>
-    <li>Operators must set up a Stripe payout account to be paid. If an Operator hasn't finished setup when money is released, we hold their payout until they do.</li>
-  </ul>
+<li><p>We are not a bank, a lender, or a money transmitter. We do not
+advance, fund, guarantee, insure, or make up any payment, and we are
+never responsible for paying an Operator out of our own money or for
+refunding a Client out of our own money.</p></li>
+</ul>
+<h2 id="s8">8. Paying in Stages</h2>
+<ul>
+<li><p>At hire, the Client chooses how to pay. The choices are to pay the
+whole job now and release it when the work is done, to pay the whole job
+now and release it in stages as the work is done, or to pay in stages,
+funding each one as it comes. Paying in stages is the Client’s choice,
+not a requirement. A job under $2,000 is always paid in a single
+payment.</p>
+<ul>
+<li><p>Where a job is staged, a job under $10,000 has two (2) stages and a
+job of $10,000 or more has three (3) stages.</p></li>
+</ul></li>
 
-  <h2 id="s9">9. Completion and release</h2>
-  <ul>
-    <li>When the work is done, the Operator marks the job complete.</li>
-    <li>The Client then has <strong>72 hours</strong> to either release the payment or report a problem.</li>
-    <li>If the Client does neither within 72 hours, the payment is <strong>released to the Operator automatically</strong>.</li>
-    <li>Once payment is released, the Operator's payout (the bid amount minus the Operator fee) is sent to their bank through Stripe. A released payment can't be reversed through DirtBidder.</li>
-  </ul>
+<li><p>Each stage is funded separately, marked complete separately, and
+released separately, and the release rules in section 9 apply to every
+stage on its own. An Operator must not begin work on a stage until the
+Site shows that stage funded. If an Operator begins unfunded work, it
+does so at its own risk and has no claim against us for it.</p></li>
 
-  <h2 id="s10">10. Disputes</h2>
-  <ul>
-    <li>A Client can report a problem before payment is released. The payment is then frozen.</li>
-    <li>Both sides can explain their position and submit photos. DirtBidder reviews what's submitted and decides how the escrowed money is handled. We can pay the Operator in full, refund the Client in full, or split the amount.</li>
-    <li>Our decision covers <strong>only the escrowed money</strong>. It isn't a legal ruling. Either party keeps any rights they have against the other under the law, such as small-claims court, for anything beyond it.</li>
-    <li>If the money is split, the Operator fee is recalculated on the amount the Operator actually receives.</li>
-  </ul>
+<li><p>If a Client does not fund a later stage, the Operator keeps
+everything already released to it, is not obliged to perform the
+unfunded work, and should not begin it. Either user may then close the
+job, and any funds still held are resolved under section 11. A Client’s
+failure to fund a stage is a matter between the Client and the Operator,
+and section 7 applies: we will not fund, advance, or guarantee the
+shortfall.</p></li>
+</ul>
+<h2 id="s9">9. Completion and Release</h2>
+<ul>
+<li><p>When an Operator finishes the job, or a stage of it, the Operator
+marks it complete on the Site. The Client then has seventy-two (72)
+hours to release the payment or report a problem. If the Client does
+neither within that time, the payment releases to the Operator
+automatically. Once a payment has been released, we cannot reverse
+it.</p></li>
 
-  <h2 id="s11">11. Cancellations and refunds</h2>
-  <ul>
-    <li>A Client can close a job at no cost any time before hiring.</li>
-    <li>After payment, if both sides agree to cancel before work starts, contact us and we'll refund the Client, including the Client fee.</li>
-    <li>If work has started and the parties don't agree, it's handled as a dispute under section 10.</li>
-  </ul>
+<li><p>Release settles the money and nothing else. Whether the Client
+releases the payment or it releases automatically, release is not an
+inspection, is not an acceptance that the work was done properly, and
+does not waive any claim the Client has against the Operator, including
+under the workmanship warranty in Part B. An Operator may not treat
+release as proof that the work met the required standard.</p></li>
+</ul>
+<h2 id="s10">10. Change Requests</h2>
+<ul>
+<li><p>If the work grows or conditions require something the bid did not
+cover, the Operator submits a change request stating what the extra work
+is, why it is needed, and what it will cost, with photographs where they
+help. The Client approves and funds it, or declines it.</p></li>
 
-  <h2 id="s12">12. Staying on the platform</h2>
-  <p>If you meet someone through DirtBidder, don't arrange to pay for that job outside DirtBidder to avoid the fee. Payments made outside DirtBidder aren't protected by escrow or our dispute process. We may suspend accounts that repeatedly steer jobs off the platform.</p>
-  <p>Messages sent through DirtBidder are between the Client and the Operator, but they aren't private from DirtBidder. We can review messages, bids and job posts to settle disputes, enforce these Terms and prevent fraud.</p>
+<li><p>An Operator must not begin work covered by a change request before
+the Client approves it and the Site shows it funded. We hold and release
+change request money the same way we handle the rest of the job.</p></li>
+</ul>
+<h2 id="s11">11. Disputes Over Held Funds</h2>
+<ul>
+<li><p>A Client who is not satisfied may report a problem at any time before
+the payment releases, and the funds freeze immediately. The Operator may
+respond and submit its own explanation and photographs before we decide
+anything. We will aim to decide within five (5) business days of
+receiving both sides, though a complicated dispute may take longer.</p></li>
+<li><p>We may release the payment to the Operator in full, refund the Client
+in full, or divide the held amount between them. Where we refund any
+amount to the Client, that refund includes our own fee on the refunded
+portion and is net of the payment processing cost actually incurred on
+the payment and its refund, in the same way as section 12. Where we
+release any amount to the Operator, we recalculate the Operator’s fee on
+that amount. Our decision is final as to the held funds and cannot be
+appealed within the Site.</p></li>
+<li><p>We decide on the written explanations and photographs the two of you
+give us, applying these Terms. We are not obliged to investigate, to
+visit a site, to inspect work, to obtain an expert opinion, to question
+anyone, or to look at anything neither of you sent us, and we have no
+duty to either of you to get the decision right. We may also decline to
+decide, in which case we will keep holding the money, or pay it into
+court, until the two of you resolve it or a court or arbitrator tells us
+what to do. Nothing in this section makes us a judge, an arbitrator, a
+mediator, an escrow agent, a trustee, or a fiduciary for either of you,
+and we owe neither of you a duty of care in deciding.</p></li>
+<li><p>Our decision is not a legal ruling. It does not decide fault, it does
+not decide what either user owes the other, and it reaches only the
+money we are holding. Either user may pursue any claim it has against
+the other for anything beyond that amount, including in small claims
+court, and Part B governs how those claims are resolved.</p></li>
+<li><p>By using the Site, you release us from any claim arising out of a
+decision we make under this section, or out of our declining to make
+one, except to the extent the claim arises from our own gross negligence
+or willful misconduct. Sections 22, 23 and 24 apply to this section in
+full.</p></li>
+<li><p>Once a payment has released, section 9 applies and we have no further
+role. A Client with a complaint after release deals with the Operator
+directly.</p></li>
+</ul>
+<h2 id="s12">12. Canceling</h2>
+<ul>
+<li><p>A Client may close a job at no cost at any time before hiring an
+Operator.</p></li>
 
-  <h2 id="s13">13. Reviews and badges</h2>
-  <ul>
-    <li>Clients can rate an Operator after a paid job. Reviews must be honest and about the actual job.</li>
-    <li>Don't offer anything in exchange for a review, and don't threaten a bad one to get a discount.</li>
-    <li>Badges are awarded automatically based on completed jobs, ratings and dispute history. They can't be bought.</li>
-    <li>We may remove reviews that are fake, abusive, off-topic, or reveal private information.</li>
-  </ul>
+<li><p>If a Client has funded a job and the work has not started, and both
+users agree to cancel, the Client is refunded the bid amount and our
+fee, less the payment processing cost actually incurred on the payment
+and its refund. That cost is charged by our payment processor, not by
+us, and we keep no part of our own fee on a canceled job. If the users
+do not agree, or the work has started, the held funds are resolved under
+section 11 and the job contract is ended under Part B.</p></li>
+</ul>
+<h2 id="s13">13. Keeping Jobs on the Site</h2>
+<ul>
+<li><p>You may discuss price, scope, and timing off the Site. What you may
+not do is take a job you found here off the Site in order to avoid our
+fee. A job first posted or first bid on through the Site must be hired
+and paid through the Site.</p></li>
 
-  <h2 id="s14">14. Prohibited conduct</h2>
-  <p>Don't use the Service to break the law, commit fraud, post false jobs or bids, harass anyone, collect other users' personal information, upload malicious code, interfere with the Service, or scrape or copy it. We may remove content and suspend or close accounts that violate these Terms.</p>
+<li><p>This matters for you as well as for us. A job paid off the Site has
+no held funds, no dispute process, no review, and no badge, and neither
+user has any recourse through us if it goes wrong.</p></li>
 
-  <h2 id="s15">15. Disclaimers</h2>
-  <p>The Service is provided "as is." We don't verify every user, license or insurance policy, and we don't guarantee the quality, safety, legality or timeliness of any work, or that any job or bid is accurate. Badges and reviews reflect activity on DirtBidder and aren't an endorsement. To the fullest extent the law allows, we disclaim all implied warranties, including merchantability, fitness for a particular purpose and non-infringement.</p>
+<li><p>If you circumvent the Site on a job sourced here, we may recover from
+you the fees that would have been payable on that job, together with our
+costs of collection and reasonable attorneys’ fees, and we may suspend
+or close your account. This applies to a job hired off the Site within
+twelve (12) months after the job was posted or after the users first
+made contact through the Site, whichever is later. Where the job price
+is disputed, the last bid placed on the Site for that job is treated as
+the price unless you show us what the job was actually worth.</p></li>
 
-  <h2 id="s16">16. Limits of liability</h2>
-  <p>To the fullest extent the law allows, DirtBidder isn't liable for property damage, personal injury, lost profits, or indirect or consequential damages arising from any job or from dealings between users. Our total liability for any claim related to the Service is limited to the greater of (a) the DirtBidder fees you paid on the job the claim relates to, or (b) $100. Some places don't allow these limits, so they may not apply to you.</p>
+<li><p>By placing your first bid, or by first sharing a job location, you
+agree to this section.</p></li>
+</ul>
+<h2 id="s14">14. Messages</h2>
+<ul>
+<li><p>Messages on the Site are between users, but they are not private from
+us. We may access, review, scan, filter, store, and retain messages and
+attachments, and we use automated tools that may flag, hold, or block
+content. We do this to resolve disputes, to enforce section 13 and
+section 15, to prevent fraud, to keep people safe, and to comply with
+the law. Our Privacy Policy explains how long we keep this content and
+what else we do with it.</p></li>
 
-  <h2 id="s17">17. Indemnity</h2>
-  <p>You agree to defend and hold harmless DirtBidder LLC and its owner from claims, losses and costs, including reasonable attorneys' fees, arising from your jobs, your work, your content or your violation of these Terms or the law.</p>
+<li><p>Do not put anything in a message that you would not want us to
+read.</p></li>
+</ul>
+<h2 id="s15">15. Contact Information</h2>
+<ul>
+<li><p>Phone numbers, email addresses, and the exact site address stay
+hidden until a job is hired and the first payment is funded. Until then,
+do not ask for or give out contact details, and do not try to route a
+conversation off the Site.</p></li>
 
-  <h2 id="s18">18. Ending your account</h2>
-  <p>You can stop using the Service at any time. To close your account, email us. We may suspend or close accounts that violate these Terms. Money already in escrow is still handled under sections 9 and 10.</p>
+<li><p>We use automated detection to flag or block attempts to exchange
+contact details early. The detection is not perfect, it will not catch
+everything, and it may occasionally flag something innocent. We are not
+responsible for contact details that get through it, and flagging a
+message is not an accusation.</p></li>
+</ul>
+<h2 id="s16">16. Reviews, Badges and Promotion</h2>
+<ul>
+<li><p>A Client may review an Operator after a paid job. Reviews must be
+honest and based on your own experience. Do not offer anything in
+exchange for a review, do not threaten a bad review to get a discount,
+and do not review yourself or a business you are connected to.</p></li>
+<li><p>Badges are generated automatically from activity on the Site and
+cannot be bought. We may remove a review that is fake, abusive, off
+topic, or that contains someone’s private information, and we may remove
+a badge obtained through conduct that breaks these Terms.</p></li>
 
-  <h2 id="s19">19. Governing law</h2>
-  <p>These Terms are governed by the laws of the State of Iowa. Any lawsuit between you and DirtBidder will be brought in the state or federal courts located in Iowa, except that either party may bring a claim in small-claims court where it qualifies.</p>
+<li><p>An Operator may choose, in its settings, to let us promote its
+completed jobs. If it does, it grants us a non-exclusive, royalty-free
+license to use its business name, logo, and non-identifying job
+information, including job type and county, to promote the Site and that
+Operator on our website and social media. We never publish the Client’s
+name, the address, or the price. An Operator may withdraw this
+permission at any time for future posts, and we will not make new posts
+after that, though we are not obliged to remove posts already published.
+If a promotion would include an individual’s name, photograph, or
+likeness rather than a business name, we will ask that person first.</p></li>
+</ul>
+<h2 id="s17">17. Public Bid Board</h2>
+<ul>
+<li><p>The Site includes a free Public Bid Board listing upcoming county,
+state, and other public earthwork projects, with links to the official
+notices. The Bid Board is published for information only and works
+differently from everything else on the Site.</p></li>
 
-  <h2 id="s20">20. Changes and contact</h2>
-  <p>We may update these Terms. If we make a material change, we'll post the new version here with a new date and, for significant changes, notify you by email. If you keep using the Service after a change, that means you accept it.</p>
-  <p>Questions: <a href="mailto:support@dirtbidder.com">support@dirtbidder.com</a> · DirtBidder LLC, Gilmore City, Iowa.</p>
+<li><p>We do not verify the accuracy, completeness, or currency of any
+listing. Listings may be incomplete, out of date, wrong, delayed, or
+missing altogether, and deadlines, specifications, and requirements may
+change without the Bid Board reflecting the change. The official notice
+issued by the public body is the only authoritative source, and you must
+check it and deal with that body directly before relying on anything you
+read here.</p></li>
+
+<li><p>Bid Board projects are not Jobs. Bidding on one happens with the
+public body, not through the Site. We charge no fee, we hold no funds,
+we decide no disputes, and no review or badge applies. We are not a
+party to any resulting contract, we are not an agent, representative, or
+partner of any public body, and we have no relationship with any of
+them.</p></li>
+
+<li><p>We are not responsible for a missed deadline, a disqualified or
+rejected bid, a listing that was wrong or never appeared, or anything
+else arising from your use of the Bid Board. Sections 22, 23 and 24
+apply to the Bid Board in full.</p></li>
+</ul>
+<h2 id="s18">18. Referrals and Recommendations</h2>
+<ul>
+<li><p>We may receive a commission or other compensation when a user follows
+a link, code, or referral from the Site to a third party such as an
+equipment supplier, rental company, or service provider. Where that is
+the case, we will say so where the referral appears.</p></li>
+
+<li><p>A referral is not an endorsement, a recommendation of suitability, or
+a statement that we have vetted the third party. Your dealings with any
+third party are between you and them, on their terms, and we are not
+responsible for what they do.</p></li>
+</ul>
+<h2 id="s19">19. Your Content</h2>
+<ul>
+<li><p>You keep ownership of the photographs, job descriptions, bids,
+messages, reviews, and other material you put on the Site. By posting
+it, you give us a non-exclusive, worldwide, royalty-free license to
+host, store, copy, display, and distribute it as needed to operate the
+Site, to resolve disputes, to enforce these Terms, and to keep records,
+and to continue doing so for as long as our records require even after
+you close your account.</p></li>
+
+<li><p>You confirm that you have the rights to everything you post, that
+posting it does not break anyone else’s rights, and that it is not
+unlawful. We may remove content that breaks these Terms.</p></li>
+
+<li><p>Review content and the promotional license in section 16 are covered
+by this section as well.</p></li>
+</ul>
+<h2 id="s20">20. Things You Must Not Do</h2>
+<ul>
+<li><p>Do not break the law or use the Site to help someone else break it.
+Do not post a false job or a bid you do not intend to honor. Do not
+misrepresent who you are, your licensing, your insurance, or your
+experience. Do not harass, threaten, or abuse anyone. Do not collect
+other users’ personal information or use it for anything other than the
+job it relates to. Do not upload malware, interfere with the Site, try
+to get into an account or part of the Site you are not entitled to, or
+scrape, copy, or republish the Site or its listings.</p></li>
+</ul>
+<h2 id="s21">21. Suspension and Closing Accounts</h2>
+<ul>
+<li><p>You may stop using the Site at any time and may close your account by
+emailing <a
+href="mailto:support@dirtbidder.com"><u>support@dirtbidder.com</u></a>.
+We may suspend or close an account that breaks these Terms, and we may
+remove content, cancel a listing, or withhold a payout while we
+investigate.</p></li>
+
+<li><p>Closing or suspending an account does not change what happens to
+money we are already holding, which continues to be handled under
+sections 9 and 11, and it does not affect a job contract already formed
+under Part B.</p></li>
+</ul>
+<h2 id="s22">22. Disclaimers</h2>
+<ul>
+<li><p>The Site is provided as is and as available. We do not promise that
+it will be uninterrupted, error free, or secure, or that any listing,
+notification, message, or payment will arrive on time.</p></li>
+
+<li><p>We make no promise about any user, any bid, any job, or any work. We
+do not guarantee the quality, safety, legality, or timeliness of work
+performed, that an Operator holds the licenses, registrations, bonds, or
+insurance it claims or that the law requires, that a Client owns the
+property or will pay, or that the information any user gives is true. To
+the fullest extent the law allows, we disclaim all implied warranties,
+including warranties of merchantability, fitness for a particular
+purpose, and non-infringement.</p></li>
+
+<li><p>Some states do not allow some of these disclaimers, and in that case
+this section applies as far as the law allows.</p></li>
+</ul>
+<h2 id="s23">23. Limit on Our Liability</h2>
+<ul>
+<li><p>To the fullest extent the law allows, we are not liable for property
+damage, personal injury, death, lost profits, lost business, loss of
+data, or any indirect, incidental, special, consequential, or punitive
+damages arising out of the Site, a job, work performed, or your dealings
+with another user, whether the claim is in contract, in tort, or on any
+other basis, and whether or not we were told the loss was possible.</p></li>
+
+<li><p>Our total liability for all claims connected with a particular job is
+limited to the greater of the fees we received from you on that job or
+$1,000. Our total liability for all claims not connected with a
+particular job is limited to the greater of the fees we received from
+you in the twelve (12) months before the claim arose or $1,000.</p></li>
+
+<li><p>This section does not limit our liability for our own gross
+negligence or willful misconduct, or for anything else the law does not
+allow us to limit. Some states restrict limits of this kind, and in
+those states this section applies as far as the law allows.</p></li>
+</ul>
+<h2 id="s24">24. Indemnity</h2>
+<ul>
+<li><p>In this section, the “DirtBidder Parties” means DirtBidder LLC and
+its owner, members, managers, officers, employees, contractors, and
+agents, and anyone to whom it transfers the business under section
+27.</p></li>
+
+<li><p>You will defend, indemnify, and hold harmless the DirtBidder Parties
+against any claim, demand, action, investigation, loss, liability,
+damage, judgment, award, settlement, penalty, fine, or cost, including
+reasonable attorneys’ fees and the costs of investigation and of
+enforcing this section, that arises out of or relates to any of the
+following: a job you posted, bid on, hired, or performed; work performed
+or not performed on a job, including property damage, personal injury,
+or death; a mechanic’s lien, bond claim, or similar claim asserted
+against any property in connection with a job you were involved in,
+including one asserted by someone you hired or bought material from;
+your failure to hold or maintain a required license, registration, bond,
+permit, or insurance; your failure to give a notice or make a posting
+that the law requires to preserve or defeat a lien; your classification
+of, or failure to pay, your own workers, subcontractors, or taxes;
+content you posted; your breach of these Terms or of Part B; your
+violation of any law; and your infringement of anyone’s rights.</p></li>
+
+<li><p>This obligation covers claims brought by anyone, including the other
+user on a job, your own employees or subcontractors, a property owner, a
+neighbor, a utility, a supplier, a public body, and a government agency.
+It is not limited by any insurance you carry or fail to carry, and where
+the law allows, it is not limited by any workers’ compensation or
+similar exclusive remedy that would otherwise cap what you owe your own
+workers.</p></li>
+
+<li><p>We will tell you about a claim covered by this section within a
+reasonable time after we become aware of it, and a delay in telling you
+reduces your obligation only to the extent the delay actually prejudiced
+your ability to defend. Your duty to defend arises when we tender the
+claim to you, and it applies whether or not the claim turns out to have
+merit. You may control the defense provided you confirm the indemnity in
+writing, use counsel we reasonably approve, and keep us informed, and
+you may not settle a claim in a way that admits fault on our part,
+imposes any obligation or payment on us, or fails to release us fully,
+without our written consent. If you do not promptly take up the defense,
+we may defend the claim ourselves with counsel of our choosing and you
+will reimburse our costs and attorneys’ fees as they are incurred.</p></li>
+
+<li><p>Where more than one user is involved in the same job, each of you is
+responsible under this section for the whole of a covered claim, and we
+may look to any of you for it.</p></li>
+
+<li><p>This section survives the closing or suspension of your account and
+the end of these Terms, and it applies to the fullest extent the law
+allows. It does not cover a claim to the extent it is caused by a
+DirtBidder Party’s own gross negligence or willful misconduct.</p></li>
+</ul>
+<h2 id="s25">25. Disputes With Us</h2>
+<ul>
+<li><p>This section is about disputes between you and us. Disputes between a
+Client and an Operator are governed by Part B.</p></li>
+
+<li><p>If you have a dispute with us, contact us first at <a
+href="mailto:support@dirtbidder.com"><u>support@dirtbidder.com</u></a>
+and we will try to resolve it. If we cannot resolve it within thirty
+(30) days, you and we will mediate before starting any proceeding,
+sharing the mediator’s fee equally. If mediation does not resolve it
+within thirty (30) days of a written request to mediate, the dispute
+will be decided by binding arbitration before a single arbitrator
+administered by the American Arbitration Association, under its Consumer
+Arbitration Rules where you are an individual acting for personal or
+household purposes and under its Commercial Arbitration Rules in every
+other case. The arbitration will be seated in Polk County, Iowa, though
+you may ask for a hearing by telephone or video or in the county where
+you live, and judgment on the award may be entered in any court with
+jurisdiction. Each of us pays its own attorneys’ fees and costs, and
+filing and administrative fees are allocated by the applicable
+rules.</p></li>
+
+<li><p>You and we each agree to bring claims only in an individual capacity,
+and not as a plaintiff or class member in any class, collective,
+consolidated, or representative proceeding. The arbitrator may not
+preside over any form of representative proceeding. If this paragraph is
+found unenforceable as to a particular claim, that claim proceeds in
+court and the rest of this section still applies to every other
+claim.</p></li>
+
+<li><p>If twenty-five (25) or more demands for arbitration raising
+substantially the same issues are filed against us by or with the help
+of the same lawyers or coordinated group, those demands will be handled
+in batches rather than all at once. The first batch will be no more than
+twenty (20) demands chosen by each side in equal number and heard by a
+single arbitrator, and the parties will then use the results to try to
+resolve the rest, with further batches following the same process if
+they do not. The time limit for bringing any demand still waiting its
+turn pauses while this process runs. This paragraph is not a waiver of
+anyone’s right to arbitrate, and it exists so that a large group of
+similar claims can be decided sensibly and affordably rather than priced
+out of being heard at all.</p></li>
+
+<li><p>Two exceptions to arbitration. Either of us may bring a qualifying
+claim in small claims court. And we may bring an action in court to
+collect fees owed under section 6 or section 13, in which case the party
+that prevails may recover its attorneys’ fees, costs, and interest.</p></li>
+
+<li><p>Iowa law governs these Terms and any dispute between you and us,
+without regard to its conflict of laws rules. For any claim not subject
+to arbitration, you and we submit to the state and federal courts
+sitting in Polk County, Iowa.</p></li>
+</ul>
+<h2 id="s26">26. Changes to These Terms</h2>
+<ul>
+<li><p>We may change these Terms. When we do, we will post the updated
+version with a new effective date and a version number, and we will ask
+you to accept it before you continue using the Site. We will email you
+about a significant change. We keep a record of which version each user
+accepted and when.</p></li>
+
+<li><p>A change applies to jobs hired after it takes effect. A job already
+hired and funded stays under the version of these Terms that applied
+when it was hired, so a change we make partway through a job does not
+alter the deal the users struck.</p></li>
+
+<li><p>If you do not accept an updated version, you may close your account
+under section 21.</p></li>
+</ul>
+<h2 id="s27">27. General</h2>
+<ul>
+<li><p>These Terms, together with Part B, our Privacy Policy, and the terms
+of any promotion you take part in, are the entire agreement between you
+and us about the Site, and they replace anything said or written
+before.</p></li>
+
+<li><p>If a court or arbitrator finds part of these Terms unenforceable,
+that part is limited or removed to the minimum extent necessary and the
+rest stays in force. If we do not enforce something straight away, we
+have not given up the right to enforce it later. You may not transfer
+your account or your rights under these Terms without our written
+consent. We may transfer ours, including to a buyer of our business, and
+these Terms continue to apply.</p></li>
+
+<li><p>Neither of us is responsible for a failure or delay caused by
+something outside our reasonable control, including a natural event, a
+utility or network failure, an act of a third party, a payment processor
+outage, or a government order.</p></li>
+
+<li><p>We will send notices to the email address on your account, and you
+should send notices to <a
+href="mailto:support@dirtbidder.com"><u>support@dirtbidder.com</u></a>.
+Nothing in these Terms makes either of us the other’s employee, agent,
+partner, or joint venturer, and nothing in them gives any third party a
+right to enforce them, except that section 24 covers the people it
+names.</p></li>
+</ul>
+<h2 class="part" id="part-b">Part B: Terms Between Client and Operator</h2>
+<h2 id="sb1">B.1 What This Part Is</h2>
+<ul>
+<li><p>Part A is the agreement between you and DirtBidder. This Part B is
+different. It is the agreement between the Client and the Operator for
+the actual work on the ground, and DirtBidder is not a party to it.
+DirtBidder does not perform earthwork, does not supervise it, does not
+inspect it, and does not guarantee it. When a Client hires an Operator
+through the Site, a direct contract forms between those two users on the
+terms in this Part B, and DirtBidder’s only role is the one Part A
+describes: running the Site, holding the payment until the job is done,
+and deciding how held funds are divided if the two of them cannot
+agree.</p></li>
+
+<li><p>Nothing in this Part B gives either user a claim against DirtBidder,
+and nothing in it makes DirtBidder a contractor, a general contractor, a
+construction manager, an agent, a broker, or a guarantor of either
+user’s performance. Sections 22, 23 and 24 of Part A apply to everything
+in this Part B. If anything in this Part B conflicts with Part A on
+DirtBidder’s role or responsibility, Part A controls.</p></li>
+</ul>
+<h2 id="sb2">B.2 When the Job Contract Forms</h2>
+<ul>
+<li><p>A bid is an offer by the Operator to do the described work for the
+stated price on the stated timeline. The Client is free to accept any
+bid or none. The job contract between the Client and the Operator forms
+when the Client accepts a bid and funds the first payment, and its terms
+are the accepted bid together with this Part B. Until both of those
+things happen, neither user owes the other anything.</p></li>
+
+<li><p>The Client and the Operator may agree in writing to terms that differ
+from this Part B, but only for their own job and only if the agreement
+is recorded in the Site’s message thread for that job or in a signed
+writing between them. An agreement of that kind binds the two of them.
+It does not bind DirtBidder, does not change Part A, and does not change
+how DirtBidder holds or releases funds or decides disputes.</p></li>
+</ul>
+<h2 id="sb3">B.3 The Scope of Work</h2>
+<ul>
+<li><p>The work is what the accepted bid describes, read together with the
+job posting and the answers the Client gave to the Operator’s questions
+before bidding. Both users are responsible for making that description
+accurate. The Client must describe the site, the scope, the access, and
+any hazards honestly and completely. The Operator must bid on the work
+as described and must raise anything unclear before bidding rather than
+after.</p></li>
+
+<li><p>Anything not described is not included. If the bid does not say the
+Operator will haul material off, restore disturbed ground, seed or
+stabilize a surface, remove a tree, pump water, or provide survey or
+staking, those things are not part of the job and become part of it only
+through a change request.</p></li>
+</ul>
+<h2 id="sb4">B.4 Changes to the Work</h2>
+<ul>
+<li><p>Work grows. When it does, the Operator submits a change request under
+section 10 of Part A stating what the extra work is, why it is needed,
+and what it will cost, with photographs where they help. The Client then
+approves and funds the change or declines it. The Operator must not
+start work covered by a change request before the Client approves it and
+the Site shows it funded, and a Client who asks for extra work outside
+the change request process is responsible to the Operator for the
+reasonable value of that work even though it sits outside the held
+funds.</p></li>
+
+<li><p>The money DirtBidder holds covers only the accepted bid and any
+approved and funded change request. That is a limit on what DirtBidder
+can release or refund, not a limit on what the users owe each other.</p></li>
+</ul>
+<h2 id="sb5">B.5 Schedule, Weather and Delays</h2>
+<ul>
+<li><p>The Operator will start and finish within the timeline in the
+accepted bid, and will tell the Client promptly when something is going
+to push that timeline. Earthwork depends on conditions, so the timeline
+is a good-faith estimate rather than a guarantee unless the bid says
+otherwise in plain terms.</p></li>
+
+<li><p>Neither user is in breach for a delay caused by something outside its
+reasonable control, including weather, ground conditions that make the
+site unworkable, utility strikes by others, permitting delays, equipment
+failure that could not reasonably have been prevented, or a government
+order. The affected user must tell the other promptly and get back to
+work as soon as it reasonably can. If the Operator is held up by
+something the Client is responsible for, such as blocked access or a
+hazard the Client did not disclose, the Operator may charge for standby
+time only if the accepted bid states a standby rate.</p></li>
+</ul>
+<h2 id="sb6">B.6 Site Access and What the Client Must Disclose</h2>
+<ul>
+<li><p>The Client must own the property or have the owner’s written
+permission for the work, and must give the Operator safe and lawful
+access to the site for the hours the work requires. If the Client is not
+the owner, the Client is responsible to the Operator for having the
+authority it claims.</p></li>
+
+<li><p>Before work starts, the Client must disclose every hazard and buried
+feature it knows about or reasonably should know about, including buried
+utility lines, private lines that public locating services will not
+mark, septic tanks and laterals, wells, cisterns, drain tile, irrigation
+lines, fuel tanks, foundations, debris fill, property lines, easements,
+and any environmental condition affecting the site. The Client must also
+point out anything on the surface that must not be disturbed. A Client
+who fails to disclose something it knew about or reasonably should have
+known about is responsible to the Operator for the resulting damage,
+delay, and added cost.</p></li>
+</ul>
+<h2 id="sb7">B.7 Utility Locates and Permits</h2>
+<ul>
+<li><p>The Operator is responsible for requesting public utility locates
+through the applicable one-call service before any excavation, for
+waiting the required period, for respecting the marks, and for
+excavating by hand or other safe methods within the tolerance zone the
+applicable law requires. The Operator is responsible for obtaining the
+permits the work requires.</p></li>
+
+<li><p>The Client and the Operator may agree in writing that the Client will
+obtain specified permits or arrange a private locate, and if they do,
+the user that took on the task carries the responsibility for it. Absent
+that written agreement, both responsibilities sit with the Operator.
+Public locating services do not mark privately owned lines, so a private
+locate is the Client’s responsibility unless the bid or a written
+agreement says otherwise.</p></li>
+</ul>
+<h2 id="sb8">B.8 Unexpected Site Conditions</h2>
+<ul>
+<li><p>If the Operator encounters a physical condition below the surface or
+otherwise concealed that a competent operator would not reasonably have
+anticipated from the job posting, the site visit, and the information
+the Client gave, the Operator must stop work in the affected area,
+protect the area, and notify the Client promptly. Rock, groundwater,
+buried debris or structures, unsuitable or contaminated soil, and
+undisclosed utilities are examples.</p></li>
+
+<li><p>Neither user may require the other to absorb the cost of that
+condition. The Operator may submit a change request covering the added
+work, and the Client may approve it, decline it, or end the job under
+B.15. If the condition requires a licensed specialist, such as
+contaminated soil or a damaged gas line, the Operator must not attempt
+the remediation itself unless it holds the required license.</p></li>
+</ul>
+<h2 id="sb9">B.9 Material, Spoil and Haul-Off</h2>
+<ul>
+<li><p>Material excavated from the site remains the Client’s property and
+the Client’s responsibility unless the accepted bid provides for
+haul-off, in which case the Operator takes ownership of and
+responsibility for the material it removes and must dispose of it
+lawfully. The Operator must not bring material onto the site, stockpile
+material on neighboring property, or dispose of material on the site,
+unless the Client agrees in writing.</p></li>
+
+<li><p>Fill, topsoil, rock, and other material the Operator supplies must be
+reasonably fit for the stated purpose and free of hazardous substances
+and significant debris.</p></li>
+</ul>
+<h2 id="sb10">B.10 Safety, Licensing and Compliance</h2>
+<ul>
+<li><p>The Operator runs the work. It is responsible for the safety of its
+own crew and equipment, for the conditions it creates on the site, for
+complying with occupational safety requirements, and for environmental,
+erosion, and stormwater rules that apply to the work. The Operator must
+hold, for the full time it is working, every license, registration,
+certification, and bond the law requires for a contractor doing that
+work in the place where the site sits, and must comply with the law of
+that place whether or not the Operator is based there. This is a
+continuing representation, and the Operator must stop bidding if it
+stops being true.</p></li>
+
+<li><p>The Client may be present and may ask questions, but the Client does
+not direct how the Operator performs the work, does not control the
+Operator’s crew, and is not responsible for the Operator’s means,
+methods, or safety practices.</p></li>
+
+<li><p>DirtBidder does not verify any of this. Section 5 of Part A says so,
+and nothing in this Part B changes it.</p></li>
+</ul>
+<h2 id="sb11">B.11 Insurance</h2>
+<ul>
+<li><p>The Operator must carry, for the full time it is working, commercial
+general liability insurance and commercial automobile liability
+insurance covering the work and its equipment, and workers’ compensation
+insurance to the extent the law requires it for the Operator’s workers.
+Coverage must be at least $1,000,000 for each occurrence and $2,000,000
+in the aggregate for general liability, and $1,000,000 combined single
+limit for automobile liability.</p></li>
+
+<li><p>The Operator must give the Client a certificate of insurance on
+request before work starts, and must tell the Client if coverage lapses
+or is canceled while the job is open. A Client who wants to be named as
+an additional insured must ask for it before accepting the bid, and the
+Operator must say in its bid whether it can provide it.</p></li>
+
+<li><p>DirtBidder does not collect, review, verify, or hold certificates of
+insurance, and a Client who wants proof of coverage must ask the
+Operator for it directly.</p></li>
+</ul>
+<h2 id="sb12">B.12 Damage and Repair</h2>
+<ul>
+<li><p>The Operator is responsible for damage it causes to the property, to
+improvements on it, to neighboring property, and to utilities, except
+damage that results from a hazard the Client failed to disclose under
+B.6 or from a line that was mislocated or unmarked by the locating
+service through no fault of the Operator. The Operator must report
+damage to the Client promptly, must report a struck utility to the
+utility owner and to emergency services where the law or safety requires
+it, and must repair or pay to repair what it damaged.</p></li>
+
+<li><p>Ground disturbance that is a normal and unavoidable part of the work
+described in the bid, such as rutting from equipment access, is not
+damage under this section unless the bid provides for restoration.</p></li>
+</ul>
+<h2 id="sb13">B.13 Workmanship Warranty</h2>
+<ul>
+<li><p>The Operator warrants that the work will be performed in a
+workmanlike manner, consistent with the standard of care of a competent
+contractor doing similar work in the same area, and in accordance with
+the accepted bid and any approved change requests. If the Client
+notifies the Operator of work that does not meet that standard within
+twelve (12) months after the job is marked complete, the Operator will
+correct it at its own cost within a reasonable time. This warranty is an
+additional remedy. It does not shorten the time the Client has to bring
+any claim it would otherwise have.</p></li>
+
+<li><p>This warranty does not cover damage from the Client’s own use or
+neglect, settlement or movement that is normal for the soil and the work
+performed, weather or erosion after completion, work by others, material
+the Client supplied, or a design or plan the Client provided. The
+Operator makes no other warranty, express or implied, except those that
+cannot be disclaimed under applicable law, and does not warrant a
+design, elevation, or drainage outcome that was specified by the Client
+or the Client’s engineer rather than by the Operator.</p></li>
+</ul>
+<h2 id="sb14">B.14 Payment, Release and Lien Rights</h2>
+<ul>
+<li><p>The Client pays the bid price through the Site as Part A describes,
+and the Operator looks to the held funds for payment of the accepted bid
+and approved change requests.</p></li>
+
+<li><p>Section 9 of Part A sets out what release means, and both users
+should understand it. Releasing a payment, whether the Client releases
+it or it releases automatically, discharges the Client’s payment
+obligation for that stage. It is not an inspection, not an acceptance of
+the quality of the work, and not a waiver of the Client’s rights under
+B.13 or of any other claim the Client has against the Operator.</p></li>
+
+<li><p>Earthwork is an improvement to real property, so an Operator who is
+not paid may generally place a lien on the Client’s land. That is a real
+risk for a Client who has already paid, and the next three paragraphs
+are how this Part B handles it.</p></li>
+
+<li><p>When a payment is released, the Operator waives, for the work and
+material that payment covers, every mechanic’s lien, bond claim, and
+similar claim it has or could have against the property, the Client, and
+the Client’s lender. The Operator will obtain the same waiver from every
+person it hires or buys material from for the job, and will give the
+Client copies on request. If someone in that position asserts a lien or
+claim against the property for work a released payment covered, the
+Operator will get it removed or bonded off at its own cost within
+fourteen (14) days of the Client asking, and will indemnify the Client
+for the cost of dealing with it, including reasonable attorneys’
+fees.</p></li>
+
+<li><p>Lien rights depend on notices, registrations, and filings that vary
+from state to state. Some of them must be given before the work starts
+or within days of starting, rather than when a payment is missed, and in
+some states a contractor that misses one loses its lien rights entirely,
+however much it is owed. Which ones apply can turn on who the Operator
+contracted with, whether the property is a home, and whether the
+Operator uses subcontractors or suppliers.</p></li>
+
+<li><p>Those obligations belong to the Operator. The Operator is responsible
+for knowing which requirements apply where the site is, for meeting
+them, and for meeting them on time, and the Operator should get its own
+advice rather than relying on anything it reads here or on the Site.
+DirtBidder does not give any notice, make any filing or posting on any
+registry, track any deadline, or warn either user that one is
+approaching. An Operator that loses lien rights, and a Client that faces
+a claim because someone did or did not take one of these steps, has no
+claim against DirtBidder for it. Sections 22, 23 and 24 of Part A
+apply.</p></li>
+</ul>
+<h2 id="sb15">B.15 Stopping or Ending a Job</h2>
+<ul>
+<li><p>Before work starts, the Client and the Operator may cancel by
+agreement, and section 12 of Part A governs the refund. After work
+starts, either user may end the job if the other materially breaches and
+does not fix the breach within five (5) business days of written notice
+through the Site.</p></li>
+
+<li><p>A Client may also end a job at any time for its own reasons. If it
+does, the Operator is entitled to payment for the work actually
+performed and for material already ordered or delivered that cannot
+reasonably be returned, up to the bid price. An Operator that walks off
+a job without cause must return any payment it received for work it did
+not perform, and is responsible to the Client for the reasonable extra
+cost of getting the remaining work done, up to the bid price.</p></li>
+
+<li><p>If the Client does not fund a later stage, section 8 of Part A
+applies. The Operator keeps what has already been released to it, is not
+obliged to perform unfunded work, and should not begin it. Either user
+may then close the job, and any funds still held are resolved under
+section 11 of Part A.</p></li>
+
+<li><p>The Operator must leave the site in a safe condition when a job ends
+for any reason, including backfilling or barricading open
+excavations.</p></li>
+</ul>
+<h2 id="sb16">B.16 Responsibility Between the Client and the Operator</h2>
+<ul>
+<li><p>Each user is responsible to the other for loss its own breach or
+negligence causes. Neither user is responsible to the other for lost
+profits, lost business, loss of use, or other indirect or consequential
+damages, except that this exclusion does not apply to damage to
+property, personal injury, or a user’s indemnity obligation under this
+section.</p></li>
+
+<li><p>The Operator will defend and hold the Client harmless against
+third-party claims for personal injury or property damage caused by the
+Operator’s work or its crew, except to the extent the claim arises from
+something the Client was responsible for under B.6. The Client will
+defend and hold the Operator harmless against third-party claims arising
+from the Client’s lack of authority over the property or from a hazard
+the Client failed to disclose under B.6.</p></li>
+
+<li><p>The Operator is an independent business. Nothing in this Part B
+creates an employment relationship, a partnership, or a joint venture
+between the Client and the Operator, and neither may bind the other.</p></li>
+</ul>
+<h2 id="sb17">B.17 Disputes Between the Client and the Operator</h2>
+<ul>
+<li><p>If the Client reports a problem before the payment releases,
+DirtBidder may decide how the held funds are divided, and section 11 of
+Part A governs that process. That decision resolves the held money and
+nothing else. It is not a legal ruling, it does not decide fault, and it
+does not stop either user from pursuing a claim for anything beyond the
+held funds.</p></li>
+
+<li><p>For everything beyond the held funds, the Client and the Operator
+will first try to resolve the dispute between themselves, and if that
+fails will mediate before starting any proceeding. The user that wants
+to mediate asks the other in writing, and both share the mediator’s fee
+equally. If mediation does not resolve the dispute within thirty (30)
+days of that request, the dispute will be decided by binding arbitration
+before a single arbitrator administered by the American Arbitration
+Association, under its Consumer Arbitration Rules where the Client is an
+individual who hired the work for personal, family, or household
+purposes, and under its Construction Industry Arbitration Rules in every
+other case, including the fast track procedures of the applicable rules
+where the amount in dispute qualifies, in the county where the site is
+located, and judgment on the award may be entered in any court with
+jurisdiction. Each user pays its own attorneys’ fees and costs in
+mediation and arbitration.</p></li>
+
+<li><p>Two exceptions. Either user may bring a claim in small claims court
+if it qualifies. And a claim to collect money owed for completed work
+may be brought in court, in which case the user that prevails in the
+collection action may recover its attorneys’ fees, costs, and
+interest.</p></li>
+
+<li><p>The law of the place where the site is located governs the job
+contract, including this Part B, without regard to its conflict of laws
+rules. This is a different choice from the governing law in section 25
+of Part A, which governs the relationship between each user and
+DirtBidder.</p></li>
+</ul>
+
+  <p style="margin-top:2rem">Questions: <a href="mailto:support@dirtbidder.com">support@dirtbidder.com</a> · DirtBidder LLC, Gilmore City, Iowa.</p>
 </main>
 <script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
 try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}

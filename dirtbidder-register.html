@@ -732,7 +732,14 @@
         <div class="checkbox-row">
           <input type="checkbox" id="terms" />
           <label class="checkbox-label" for="terms">
-            I agree to DirtBidder's <a href="dirtbidder-terms.html" target="_blank" rel="noopener">Terms of Service</a> (including the payment &amp; escrow rules) and <a href="dirtbidder-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+            I agree to DirtBidder's <a href="dirtbidder-terms.html" target="_blank" rel="noopener">Terms of Service</a> (including the payment &amp; held-funds rules) and <a href="dirtbidder-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+          </label>
+        </div>
+
+        <div class="checkbox-row" id="lienRow" style="display:none">
+          <input type="checkbox" id="lienAck" />
+          <label class="checkbox-label" for="lienAck">
+            I understand that lien notices, registry postings and deadlines are my responsibility, not DirtBidder's. <a href="dirtbidder-lien-notice.html" target="_blank" rel="noopener">Read the Iowa lien deadlines</a>
           </label>
         </div>
 
@@ -981,6 +988,7 @@
     document.getElementById('roleClient').classList.toggle('selected', role === 'client');
     document.getElementById('roleOperator').classList.toggle('selected', role === 'operator');
 
+    document.getElementById('lienRow').style.display = role === 'operator' ? '' : 'none';
     const benefits = document.getElementById('benefitsList');
     if (role === 'client') {
       benefits.innerHTML = `
@@ -1026,6 +1034,10 @@
       }
       if (!document.getElementById('terms').checked) {
         alert('Please agree to the Terms of Service and Privacy Policy to continue.');
+        return;
+      }
+      if (currentRole === 'operator' && !document.getElementById('lienAck').checked) {
+        alert('Please check the box about lien notices and deadlines to continue.');
         return;
       }
     }
@@ -1127,7 +1139,8 @@
           phone: phone,
           role: currentRole,
           profile: profile,
-          accepted_terms: document.getElementById('terms').checked
+          accepted_terms: document.getElementById('terms').checked,
+          accepted_lien: currentRole === 'operator' && document.getElementById('lienAck').checked
         })
       });
 

@@ -6,10 +6,23 @@
 
   // What changed, in plain words, for each version. Add a line here whenever the Terms change.
   var CHANGES = {
+    '2026-10-24': [
+      'New Terms written with our attorney. They’re longer, but most of it spells out how DirtBidder already works.',
+      'Paying in stages is the client’s choice at hire. Jobs under $2,000 are paid at once.',
+      'If both sides cancel before work starts, the client gets everything back except the card processing cost. DirtBidder keeps none of its fee.',
+      'Operators: carry $1M/$2M general liability and $1M auto insurance, stand behind the work for 12 months, and give lien waivers as payments are released.',
+      'A job that starts on DirtBidder stays on DirtBidder. Taking it off the site within 12 months means paying the fees plus attorney fees.',
+      'Disputes with DirtBidder go to individual arbitration, not class actions.'
+    ],
     '2026-10-06': [
       'DirtBidder can read messages, bids and job posts to settle disputes, enforce the rules and prevent fraud.',
       'A client can share a job’s exact location with one operator before hiring, so they can look at the site.'
     ]
+  };
+
+  // Which documents changed and the version label shown, per version
+  var INFO = {
+    '2026-10-24': { docs: 'Terms of Service', label: 'Version 1.0' }
   };
 
   function call(path, opts) {
@@ -31,6 +44,8 @@
     if (document.getElementById('dbTermsBox')) return;
     var list = CHANGES[version] || [];
     var date = niceDate(version);
+    var info = INFO[version] || {};
+    var docs = info.docs || 'Terms of Service and Privacy Policy';
     var o = document.createElement('div');
     o.id = 'dbTermsBox';
     o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.setAttribute('aria-labelledby', 'dbTermsTitle');
@@ -39,11 +54,11 @@
     o.innerHTML =
       '<div style="background:#2A1F17;border:1px solid rgba(232,137,42,0.35);border-radius:6px;max-width:440px;width:100%;padding:1.4rem 1.3rem;font-family:Barlow,Arial,sans-serif;color:#C4A882;line-height:1.5;margin:auto">' +
         '<div id="dbTermsTitle" style="font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;font-size:1.45rem;text-transform:uppercase;color:#F2EDE6;line-height:1.1;margin-bottom:0.5rem">We updated our Terms</div>' +
-        '<p style="font-size:0.93rem;margin:0 0 0.8rem">' + (date ? 'Our Terms of Service and Privacy Policy changed on ' + esc(date) + '.' : 'Our Terms of Service and Privacy Policy have changed.') + (list.length ? ' Here’s what’s different:' : ' Please read them before you continue.') + '</p>' +
+        '<p style="font-size:0.93rem;margin:0 0 0.8rem">' + (date ? 'Our ' + docs + ' changed on ' + esc(date) + (info.label ? ' (' + esc(info.label) + ')' : '') + '.' : 'Our ' + docs + ' changed.') + (list.length ? ' Here’s what’s different:' : ' Please read them before you continue.') + '</p>' +
         (list.length ? '<ul style="margin:0 0 0.9rem;padding-left:1.2rem;font-size:0.93rem;color:#F2EDE6">' + list.map(function (t) { return '<li style="margin-bottom:0.45rem">' + esc(t) + '</li>'; }).join('') + '</ul>' : '') +
         '<p style="font-size:0.9rem;margin:0 0 1.1rem">Read the full <a href="dirtbidder-terms.html" target="_blank" rel="noopener" style="' + A + '">Terms of Service</a> and <a href="dirtbidder-privacy.html" target="_blank" rel="noopener" style="' + A + '">Privacy Policy</a>.</p>' +
         '<div id="dbTermsErr" role="alert" style="display:none;color:#E57373;font-size:0.88rem;margin-bottom:0.7rem"></div>' +
-        '<button type="button" id="dbTermsYes" style="width:100%;background:#E8892A;color:#1C1410;border:0;border-radius:3px;padding:0.85rem 0.6rem;font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer">I agree to the updated Terms and Privacy Policy</button>' +
+        '<button type="button" id="dbTermsYes" style="width:100%;background:#E8892A;color:#1C1410;border:0;border-radius:3px;padding:0.85rem 0.6rem;font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer">' + (info.docs === 'Terms of Service' ? 'I agree to the updated Terms' : 'I agree to the updated Terms and Privacy Policy') + '</button>' +
         '<div style="text-align:right;margin-top:0.8rem;font-size:0.88rem"><button type="button" id="dbTermsNo" style="background:none;border:0;color:#A89887;font:inherit;cursor:pointer;padding:0.3rem 0">Not now</button></div>' +
       '</div>';
     document.body.appendChild(o);
