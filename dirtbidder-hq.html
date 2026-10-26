@@ -199,6 +199,38 @@
       </details>
     </div>`;
 
+  // Off-site jobs note (Terms section 13). Stays open across the refresh once tapped open.
+  let offOpen = false;
+  const OFFSITE_NOTE = `
+    <div class="taxnote">
+      <div class="short"><b>Short version:</b> If a client and operator meet here and do the job off DirtBidder to skip the fee, <b>you can still collect the fee</b>, plus collection costs and attorney's fees (Terms section 13).</div>
+      <details>
+        <summary>Read more</summary>
+        <h4>What the Terms say</h4>
+        <ul>
+          <li>A job first posted or bid on here must be hired and paid here.</li>
+          <li>Taking it off the site: DirtBidder can recover the fees it would have earned, <b>plus collection costs and reasonable attorney's fees</b>, and suspend or close the account.</li>
+          <li>Covers <b>12 months</b> after the job was posted or they first made contact here, whichever is later.</li>
+          <li>Price in dispute? <b>The last bid on the site counts</b> unless they prove the real job value.</li>
+          <li>Applies to <b>both sides</b>. They agree to it with their first bid or first location share.</li>
+        </ul>
+        <h4>Proof</h4>
+        <ul>
+          <li>The site keeps the job post, bids, messages and whether the GPS pin was shared.</li>
+          <li>Add proof the job got done: photos, seeing it, someone telling you.</li>
+        </ul>
+        <h4>If it happens</h4>
+        <ul>
+          <li>No card on file, so it can't be charged automatically. You bill them.</li>
+          <li>1. Screenshot the job, bids and messages.</li>
+          <li>2. Send a friendly invoice for the fee, citing Terms section 13.</li>
+          <li>3. If they refuse, send it to Paweena (Surge). Disputes with DirtBidder go to arbitration.</li>
+          <li>On small jobs the fee may not be worth a fight. Suspending the account is the bigger lever.</li>
+        </ul>
+        <div class="fine">Not a lawyer. Check with Paweena before going after anyone.</div>
+      </details>
+    </div>`;
+
   const FEED = {
     signup: (a) => ['👤', `<b>${esc((a.who || '').trim() || 'Someone (no name given)')}</b> joined as ${a.detail === 'operator' ? 'an operator' : 'a client'}`],
     job: (a) => ['📋', `<b>${esc(a.who)}</b> posted <i>${esc(a.detail)}</i>`],
@@ -300,6 +332,10 @@
             <div class="card-body" id="taxBody">${taxOpen ? TAX_NOTE.replace('<details>', '<details open>') : TAX_NOTE}</div>
           </div>
           <div class="card">
+            <div class="card-head"><div class="card-title">Jobs taken off the site</div><span class="pill">Note to self</span></div>
+            <div class="card-body" id="offBody">${offOpen ? OFFSITE_NOTE.replace('<details>', '<details open>') : OFFSITE_NOTE}</div>
+          </div>
+          <div class="card">
             <div class="card-head"><div class="card-title">Quick links</div></div>
             <div class="card-body links">
               ${LINKS.map(l => `<a class="link${l.primary ? ' primary' : ''}" href="${l.u}"${/^https?:/.test(l.u) ? ' target="_blank" rel="noopener"' : ''}><span class="ic">${l.ic}</span><span><b>${l.t}</b><small>${l.s}</small></span></a>`).join('')}
@@ -316,6 +352,8 @@
       </div>`;
     const tax = document.querySelector('#taxBody details');
     if (tax) tax.addEventListener('toggle', () => { taxOpen = tax.open; });
+    const off = document.querySelector('#offBody details');
+    if (off) off.addEventListener('toggle', () => { offOpen = off.open; });
     renderTasks();
     renderWait();
     renderBids();
