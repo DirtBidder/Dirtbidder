@@ -3,8 +3,8 @@
 // It only loads and plays when tapped, so the page stays fast.
 (function () {
   var VIDS = {
-    client: { src: 'videos/dirtbidder-client-demo.mp4', poster: 'videos/dirtbidder-client-poster.jpg', label: 'How DirtBidder works for landowners' },
-    operator: { src: 'videos/dirtbidder-operator-demo.mp4', poster: 'videos/dirtbidder-operator-poster.jpg', label: 'How DirtBidder works for operators' }
+    client: { src: '/videos/dirtbidder-client-demo.mp4', poster: '/videos/dirtbidder-client-poster.jpg', label: 'How DirtBidder works for landowners' },
+    operator: { src: '/videos/dirtbidder-operator-demo.mp4', poster: '/videos/dirtbidder-operator-poster.jpg', label: 'How DirtBidder works for operators' }
   };
   var box = null, lastFocus = null;
 

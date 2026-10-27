@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DirtBidder: Now in Oklahoma</title>
+<meta name="description" content="Free for Oklahoma dirt contractors. Landowners post excavation, pond and land clearing jobs, you send a sealed bid, and the customer pays before you start.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DirtBidder">
 <meta property="og:title" content="DirtBidder: Now in Oklahoma">
@@ -15,8 +16,74 @@
 <meta property="og:image:alt" content="DirtBidder, now in Oklahoma: Move dirt. Make deals. Post jobs, place bids, get paid.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.dirtbidder.com/og-oklahoma.png">
-<style>body{margin:0;background:#1C1410;color:#F2EDE6;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:16px}a{color:#E8892A}</style>
-<script>location.replace('/?from=oklahoma');</script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --dust:#C4A882; --stone:#A89887; --chalk:#F2EDE6; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', Arial, sans-serif; background: var(--soil); color: var(--dust); line-height: 1.55; }
+  nav { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(232,137,42,0.15); }
+  .logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; }
+  .logo span { color: var(--amber); }
+  nav a.login { color: var(--dust); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  main { max-width: 640px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  .tag { display: inline-block; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.85rem; padding: 0.25rem 0.6rem; border-radius: 3px; }
+  h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; text-transform: uppercase; color: var(--chalk); font-size: 2.6rem; line-height: 1.02; margin: 0.8rem 0 0.8rem; }
+  h1 em { font-style: normal; color: var(--amber); }
+  .lead { font-size: 1.1rem; color: var(--chalk); margin-bottom: 1.2rem; }
+  .job { background: var(--dig); border-left: 4px solid var(--amber); border-radius: 4px; padding: 1rem 1.1rem; margin: 0 0 1.4rem; }
+  .job b { display: block; color: var(--chalk); font-family: 'Barlow Condensed', sans-serif; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  .cta { display: block; text-align: center; background: var(--amber); color: var(--soil); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 1rem; border-radius: 4px; }
+  .cta:hover { filter: brightness(1.08); }
+  .under { text-align: center; font-size: 0.9rem; margin: 0.6rem 0 1.8rem; }
+  ul.perks { list-style: none; margin: 0 0 1.8rem; }
+  ul.perks li { padding: 0.65rem 0 0.65rem 2rem; position: relative; border-bottom: 1px solid rgba(196,168,130,0.12); color: var(--chalk); }
+  ul.perks li::before { content: '✓'; position: absolute; left: 0.2rem; top: 0.6rem; color: var(--amber); font-weight: 800; }
+  ul.perks small { display: block; color: var(--dust); font-size: 0.88rem; }
+  h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; text-transform: uppercase; color: var(--chalk); font-size: 1.4rem; margin: 0 0 0.7rem; }
+  ol.steps { margin: 0 0 1.6rem 1.2rem; }
+  ol.steps li { margin-bottom: 0.45rem; }
+  .watch { display: inline-flex; align-items: center; gap: 0.55rem; color: var(--chalk); text-decoration: none; font-weight: 600; border: 1px solid rgba(232,137,42,0.4); border-radius: 30px; padding: 0.45rem 1rem 0.45rem 0.45rem; margin-bottom: 2rem; }
+  .watch .play { width: 30px; height: 30px; border-radius: 50%; background: var(--amber); color: var(--soil); display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; padding-left: 2px; }
+  .from { font-size: 0.95rem; background: var(--dig); padding: 1rem 1.1rem; border-radius: 4px; margin-bottom: 1.6rem; }
+  .small { font-size: 0.85rem; color: var(--stone); text-align: center; }
+  .small a { color: var(--amber); }
+  @media (max-width: 420px) { h1 { font-size: 2.15rem; } }
+</style>
 </head>
-<body><p>Taking you to <a href="/?from=oklahoma">DirtBidder</a>…</p></body>
+<body>
+<nav><a class="logo" href="/"><span>Dirt</span>Bidder</a><a class="login" href="/dirtbidder-login.html">Log in</a></nav>
+<main>
+  <span class="tag">Now in Oklahoma</span>
+  <h1>Oklahoma dirt contractors: <em>free to join, no lead fees</em></h1>
+  <p class="lead">Landowners post ponds, driveways, land clearing and building pads. You send a sealed bid. The customer pays up front, so you never chase your money.</p>
+
+  <div class="job"><b>Pond job waiting near McAlester</b>A small pond, full of water, that needs cleaned out and made bigger. It goes up as soon as a local contractor signs up, and you'll get an email the minute it's posted.</div>
+
+  <a class="cta" href="/dirtbidder-register.html?role=operator&amp;from=oklahoma">Sign up free</a>
+  <p class="under">Takes about 2 minutes. No credit card.</p>
+
+  <ul class="perks">
+    <li>Free to join<small>No monthly fee and you never pay for leads. A small fee (5% or less) only when you get paid on a job.</small></li>
+    <li>Ask before you bid<small>Message the landowner, and walk the site with the GPS pin before you price it.</small></li>
+    <li>Sealed bids<small>Only the customer sees your price. Change it any time before they accept.</small></li>
+    <li>The money's there before you start<small>The customer pays through DirtBidder and it's held until the work is done. On bigger jobs you get paid as you go.</small></li>
+    <li>Paid to your bank<small>Usually about 2 business days after the job is released.</small></li>
+  </ul>
+
+  <a class="watch" href="#" data-demo="operator"><span class="play">▶</span>Watch how it works <small style="color:var(--dust);font-weight:500">· 2 min</small></a>
+
+  <div class="from">I'm Daniel Wheeler. I run an excavator in north central Iowa and started DirtBidder so dirt contractors can find private work without paying for leads. Almost 90 contractors have joined so far, and we're adding Oklahoma now.</div>
+
+  <a class="cta" href="/dirtbidder-register.html?role=operator&amp;from=oklahoma">Sign up free</a>
+  <p class="under">Questions? Email <a href="mailto:support@dirtbidder.com" style="color:var(--amber)">support@dirtbidder.com</a></p>
+
+  <p class="small">Got dirt work of your own? <a href="/dirtbidder-register.html">Post a job free</a> · <a href="/">dirtbidder.com</a></p>
+</main>
+<script>/* visitor counter for DirtBidder HQ — skips the owner's own devices */
+try { if (!localStorage.getItem('dirtbidder_admin')) fetch('https://dirtbidder-backend-production.up.railway.app/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: location.pathname, ref: document.referrer }), keepalive: true }).catch(function () {}); } catch (e) {}
+</script>
+<script src="/dirtbidder-pixel.js"></script>
+<script src="/dirtbidder-demo-video.js"></script>
+<script>try { window.dbTrack && window.dbTrack('ViewContent', { content_name: 'Oklahoma operators' }); } catch (e) {}</script>
+</body>
 </html>
