@@ -55,10 +55,9 @@
       small(160, 14, 'FROM THE SIDE') +
       `<line x1="10" y1="40" x2="310" y2="40" stroke="${STONE}" stroke-width="2"/>` + small(40, 34, 'ground') +
       `<path d="M95,40 L95,128 L225,128 L225,40" fill="rgba(139,94,60,0.25)" stroke="${DUST}" stroke-width="2" stroke-dasharray="5 3"/>` +
-      `<rect x="96" y="118" width="128" height="10" fill="rgba(168,152,135,0.6)"/>` + small(260, 126, '← gravel base', 'start') +
-      `<rect x="120" y="28" width="80" height="90" rx="10" fill="rgba(232,137,42,0.18)" stroke="${AMBER}" stroke-width="2"/>` + small(160, 78, 'SHELTER') +
-      dim(120, 142, 200, 142) + txt(160, 158, 'LENGTH') +
-      dim(212, 28, 212, 118) + txt(240, 76, 'HEIGHT', 'start') +
+      `<rect x="120" y="28" width="80" height="100" rx="10" fill="rgba(232,137,42,0.18)" stroke="${AMBER}" stroke-width="2"/>` + small(160, 78, 'SHELTER') +
+      dim(95, 142, 225, 142) + txt(160, 158, 'HOLE LENGTH') +
+      dim(238, 40, 238, 128) + txt(246, 88, 'DEPTH', 'start') +
       small(70, 90, '2 ft room', 'middle') + small(70, 102, 'each side', 'middle'), 165),
     strip: svg(
       small(160, 14, 'FROM THE SIDE: DIRT ON TOP OF THE ROCK') +
@@ -161,39 +160,44 @@
     },
     shelter: {
       types: ['Storm Shelter Install'], name: 'storm shelter install', pic: 'shelter',
-      tip: 'Pick your shelter size and the measurements fill in. The hole is figured with 2 feet of working room on every side and a 6-inch gravel base.',
-      // Fill these in with the real outside measurements (feet) of each model; picking a size then fills the boxes
-      presets: { 'Small': null, 'Medium': null, 'Large': null },
+      tip: 'Pick your shelter and the hole size fills in. Not on the list? Pick Other and type the hole size the maker gives you.',
+      // Hole sizes (feet) from the manufacturer; picking one fills the boxes and the install steps
+      presets: {
+        'Refuge Small (6 person)': { len: 12, wid: 10, dep: 7, set: 'Installer lifts it off the trailer with his excavator', anchor: 'Augers and straps (provided) plus 2 concrete bin blocks (installer brings)' },
+        'Refuge Medium (8 person)': { len: 12, wid: 10, dep: 7, set: 'Installer lifts it off the trailer with his excavator', anchor: 'Augers and straps (provided) plus 2 concrete bin blocks (installer brings)' },
+        'Refuge Large (12 person)': { len: 12, wid: 10, dep: 5.5, set: 'Installer lifts it off the trailer with his excavator', anchor: 'Augers and straps (provided) plus 2 concrete bin blocks (installer brings)' }
+      },
+      steps: {
+        Refuge: 'Lift the shelter off the delivery trailer with the excavator, put the provided steel pipes through the bottom, set it in the hole, place 2 concrete bin blocks (installer brings) on the pipes, install the 4 augers and steel straps (provided), backfill, then put on the vent caps (provided). Only the door sits above ground.',
+        'Refuge Large (12 person)': ' The large model has a slanted door, so it sits a little out of the hole; on flat ground the dirt is mounded around the top.'
+      },
       fields: [
-        choice('size', 'Shelter size', ['Small', 'Medium', 'Large', 'Other']),
-        num('len', 'Shelter length', 'e.g. 10'), num('wid', 'Shelter width', 'e.g. 6'), num('hi', 'Shelter height', 'e.g. 7'),
-        num('above', 'Above ground (0 if buried)', 'e.g. 0'),
-        choice('set', 'Who sets the shelter in the hole?', ['We deliver and set it', 'Installer sets it with his machine', 'Needs a crane or boom truck', 'Not sure']),
-        choice('anchor', 'Anchoring', ['None needed', 'Ground anchors', 'Concrete (deadmen or poured)', 'Comes with the shelter, installer puts it in']),
+        choice('size', 'Shelter', ['Refuge Small (6 person)', 'Refuge Medium (8 person)', 'Refuge Large (12 person)', 'Other shelter']),
+        num('len', 'Hole length', 'e.g. 12'), num('wid', 'Hole width', 'e.g. 10'), num('dep', 'Hole depth', 'e.g. 7'),
+        choice('set', 'Setting the shelter', ['Installer lifts it off the trailer with his excavator', 'We set it with our own truck', 'Needs a crane or boom truck', 'Not sure']),
+        choice('anchor', 'Anchoring', ['Augers and straps (provided) plus 2 concrete bin blocks (installer brings)', 'Ground anchors', 'Concrete (deadmen or poured)', 'None needed', 'Not sure']),
         choice('backfill', 'Backfill with', ['The dirt that was dug out', 'Gravel or sand', 'Not sure']),
-        choice('dirt', 'Extra dirt', ['Spread it on site', 'Haul it off', 'Not sure']),
+        choice('dirt', 'Extra dirt', ['Spread it or mound it on site', 'Haul it off', 'Not sure']),
         choice('soil', 'Soil there', ['Clay', 'Sand', 'Rocky', 'Wet or high water table', 'Not sure']),
         choice('access', 'Can a machine get to the spot?', ['Yes, open yard', 'Through a gate (put the width in the description)', 'Tight, small machine only', 'Not sure'])
       ],
       calc: v => {
-        if (!v.len || !v.wid || !v.hi) return null;
-        const above = Math.min(v.above || 0, v.hi);
-        const buried = v.hi - above, base = 0.5;
-        const hl = v.len + 4, hw = v.wid + 4, hd = buried + base;
-        const dig = hl * hw * hd / 27;
-        const shelterCy = v.len * v.wid * buried / 27, gravel = hl * hw * base / 27;
-        const fillAll = v.backfill === 'Gravel or sand';
-        const extra = fillAll ? dig : shelterCy + gravel;
-        const backfillCy = dig - shelterCy - gravel;
+        if (!v.len || !v.wid || !v.dep) return null;
+        const dig = v.len * v.wid * v.dep / 27;
+        // The shelter takes up roughly the hole minus 2 ft of working room on each side; that much dirt is left over
+        const shelter = Math.max(0, (v.len - 4) * (v.wid - 4) * Math.max(0, v.dep - 0.5)) / 27;
+        const extra = v.backfill === 'Gravel or sand' ? dig : shelter;
+        const pre = current && current.steps;
+        const steps = pre && /^Refuge/.test(v.size || '') ? pre.Refuge + (pre[v.size] || '') : '';
         return {
-          line: `Hole about ${fmt(hl)} x ${fmt(hw)} ft, ${(Math.round(hd * 2) / 2).toString()} ft deep: about ${fmt(dig)} cubic yards to dig`,
-          sub: `About ${fmt(extra)} cubic yards of extra dirt (${fmt(extra * 1.25)} once dug loose)` +
-            ` · about ${fmt(Math.max(1, gravel * 1.4))} tons of gravel for the base` +
-            (fillAll ? ` · about ${fmt(backfillCy * 1.4)} tons of gravel or sand to backfill` : ''),
+          line: `Hole ${fmt(v.len)} x ${fmt(v.wid)} ft, ${v.dep} ft deep: about ${fmt(dig)} cubic yards to dig`,
+          sub: `About ${fmt(extra)} cubic yards of extra dirt, roughly (${fmt(extra * 1.25)} once dug loose)` +
+            (v.backfill === 'Gravel or sand' ? ` · about ${fmt((dig - shelter) * 1.4)} tons of gravel or sand to backfill` : ''),
+          steps,
           cy: dig
         };
       },
-      title: v => `Storm shelter install${v.size && v.size !== 'Other' ? ' (' + v.size.toLowerCase() + ')' : ''}${v.len && v.wid && v.hi ? ', ' + fmt(v.len) + ' x ' + fmt(v.wid) + ' x ' + fmt(v.hi) + ' ft' : ''}`
+      title: v => `Storm shelter install${v.size && v.size !== 'Other shelter' ? ', ' + v.size : ''}${v.len && v.wid && v.dep ? ', ' + fmt(v.len) + ' x ' + fmt(v.wid) + ' ft hole, ' + v.dep + ' ft deep' : ''}`
     },
     strip: {
       types: ['Overburden Stripping'], name: 'stripping job', pic: 'strip',
@@ -247,7 +251,7 @@
     if (!out || !current) return;
     const r = current.calc(values());
     out.innerHTML = r
-      ? `<div style="font-size:1.05rem;color:var(--chalk);font-weight:700">📏 ${r.line}</div>${r.sub ? `<div style="font-size:0.85rem;color:var(--dust);margin-top:0.2rem">${r.sub}</div>` : ''}<div style="font-size:0.75rem;color:var(--stone);margin-top:0.3rem">A rough guide for operators, not a quote. They’ll check it.</div>`
+      ? `<div style="font-size:1.05rem;color:var(--chalk);font-weight:700">📏 ${r.line}</div>${r.sub ? `<div style="font-size:0.85rem;color:var(--dust);margin-top:0.2rem">${r.sub}</div>` : ''}${r.steps ? `<div style="font-size:0.85rem;color:var(--dust);margin-top:0.4rem"><strong>The job:</strong> ${r.steps}</div>` : ''}<div style="font-size:0.75rem;color:var(--stone);margin-top:0.3rem">A rough guide for operators, not a quote. They’ll check it.</div>`
       : `<div style="font-size:0.85rem;color:var(--stone)">Fill in the measurements and we’ll figure out the dirt for you.</div>`;
   }
 
@@ -271,7 +275,7 @@
     if (sizeEl && current.presets) sizeEl.addEventListener('change', () => {
       const p = current.presets[sizeEl.value];
       if (!p) return;
-      ['len', 'wid', 'hi'].forEach(k => { const el = document.getElementById('js_' + k); if (el && p[k]) el.value = p[k]; });
+      Object.keys(p).forEach(k => { const el = document.getElementById('js_' + k); if (el && p[k] != null) el.value = p[k]; });
       update();
     });
     update();
@@ -285,11 +289,12 @@
     current.fields.forEach(f => {
       const val = v[f.id];
       if (!val) return;
-      lines.push(f.type === 'num' ? `${f.label.replace(/ \(0 if none\)$/, '')}: ${fmt(val)}${f.unit === 'count' ? '' : f.unit === 'in' ? ' inches' : ' feet'}` : `${f.label.replace(/\?$/, '')}: ${val}`);
+      lines.push(f.type === 'num' ? `${f.label.replace(/ \(0 if none\)$/, '')}: ${val % 1 ? val : fmt(val)}${f.unit === 'count' ? '' : f.unit === 'in' ? ' inches' : ' feet'}` : `${f.label.replace(/\?$/, '')}: ${val}`);
     });
     if (!lines.length) return '';
     const r = current.calc(v);
     if (r) { lines.push('Estimate: ' + r.line + (r.sub ? ' (' + r.sub + ')' : '') + '. Rough guide only.'); }
+    if (r && r.steps) lines.push('What the job includes: ' + r.steps);
     return `${current.name.toUpperCase()} DETAILS\n` + lines.map(l => '• ' + l).join('\n');
   }
 
