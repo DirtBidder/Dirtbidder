@@ -1443,6 +1443,7 @@
       document.getElementById('successScreen').classList.add('active');
       window.scrollTo(0, 0);
       if (window.dbTrack) dbTrack('Lead', { content_name: 'job_posted' });
+      saveRepost();
     } catch (err) {
       console.error(err);
       alert('Network error — could not reach the server. Please try again.');
@@ -1450,6 +1451,52 @@
       publishBtn.textContent = originalText;
     }
   }
+
+  // "Post this job again": remember the job (not the location, address, dates, pin or photos) on this device
+  const REPOST_KEY = 'dirtbidder_last_job';
+  const REPOST_FIELDS = ['jobTitle', 'jobDesc', 'acreage', 'terrain', 'landState', 'soilType', 'spoils', 'budgetMin', 'budgetMax', 'startTimeline', 'flexibility', 'minExp', 'extraNotes'];
+  function saveRepost() {
+    try {
+      const f = {};
+      REPOST_FIELDS.forEach(id => { const el = document.getElementById(id); if (el && el.value) f[id] = el.value; });
+      localStorage.setItem(REPOST_KEY, JSON.stringify({
+        type: getSelectedJobType(), sizer: window.JobSizer ? JobSizer.getRaw() : {}, fields: f, equipment: getSelectedEquipment(), at: Date.now()
+      }));
+    } catch (e) {}
+  }
+  function loadRepost() {
+    try { return JSON.parse(localStorage.getItem(REPOST_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function fillRepost() {
+    const r = loadRepost();
+    if (!r) return;
+    const btn = Array.from(document.querySelectorAll('.job-type-btn')).find(b => b.querySelector('.jt-name').textContent.trim() === r.type);
+    if (btn) selectJobType(btn);
+    if (window.JobSizer) JobSizer.setRaw(r.sizer);
+    Object.entries(r.fields || {}).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+    document.querySelectorAll('.equip-check').forEach(el => {
+      const want = (r.equipment || []).includes(el.querySelector('.equip-check-label').textContent.trim());
+      if (want !== el.classList.contains('selected')) toggleEquip(el);
+    });
+    if (typeof updateBudgetPreview === 'function') updateBudgetPreview();
+    const bar = document.getElementById('repostBar');
+    if (bar) bar.innerHTML = '<div style="font-weight:700;color:var(--chalk)">✓ Filled in from your last job</div><div style="font-size:0.85rem;color:var(--dust);margin-top:0.2rem">Check the details, then add the new location and anything that’s different for this customer.</div>';
+  }
+  (function showRepost() {
+    const r = loadRepost();
+    const step1 = document.getElementById('step1');
+    if (!r || !step1 || !r.fields || !r.fields.jobTitle) return;
+    const card = step1.querySelector('.form-card');
+    const bar = document.createElement('div');
+    bar.id = 'repostBar';
+    bar.className = 'form-card';
+    bar.style.borderLeft = '3px solid var(--amber)';
+    const esc = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    bar.innerHTML = `<div style="font-weight:700;color:var(--chalk)">Posting the same kind of job again?</div>
+      <div style="font-size:0.85rem;color:var(--dust);margin:0.25rem 0 0.75rem">Your last job: <strong>${esc(r.fields.jobTitle)}</strong>. Fill everything in from it, then just add the new location.</div>
+      <button type="button" class="btn-next" style="width:auto" onclick="fillRepost()">Fill in from my last job</button>`;
+    card.parentNode.insertBefore(bar, card);
+  })();
 
   function resetForm() {
     document.getElementById('progressBar').style.display = 'flex';

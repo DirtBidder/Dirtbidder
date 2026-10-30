@@ -295,5 +295,18 @@
 
   function title() { return current ? current.title(values()) : ''; }
 
-  window.JobSizer = { render, summary, title, guideFor };
+  // Raw box values (for "post this job again") and putting them back
+  function getRaw() {
+    const v = {};
+    if (!current) return v;
+    current.fields.forEach(f => { const el = document.getElementById('js_' + f.id); if (el && el.value) v[f.id] = el.value; });
+    return v;
+  }
+  function setRaw(v) {
+    if (!current || !v) return;
+    current.fields.forEach(f => { const el = document.getElementById('js_' + f.id); if (el && v[f.id] != null) el.value = v[f.id]; });
+    update();
+  }
+
+  window.JobSizer = { render, summary, title, guideFor, getRaw, setRaw };
 })();
