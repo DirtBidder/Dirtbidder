@@ -1,5 +1,5 @@
 // "Job sizer": simple fill-in-the-blanks forms with a picture for the most common jobs (pond, field tile,
-// driveway / road, building pad, ditch cleaning, quarry overburden stripping). The client types a few measurements and picks answers; the page
+// driveway / road, building pad, ditch cleaning, storm shelter install, quarry overburden stripping). The client types a few measurements and picks answers; the page
 // works out the dirt (or gravel) and writes a clean summary that goes at the top of the job description.
 // Used by dirtbidder-post-job.html: JobSizer.render(jobTypeName), JobSizer.summary(), JobSizer.title().
 (function () {
@@ -51,6 +51,15 @@
       dim(110, 30, 210, 30) + txt(160, 24, 'WIDTH AT TOP') +
       dim(222, 72, 222, 100) + txt(228, 90, 'SILT TO DIG OUT', 'start') +
       small(160, 128, 'Also tell us how many feet of ditch'), 135),
+    shelter: svg(
+      small(160, 14, 'FROM THE SIDE') +
+      `<line x1="10" y1="40" x2="310" y2="40" stroke="${STONE}" stroke-width="2"/>` + small(40, 34, 'ground') +
+      `<path d="M95,40 L95,128 L225,128 L225,40" fill="rgba(139,94,60,0.25)" stroke="${DUST}" stroke-width="2" stroke-dasharray="5 3"/>` +
+      `<rect x="96" y="118" width="128" height="10" fill="rgba(168,152,135,0.6)"/>` + small(260, 126, '← gravel base', 'start') +
+      `<rect x="120" y="28" width="80" height="90" rx="10" fill="rgba(232,137,42,0.18)" stroke="${AMBER}" stroke-width="2"/>` + small(160, 78, 'SHELTER') +
+      dim(120, 142, 200, 142) + txt(160, 158, 'LENGTH') +
+      dim(212, 28, 212, 118) + txt(240, 76, 'HEIGHT', 'start') +
+      small(70, 90, '2 ft room', 'middle') + small(70, 102, 'each side', 'middle'), 165),
     strip: svg(
       small(160, 14, 'FROM THE SIDE: DIRT ON TOP OF THE ROCK') +
       // rock below, dirt layer on top, cut edge stepped back in benches with a slope
@@ -150,6 +159,42 @@
       },
       title: v => v.len ? `Ditch cleaning, ${fmt(v.len)} ft` : 'Ditch cleaning'
     },
+    shelter: {
+      types: ['Storm Shelter Install'], name: 'storm shelter install', pic: 'shelter',
+      tip: 'Pick your shelter size and the measurements fill in. The hole is figured with 2 feet of working room on every side and a 6-inch gravel base.',
+      // Fill these in with the real outside measurements (feet) of each model; picking a size then fills the boxes
+      presets: { 'Small': null, 'Medium': null, 'Large': null },
+      fields: [
+        choice('size', 'Shelter size', ['Small', 'Medium', 'Large', 'Other']),
+        num('len', 'Shelter length', 'e.g. 10'), num('wid', 'Shelter width', 'e.g. 6'), num('hi', 'Shelter height', 'e.g. 7'),
+        num('above', 'Above ground (0 if buried)', 'e.g. 0'),
+        choice('set', 'Who sets the shelter in the hole?', ['We deliver and set it', 'Installer sets it with his machine', 'Needs a crane or boom truck', 'Not sure']),
+        choice('anchor', 'Anchoring', ['None needed', 'Ground anchors', 'Concrete (deadmen or poured)', 'Comes with the shelter, installer puts it in']),
+        choice('backfill', 'Backfill with', ['The dirt that was dug out', 'Gravel or sand', 'Not sure']),
+        choice('dirt', 'Extra dirt', ['Spread it on site', 'Haul it off', 'Not sure']),
+        choice('soil', 'Soil there', ['Clay', 'Sand', 'Rocky', 'Wet or high water table', 'Not sure']),
+        choice('access', 'Can a machine get to the spot?', ['Yes, open yard', 'Through a gate (put the width in the description)', 'Tight, small machine only', 'Not sure'])
+      ],
+      calc: v => {
+        if (!v.len || !v.wid || !v.hi) return null;
+        const above = Math.min(v.above || 0, v.hi);
+        const buried = v.hi - above, base = 0.5;
+        const hl = v.len + 4, hw = v.wid + 4, hd = buried + base;
+        const dig = hl * hw * hd / 27;
+        const shelterCy = v.len * v.wid * buried / 27, gravel = hl * hw * base / 27;
+        const fillAll = v.backfill === 'Gravel or sand';
+        const extra = fillAll ? dig : shelterCy + gravel;
+        const backfillCy = dig - shelterCy - gravel;
+        return {
+          line: `Hole about ${fmt(hl)} x ${fmt(hw)} ft, ${(Math.round(hd * 2) / 2).toString()} ft deep: about ${fmt(dig)} cubic yards to dig`,
+          sub: `About ${fmt(extra)} cubic yards of extra dirt (${fmt(extra * 1.25)} once dug loose)` +
+            ` · about ${fmt(Math.max(1, gravel * 1.4))} tons of gravel for the base` +
+            (fillAll ? ` · about ${fmt(backfillCy * 1.4)} tons of gravel or sand to backfill` : ''),
+          cy: dig
+        };
+      },
+      title: v => `Storm shelter install${v.size && v.size !== 'Other' ? ' (' + v.size.toLowerCase() + ')' : ''}${v.len && v.wid && v.hi ? ', ' + fmt(v.len) + ' x ' + fmt(v.wid) + ' x ' + fmt(v.hi) + ' ft' : ''}`
+    },
     strip: {
       types: ['Overburden Stripping'], name: 'stripping job', pic: 'strip',
       tip: 'Depth is how much dirt sits on top of the rock, on average. If the depth changes a lot, put the average here and the shallow and deep spots in the description.',
@@ -222,6 +267,13 @@
     box.style.display = '';
     box.querySelectorAll('input,select').forEach(el => el.addEventListener('input', update));
     box.querySelectorAll('select').forEach(el => el.addEventListener('change', update));
+    const sizeEl = document.getElementById('js_size');
+    if (sizeEl && current.presets) sizeEl.addEventListener('change', () => {
+      const p = current.presets[sizeEl.value];
+      if (!p) return;
+      ['len', 'wid', 'hi'].forEach(k => { const el = document.getElementById('js_' + k); if (el && p[k]) el.value = p[k]; });
+      update();
+    });
     update();
   }
 
