@@ -293,25 +293,32 @@
 
       <div class="sec">Marketplace</div>
       <div class="tiles">
-        ${tile('Operators', num(u.operators), `${num(u.clients)} clients · ${num(u.new_7d)} new this week`)}
+        ${tile('Operators', num(u.operators), u.new_operators_7d != null ? `${num(u.new_operators_7d)} new this week` : `${num(u.new_7d)} new sign-ups this week`)}
+        ${tile('Clients', num(u.clients), u.new_clients_7d != null ? `${num(u.new_clients_7d)} new this week` : 'Landowners and businesses')}
         ${tile('Open jobs', num(j.open), `${num(j.in_progress)} in progress · ${num(j.completed)} done`)}
-        ${tile('Bids', num(b.total), `${num(b.pending)} waiting · ${num(b.new_7d)} this week`, { href: 'dirtbidder-admin.html#bids' })}
-        ${tile('Average bid', money(b.avg_bid), j.total ? (b.total / j.total).toFixed(1) + ' bids per job' : 'No jobs yet')}
+        ${tile('Bids', num(b.total), `${num(b.pending)} waiting · avg ${money(b.avg_bid)}${j.total ? ' · ' + (b.total / j.total).toFixed(1) + ' per job' : ''}`, { href: 'dirtbidder-admin.html#bids' })}
       </div>
 
       <div class="sec">Last 8 weeks</div>
       <div class="card"><div class="card-body minis">
         ${mini('Visitors', d.weekly, 'visitors', num)}
-        ${mini('Sign-ups', d.weekly, 'signups', num)}
+        ${d.weekly.length && d.weekly[0].op_signups != null ? mini('Operator sign-ups', d.weekly, 'op_signups', num) + mini('Client sign-ups', d.weekly, 'client_signups', num) : mini('Sign-ups', d.weekly, 'signups', num)}
         ${mini('Jobs posted', d.weekly, 'jobs', num)}
         ${mini('Paid through DirtBidder', d.weekly, 'paid_in', short)}
       </div></div>
+
+      ${d.newest ? `<div class="grid2" style="margin-top:0.75rem">
+        ${['operators', 'clients'].map(k => `<div class="card">
+          <div class="card-head"><div class="card-title">Newest ${k}</div><span class="pill">${num(k === 'operators' ? u.operators : u.clients)} total</span></div>
+          <div class="card-body">${d.newest[k].length ? `<ul class="feed">${d.newest[k].map(p => `<li><span class="ic">${k === 'operators' ? '🚜' : '🏡'}</span><div class="txt"><b>${esc((p.who || '').trim() || 'No name given')}</b>${p.zip ? ' · ZIP ' + esc(p.zip) : ''}<small>${ago(p.at)}</small></div></li>`).join('')}</ul>` : `<div class="empty">No ${k} yet.</div>`}</div>
+        </div>`).join('')}
+      </div>` : ''}
 
       <div class="grid2" style="margin-top:0.75rem">
         <div class="card">
           <div class="card-head"><div class="card-title">Recent activity</div><span class="pill">Live</span></div>
           <div class="card-body">
-            ${d.activity.length ? `<ul class="feed">${d.activity.map(a => {
+            ${(d.newest ? d.activity.filter(a => a.kind !== 'signup') : d.activity).length ? `<ul class="feed">${(d.newest ? d.activity.filter(a => a.kind !== 'signup') : d.activity).map(a => {
               const [ic, txt] = (FEED[a.kind] || (() => ['•', esc(a.kind)]))(a);
               return `<li><span class="ic">${ic}</span><div class="txt">${txt}<small>${ago(a.at)}</small></div>${a.amount != null ? `<span class="amt">${money(a.amount)}</span>` : ''}</li>`;
             }).join('')}</ul>` : '<div class="empty">Nothing yet. Activity shows up here as people use the site.</div>'}
