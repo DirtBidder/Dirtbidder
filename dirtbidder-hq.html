@@ -310,7 +310,7 @@
       ${d.newest ? `<div class="grid2" style="margin-top:0.75rem">
         ${['operators', 'clients'].map(k => `<div class="card">
           <div class="card-head"><div class="card-title">Newest ${k}</div><span class="pill">${num(k === 'operators' ? u.operators : u.clients)} total</span></div>
-          <div class="card-body">${d.newest[k].length ? `<ul class="feed">${d.newest[k].map(p => `<li><span class="ic">${k === 'operators' ? '🚜' : '🏡'}</span><div class="txt"><b>${esc((p.who || '').trim() || 'No name given')}</b>${p.zip ? ' · ZIP ' + esc(p.zip) : ''}<small>${ago(p.at)}</small></div></li>`).join('')}</ul>` : `<div class="empty">No ${k} yet.</div>`}</div>
+          <div class="card-body">${d.newest[k].length ? `<ul class="feed">${d.newest[k].map(p => `<li><span class="ic">${k === 'operators' ? '🚜' : '🏡'}</span><div class="txt"><b>${esc((p.who || '').trim() || 'No name given')}</b>${p.town ? ' · ' + esc(p.town) : p.zip ? ' · ZIP ' + esc(p.zip) : ''}<small>${ago(p.at)}</small></div></li>`).join('')}</ul>` : `<div class="empty">No ${k} yet.</div>`}</div>
         </div>`).join('')}
       </div>` : ''}
 
