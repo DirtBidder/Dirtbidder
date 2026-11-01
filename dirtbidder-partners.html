@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner with DirtBidder</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Storm shelter makers, tile suppliers, quarries and equipment rental companies: get in front of landowners and contractors right when they're planning the job.">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --dust:#C4A882; --stone:#A89887; --chalk:#F2EDE6; --success:#6FBF73; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--dust); line-height: 1.6; -webkit-text-size-adjust: 100%; }
+  nav { padding: 1rem 1.25rem; border-bottom: 1px solid rgba(232,137,42,0.15); display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; }
+  .logo span { color: var(--amber); }
+  nav a.back { color: var(--amber); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  .draft { background: #5a3a12; color: var(--chalk); text-align: center; font-size: 0.85rem; padding: 0.5rem 1rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); font-size: 0.85rem; }
+  h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2.6rem; text-transform: uppercase; color: var(--chalk); line-height: 1.02; margin-top: 0.3rem; }
+  h1 em { font-style: normal; color: var(--amber); }
+  .lede { margin: 0.8rem 0 1.5rem; font-size: 1.05rem; max-width: 36rem; }
+  h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--chalk); line-height: 1.1; margin: 2.8rem 0 0.6rem; }
+  p { font-size: 0.97rem; margin-bottom: 0.8rem; }
+  strong { color: var(--chalk); font-weight: 600; }
+  a { color: var(--amber); }
+  .btn { display: inline-block; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 1.4rem; border-radius: 4px; border: 0; cursor: pointer; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .card { background: var(--dig); border: 1px solid rgba(232,137,42,0.12); border-radius: 6px; padding: 1rem 1.1rem; }
+  .card .ic { font-size: 1.5rem; }
+  .card h3 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.15rem; text-transform: uppercase; color: var(--chalk); margin: 0.3rem 0 0.2rem; letter-spacing: 0.02em; }
+  .card p { font-size: 0.88rem; margin: 0; }
+  .steps { list-style: none; counter-reset: s; }
+  .steps li { counter-increment: s; position: relative; padding: 0 0 1.1rem 3rem; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 2.1rem; height: 2.1rem; border-radius: 50%; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; }
+  .steps strong { display: block; font-size: 1rem; }
+  .steps span { font-size: 0.92rem; }
+  .fees { width: 100%; border-collapse: collapse; margin: 0.4rem 0 0.8rem; font-size: 0.93rem; }
+  .fees th, .fees td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid rgba(196,168,130,0.15); }
+  .fees th { color: var(--stone); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .fees td:last-child { color: var(--chalk); font-weight: 600; }
+  .note { font-size: 0.85rem; color: var(--stone); }
+  /* Example of how a partner shows on a job */
+  .example { border: 1px dashed rgba(232,137,42,0.4); border-radius: 6px; padding: 1rem; background: rgba(232,137,42,0.04); }
+  .example .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); margin-bottom: 0.5rem; }
+  .job { background: var(--dig); border-radius: 6px; padding: 0.9rem 1rem; }
+  .job .t { color: var(--chalk); font-weight: 600; }
+  .job .m { font-size: 0.85rem; color: var(--stone); }
+  .partner { margin-top: 0.75rem; display: flex; gap: 0.8rem; align-items: center; background: var(--clay); border-left: 3px solid var(--amber); border-radius: 4px; padding: 0.75rem 0.9rem; }
+  .partner .logo-box { width: 44px; height: 44px; border-radius: 6px; background: var(--soil); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; color: var(--amber); flex: none; }
+  .partner .txt { flex: 1; font-size: 0.88rem; }
+  .partner .txt b { color: var(--chalk); display: block; font-size: 0.95rem; }
+  .partner .go { background: var(--amber); color: var(--soil); font-weight: 700; font-size: 0.82rem; padding: 0.45rem 0.7rem; border-radius: 4px; text-decoration: none; white-space: nowrap; }
+  /* Form */
+  form { background: var(--dig); border-radius: 6px; padding: 1.2rem; }
+  .f { margin-bottom: 0.9rem; }
+  .f label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dust); margin-bottom: 0.3rem; }
+  .f input, .f select, .f textarea { width: 100%; font: inherit; font-size: 1rem; color: var(--chalk); background: var(--soil); border: 1px solid rgba(196,168,130,0.25); border-radius: 4px; padding: 0.7rem 0.8rem; }
+  .f textarea { min-height: 90px; resize: vertical; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0.75rem; }
+  .agree { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.88rem; margin: 0.4rem 0 1rem; }
+  .agree input { margin-top: 0.3rem; width: 18px; height: 18px; flex: none; }
+  #sent { display: none; background: rgba(111,191,115,0.12); border: 1px solid var(--success); color: var(--chalk); border-radius: 6px; padding: 1rem; margin-top: 1rem; }
+  @media (max-width: 560px) { h1 { font-size: 2.1rem; } .grid, .two { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="draft">DRAFT PREVIEW: not live on dirtbidder.com yet. The form doesn't send anything.</div>
+<nav><a class="logo" href="index.html"><span>Dirt</span>Bidder</a><a class="back" href="index.html">← Home</a></nav>
+
+<main>
+  <div class="eyebrow">For suppliers and manufacturers</div>
+  <h1>Partner with <em>DirtBidder</em></h1>
+  <p class="lede">Landowners and contractors come to DirtBidder when they're planning a pond, a tile job, a driveway or a storm shelter. Put your company in front of them right then, and only pay when we send you a sale.</p>
+  <a class="btn" href="#apply">Apply to partner</a>
+
+  <h2>Who it's for</h2>
+  <div class="grid">
+    <div class="card"><div class="ic">🌪️</div><h3>Storm shelter makers</h3><p>Shown on every Storm Shelter Install job, with your models built into the job form.</p></div>
+    <div class="card"><div class="ic">🌾</div><h3>Tile and drainage supply</h3><p>Shown on Field Tile and Drainage jobs, right when the farmer is pricing tile.</p></div>
+    <div class="card"><div class="ic">🪨</div><h3>Quarries and gravel pits</h3><p>Shown on driveway and building pad jobs that need rock.</p></div>
+    <div class="card"><div class="ic">🚜</div><h3>Equipment rental</h3><p>Shown to contractors who need a machine for a job they just won.</p></div>
+  </div>
+
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li><strong>Apply</strong><span>Tell us what you sell and where. We review every partner before they go live.</span></li>
+    <li><strong>Sign the partner agreement</strong><span>One simple agreement, accepted online.</span></li>
+    <li><strong>Get your link and code</strong><span>Every customer we send you is tracked with your own link and code.</span></li>
+    <li><strong>Show up on matching jobs</strong><span>Your company appears on the jobs that need what you sell, in the states you serve.</span></li>
+    <li><strong>Get quote requests</strong><span>Interested customers send their name, phone and town through DirtBidder, and we pass them straight to you.</span></li>
+    <li><strong>Pay only on sales</strong><span>You send us a monthly list of sales to customers we referred, and pay the referral fee on those.</span></li>
+  </ol>
+
+  <h2>What it costs</h2>
+  <p>Nothing to join, and nothing unless a customer we send you buys. The referral fee depends on what you sell:</p>
+  <table class="fees">
+    <tr><th>What you sell</th><th>Referral fee</th></tr>
+    <tr><td>Storm shelter under $5,000</td><td>$300 per sale</td></tr>
+    <tr><td>Storm shelter $5,000 to $10,000</td><td>$500 per sale</td></tr>
+    <tr><td>Storm shelter over $10,000</td><td>Set in your agreement</td></tr>
+    <tr><td>Tile, rock and other supplies</td><td>2 to 3% of the order</td></tr>
+  </table>
+  <p class="note">A customer counts as our referral for 12 months after we send them to you, however they end up buying. Customers who find you on their own are always yours.</p>
+
+  <h2>What it looks like on a job</h2>
+  <div class="example">
+    <div class="lbl">Example</div>
+    <div class="job">
+      <div class="t">Storm shelter install, Refuge Medium (8 person)</div>
+      <div class="m">🌪️ Storm Shelter Install · Opelika, AL · 12 x 10 ft hole, 7 ft deep</div>
+      <div class="partner">
+        <div class="logo-box">YOUR<br>LOGO</div>
+        <div class="txt"><b>Need a storm shelter?</b>Get a quote from Your Company</div>
+        <a class="go" href="#apply">Get a quote</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="apply">Apply to partner</h2>
+  <form id="partnerForm">
+    <div class="two">
+      <div class="f"><label for="pCompany">Company name</label><input id="pCompany" required autocomplete="organization"></div>
+      <div class="f"><label for="pName">Your name</label><input id="pName" required autocomplete="name"></div>
+    </div>
+    <div class="two">
+      <div class="f"><label for="pEmail">Email</label><input id="pEmail" type="email" required autocomplete="email"></div>
+      <div class="f"><label for="pPhone">Phone</label><input id="pPhone" type="tel" autocomplete="tel"></div>
+    </div>
+    <div class="f"><label for="pSite">Website</label><input id="pSite" type="url" placeholder="https://"></div>
+    <div class="two">
+      <div class="f"><label for="pKind">What do you sell?</label>
+        <select id="pKind" required><option value="">Pick one…</option><option>Storm shelters</option><option>Drainage tile and supplies</option><option>Rock and gravel</option><option>Culvert pipe</option><option>Equipment rental</option><option>Other</option></select></div>
+      <div class="f"><label for="pStates">States you serve</label><input id="pStates" placeholder="e.g. AL, GA, TX"></div>
+    </div>
+    <div class="f"><label for="pNote">Anything else?</label><textarea id="pNote" placeholder="Products, price range, how you handle quotes…"></textarea></div>
+    <label class="agree"><input type="checkbox" required> I understand DirtBidder reviews every partner, and I'll need to accept the partner agreement before going live.</label>
+    <button class="btn" type="submit">Send application</button>
+    <div id="sent" role="status">Draft preview: in the live version, this sends your application to DirtBidder and you'll hear back within 2 business days.</div>
+  </form>
+</main>
+<script>
+  document.getElementById('partnerForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    document.getElementById('sent').style.display = 'block';
+  });
+</script>
+</body>
+</html>
