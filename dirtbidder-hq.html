@@ -326,6 +326,7 @@
         </div>
         <div style="display:flex;flex-direction:column;gap:0.75rem">
           <div class="card" id="waitCard" hidden></div>
+          <div class="card" id="jobsCard"></div>
           <div class="card" id="bidCard"></div>
           <div class="card" id="refCard"></div>
           <div class="card">
@@ -366,6 +367,7 @@
     renderWait();
     renderBids();
     renderRefs();
+    renderJobs();
   }
 
   // ── Public bid board: county, city and Iowa DOT jobs shown on dirtbidder-public-bids.html ──
@@ -475,6 +477,35 @@
     await loadRefs();
   }
 
+  // ── Recent jobs: exactly what each client posted ──
+  let rjobs = null, jobOpen = null;
+  function renderJobs() {
+    const el = document.getElementById('jobsCard'); if (!el) return;
+    const line = (k, v) => v || v === 0 ? `<div><span style="color:var(--stone)">${k}:</span> ${esc(v)}</div>` : '';
+    const item = j => `<li style="display:block"><details data-job="${j.id}"${jobOpen === j.id ? ' open' : ''} ontoggle="jobToggle(this)">
+        <summary style="cursor:pointer;list-style:none"><span class="t"><b>${esc(j.title)}</b><br>
+          <small style="color:var(--stone)">${esc(j.client_name || '')} · ${esc(j.location || '')} · ${ago(j.created_at)} · ${j.bid_count} bid${j.bid_count === 1 ? '' : 's'} · ${esc(j.status)}</small></span></summary>
+        <div style="font-size:0.88rem;margin-top:0.5rem;line-height:1.55">
+          ${line('Job type', j.job_type)}${line('Location', j.location)}${line('Site address', j.site_address)}
+          ${line('Acreage', j.acreage)}${line('Timeline', j.timeline)}${Number(j.budget) > 0 ? line('Budget', money(j.budget)) : ''}
+          ${line('Client', j.client_name)}${line('Phone', j.client_phone)}${line('Email', j.client_email)}
+          ${j.description ? `<div style="margin-top:0.5rem;color:var(--stone)">Description:</div><div style="white-space:pre-wrap;color:var(--chalk)">${esc(j.description)}</div>` : ''}
+          ${(j.photos || []).length ? `<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.6rem">${j.photos.map(t => `<a href="${API_BASE}/api/photos/${encodeURIComponent(t)}" target="_blank" rel="noopener"><img src="${API_BASE}/api/photos/${encodeURIComponent(t)}" alt="Site photo" loading="lazy" style="width:72px;height:72px;object-fit:cover;border-radius:3px;display:block"></a>`).join('')}</div>` : ''}
+          ${j.site_lat && j.site_lng ? `<div style="margin-top:0.5rem"><a href="https://www.google.com/maps?q=${encodeURIComponent(j.site_lat + ',' + j.site_lng)}" target="_blank" rel="noopener" style="color:var(--amber)">See the pin on a map</a></div>` : ''}
+        </div></details></li>`;
+    el.innerHTML = `
+      <div class="card-head"><div class="card-title">Recent jobs</div><span class="pill">${rjobs ? rjobs.length + ' newest' : '…'}</span></div>
+      <div class="card-body">
+        <div style="font-size:0.85rem;color:var(--stone);margin-bottom:0.5rem">Tap a job to see exactly what the client posted.</div>
+        <ul class="todo">${rjobs ? (rjobs.map(item).join('') || '<li><span class="t" style="color:var(--stone)">No jobs yet.</span></li>') : '<li><span class="t" style="color:var(--stone)">Loading…</span></li>'}</ul>
+      </div>`;
+  }
+  function jobToggle(d) { const id = Number(d.dataset.job); if (d.open) jobOpen = id; else if (jobOpen === id) jobOpen = null; }
+  async function loadJobs() {
+    try { rjobs = (await api('/api/admin/jobs/recent')).jobs; } catch (e) { rjobs = []; }
+    renderJobs();
+  }
+
   // ── Waiting to hire: clients who tried to hire before payments were live ──
   let wait = null, waitMsg = '';
   function renderWait() {
@@ -558,12 +589,13 @@
       loadWait();
       loadBids();
       loadRefs();
+      loadJobs();
     } catch (err) {
       document.getElementById('sub').textContent = '';
       document.getElementById('main').innerHTML = `<div class="card"><div class="err">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }
   }
-  if (token) { load(); setInterval(() => { const a = document.activeElement; if (!document.hidden && !(a && a.id === 'newTask') && !(document.getElementById('bidAdd') || {}).open && refOpen == null) load(); }, 60000); }
+  if (token) { load(); setInterval(() => { const a = document.activeElement; if (!document.hidden && !(a && a.id === 'newTask') && !(document.getElementById('bidAdd') || {}).open && refOpen == null && jobOpen == null) load(); }, 60000); }
 </script>
 <script src="dirtbidder-viewonly.js"></script>
 </body>
