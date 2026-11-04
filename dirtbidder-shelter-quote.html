@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get a Storm Shelter Quote | DirtBidder</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Ask Refuge Storm Shelters for a quote through DirtBidder, then find a local installer on DirtBidder.">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --soil:#1C1410; --dig:#2A1F17; --clay:#3D2B1F; --amber:#E8892A; --dust:#C4A882; --stone:#A89887; --chalk:#F2EDE6; --success:#6FBF73; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--soil); color: var(--dust); line-height: 1.6; -webkit-text-size-adjust: 100%; }
+  nav { padding: 1rem 1.25rem; border-bottom: 1px solid rgba(232,137,42,0.15); display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; color: var(--chalk); text-decoration: none; }
+  .logo span { color: var(--amber); }
+  nav a.back { color: var(--amber); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  .draft { background: #5a3a12; color: var(--chalk); text-align: center; font-size: 0.85rem; padding: 0.5rem 1rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); font-size: 0.85rem; }
+  h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2.6rem; text-transform: uppercase; color: var(--chalk); line-height: 1.02; margin-top: 0.3rem; }
+  h1 em { font-style: normal; color: var(--amber); }
+  .lede { margin: 0.8rem 0 1.5rem; font-size: 1.05rem; max-width: 36rem; }
+  h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--chalk); line-height: 1.1; margin: 2.8rem 0 0.6rem; }
+  p { font-size: 0.97rem; margin-bottom: 0.8rem; }
+  strong { color: var(--chalk); font-weight: 600; }
+  a { color: var(--amber); }
+  .btn { display: inline-block; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 1.4rem; border-radius: 4px; border: 0; cursor: pointer; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .card { background: var(--dig); border: 1px solid rgba(232,137,42,0.12); border-radius: 6px; padding: 1rem 1.1rem; }
+  .card .ic { font-size: 1.5rem; }
+  .card h3 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.15rem; text-transform: uppercase; color: var(--chalk); margin: 0.3rem 0 0.2rem; letter-spacing: 0.02em; }
+  .card p { font-size: 0.88rem; margin: 0; }
+  .steps { list-style: none; counter-reset: s; }
+  .steps li { counter-increment: s; position: relative; padding: 0 0 1.1rem 3rem; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 2.1rem; height: 2.1rem; border-radius: 50%; background: var(--amber); color: var(--soil); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; }
+  .steps strong { display: block; font-size: 1rem; }
+  .steps span { font-size: 0.92rem; }
+  .fees { width: 100%; border-collapse: collapse; margin: 0.4rem 0 0.8rem; font-size: 0.93rem; }
+  .fees th, .fees td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid rgba(196,168,130,0.15); }
+  .fees th { color: var(--stone); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .fees td:last-child { color: var(--chalk); font-weight: 600; }
+  .note { font-size: 0.85rem; color: var(--stone); }
+  /* Example of how a partner shows on a job */
+  .example { border: 1px dashed rgba(232,137,42,0.4); border-radius: 6px; padding: 1rem; background: rgba(232,137,42,0.04); }
+  .example .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); margin-bottom: 0.5rem; }
+  .job { background: var(--dig); border-radius: 6px; padding: 0.9rem 1rem; }
+  .job .t { color: var(--chalk); font-weight: 600; }
+  .job .m { font-size: 0.85rem; color: var(--stone); }
+  .partner { margin-top: 0.75rem; display: flex; gap: 0.8rem; align-items: center; background: var(--clay); border-left: 3px solid var(--amber); border-radius: 4px; padding: 0.75rem 0.9rem; }
+  .partner .logo-box { width: 44px; height: 44px; border-radius: 6px; background: var(--soil); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; color: var(--amber); flex: none; }
+  .partner .txt { flex: 1; font-size: 0.88rem; }
+  .partner .txt b { color: var(--chalk); display: block; font-size: 0.95rem; }
+  .partner .go { background: var(--amber); color: var(--soil); font-weight: 700; font-size: 0.82rem; padding: 0.45rem 0.7rem; border-radius: 4px; text-decoration: none; white-space: nowrap; }
+  /* Form */
+  form { background: var(--dig); border-radius: 6px; padding: 1.2rem; }
+  .f { margin-bottom: 0.9rem; }
+  .f label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dust); margin-bottom: 0.3rem; }
+  .f input, .f select, .f textarea { width: 100%; font: inherit; font-size: 1rem; color: var(--chalk); background: var(--soil); border: 1px solid rgba(196,168,130,0.25); border-radius: 4px; padding: 0.7rem 0.8rem; }
+  .f textarea { min-height: 90px; resize: vertical; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0.75rem; }
+  .agree { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.88rem; margin: 0.4rem 0 1rem; }
+  .agree input { margin-top: 0.3rem; width: 18px; height: 18px; flex: none; }
+  #sent { display: none; background: rgba(111,191,115,0.12); border: 1px solid var(--success); color: var(--chalk); border-radius: 6px; padding: 1rem; margin-top: 1rem; }
+  @media (max-width: 560px) { h1 { font-size: 2.1rem; } .grid, .two { grid-template-columns: 1fr; } }
+  .err { display: none; background: rgba(192,57,43,0.12); border: 1px solid #c0392b; color: var(--chalk); border-radius: 6px; padding: 0.8rem 1rem; margin-top: 0.8rem; font-size: 0.92rem; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .sizes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin: 0.6rem 0 0.4rem; }
+  .sizes .card { text-align: center; padding: 0.8rem 0.5rem; }
+  .sizes .card b { display: block; color: var(--chalk); font-size: 1rem; }
+  .sizes .card span { font-size: 0.82rem; color: var(--stone); }
+  @media (max-width: 560px) { .sizes { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="draft">DRAFT PREVIEW: not live on dirtbidder.com yet. Requests won't go through until the partner agreement is signed.</div>
+<nav><a class="logo" href="index.html"><span>Dirt</span>Bidder</a><a class="back" href="index.html">← Home</a></nav>
+<main>
+  <div class="eyebrow">Storm shelters</div>
+  <h1>Get a <em>storm shelter</em> quote</h1>
+  <p class="lede">DirtBidder works with Refuge Storm Shelters (Fiberglass Creations). Ask them for a quote here, then find a local installer on DirtBidder when you're ready.</p>
+
+  <h2>Shelter sizes</h2>
+  <div class="sizes">
+    <div class="card"><b>Small</b><span>Up to 6 people</span></div>
+    <div class="card"><b>Medium</b><span>Up to 8 people</span></div>
+    <div class="card"><b>Large</b><span>Up to 12 people</span></div>
+  </div>
+
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li><strong>Send your info</strong><span>Fill in the form below. We only send it to Refuge because you asked us to.</span></li>
+    <li><strong>Refuge contacts you</strong><span>They'll call or email with a price and answer your questions.</span></li>
+    <li><strong>Post the install on DirtBidder</strong><span>Once you buy, post the install as a job. Pick your shelter size and the job details fill in for you.</span></li>
+    <li><strong>Pick a local installer</strong><span>Compare bids from installers near you. Your payment is held safely until the job is done.</span></li>
+  </ol>
+
+  <h2 id="quote">Ask for a quote</h2>
+  <form id="quoteForm" novalidate>
+    <div class="f"><label for="qName">Your name</label><input id="qName" required autocomplete="name"></div>
+    <div class="two">
+      <div class="f"><label for="qPhone">Phone</label><input id="qPhone" type="tel" autocomplete="tel" inputmode="tel"></div>
+      <div class="f"><label for="qEmail">Email</label><input id="qEmail" type="email" autocomplete="email"></div>
+    </div>
+    <div class="two">
+      <div class="f"><label for="qZip">ZIP code</label><input id="qZip" required inputmode="numeric" maxlength="5" autocomplete="postal-code"></div>
+      <div class="f"><label for="qSize">Size you're thinking of</label>
+        <select id="qSize"><option value="">Not sure yet</option><option>Small (6 person)</option><option>Medium (8 person)</option><option>Large (12 person)</option></select></div>
+    </div>
+    <div class="f"><label for="qNotes">Anything else? (optional)</label><textarea id="qNotes" placeholder="When you'd like it, garage or yard install, questions you have"></textarea></div>
+    <div class="hp" aria-hidden="true"><label for="qWebsite">Website</label><input id="qWebsite" tabindex="-1" autocomplete="off"></div>
+    <label class="agree"><input type="checkbox" id="qConsent"><span>Please send my name, contact details, ZIP code and what I entered above to <strong>Refuge Storm Shelters (Fiberglass Creations)</strong> so they can contact me with a quote. See our <a href="dirtbidder-privacy.html">Privacy Policy</a>.</span></label>
+    <button class="btn" type="submit" id="qBtn">Send my info to Refuge</button>
+    <div class="err" id="qErr"></div>
+    <div id="sent"><strong>Sent.</strong> Refuge will be in touch soon. When you're ready for the install, <a href="dirtbidder-post-job.html">post it on DirtBidder</a>.</div>
+  </form>
+  <p class="note" style="margin-top:1rem">DirtBidder may receive a referral fee from Refuge if you buy. It doesn't change your price.</p>
+</main>
+<script>
+  (function () {
+    var API = 'https://dirtbidder-backend-production.up.railway.app';
+    var form = document.getElementById('quoteForm'), btn = document.getElementById('qBtn'), err = document.getElementById('qErr');
+    var v = function (id) { return document.getElementById(id).value.trim(); };
+    var show = function (m) { err.textContent = m; err.style.display = 'block'; };
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      err.style.display = 'none';
+      if (!v('qName')) return show('Please enter your name.');
+      if (!v('qPhone') && !v('qEmail')) return show('Please enter a phone number or email so Refuge can reach you.');
+      if (!/^\d{5}$/.test(v('qZip'))) return show('Please enter your 5-digit ZIP code.');
+      if (!document.getElementById('qConsent').checked) return show('Please check the box so we can send your info to Refuge.');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      fetch(API + '/api/referrals', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partner: 'refuge', name: v('qName'), phone: v('qPhone'), email: v('qEmail'), zip: v('qZip'), product: v('qSize'), notes: v('qNotes'), website: v('qWebsite'), consent: true }) })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (x) {
+          if (!x.ok) throw new Error(x.d.error || 'Something went wrong. Please try again.');
+          form.querySelectorAll('.f, .agree, #qBtn').forEach(function (el) { el.style.display = 'none'; });
+          document.getElementById('sent').style.display = 'block';
+        })
+        .catch(function (e2) { show(e2.message); btn.disabled = false; btn.textContent = 'Send my info to Refuge'; });
+    });
+  })();
+</script>
+</body>
+</html>

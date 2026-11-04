@@ -327,6 +327,7 @@
         <div style="display:flex;flex-direction:column;gap:0.75rem">
           <div class="card" id="waitCard" hidden></div>
           <div class="card" id="bidCard"></div>
+          <div class="card" id="refCard"></div>
           <div class="card">
             <div class="card-head"><div class="card-title">To-do</div><span class="pill" id="todoCount"></span></div>
             <div class="card-body">
@@ -364,6 +365,7 @@
     renderTasks();
     renderWait();
     renderBids();
+    renderRefs();
   }
 
   // ── Public bid board: county, city and Iowa DOT jobs shown on dirtbidder-public-bids.html ──
@@ -412,6 +414,65 @@
     try { await api('/api/public-bids/' + id, { method: 'DELETE' }); pbMsg = '✓ Taken off the board.'; }
     catch (err) { pbMsg = err.message; }
     await loadBids();
+  }
+
+  // ── Referrals: customers who asked us to send their info to a partner (Refuge), with their 12-month credit window ──
+  let refs = null, refMsg = '', refOpen = null;
+  const dShort = d => d ? new Date(String(d).slice(0, 10) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+  const REF_STATUS = { open: 'Waiting', quoted: 'Got a quote', bought: 'Bought', not_buying: 'Not buying' };
+  function renderRefs() {
+    const el = document.getElementById('refCard'); if (!el) return;
+    if (!refs) { el.innerHTML = `<div class="card-head"><div class="card-title">Referrals</div><span class="pill">…</span></div><div class="card-body" style="color:var(--stone);font-size:0.85rem">Loading…</div>`; return; }
+    const t = refs.totals, inst = refs.installs || [];
+    const field = (id, label, val, type) => `<label style="display:block;font-size:0.8rem;color:var(--stone);margin-top:0.45rem">${label}<input id="${id}" type="${type}" value="${esc(val == null ? '' : val)}" ${type === 'number' ? 'step="0.01" min="0" inputmode="decimal"' : ''} style="display:block;width:100%;margin-top:0.2rem;background:var(--soil);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.5rem 0.6rem;font:inherit;font-size:0.92rem"></label>`;
+    const row = r => {
+      const left = Math.ceil((new Date(r.expires_at) - Date.now()) / 86400000);
+      const when = r.status === 'bought' ? `Bought ${dShort(r.bought_at)}${r.earns_fee ? '' : ' · <span class="warn">after the 12 months</span>'}`
+        : !r.active ? 'Credit ended ' + dShort(r.expires_at)
+        : `Credit until ${dShort(r.expires_at)} (${left} days)`;
+      const fee = r.status === 'bought' && r.fee != null ? ` · fee ${money(r.fee)}${r.fee_paid_at ? ' paid' : ' owed'}` : '';
+      return `<li style="display:block"><details data-ref="${r.id}"${refOpen === r.id ? ' open' : ''} ontoggle="refToggle(this)">
+        <summary style="cursor:pointer;list-style:none"><span class="t"><b>${esc(r.name)}</b> · ${esc(r.town || r.zip)}<br>
+          <small style="color:var(--stone)">${esc(REF_STATUS[r.status] || r.status)} · sent ${dShort(r.consent_at)} · ${when}${fee}</small></span></summary>
+        <div style="font-size:0.85rem;margin-top:0.4rem">${[r.phone && 'Phone: ' + esc(r.phone), r.email && 'Email: ' + esc(r.email), r.product && 'Wants: ' + esc(r.product), r.notes && 'Notes: ' + esc(r.notes), r.sent_to_partner ? 'Sent to Refuge automatically' : 'Not sent automatically. Forward it to Refuge yourself.'].filter(Boolean).join('<br>')}</div>
+        <form onsubmit="saveRef(event, ${r.id})">
+          <label style="display:block;font-size:0.8rem;color:var(--stone);margin-top:0.45rem">Status<select id="rs${r.id}" style="display:block;width:100%;margin-top:0.2rem;background:var(--soil);border:1.5px solid rgba(196,168,130,0.18);color:var(--chalk);border-radius:3px;padding:0.5rem 0.6rem;font:inherit;font-size:0.92rem">${Object.keys(REF_STATUS).map(k => `<option value="${k}"${k === r.status ? ' selected' : ''}>${REF_STATUS[k]}</option>`).join('')}</select></label>
+          ${field('rq' + r.id, 'Quote or deposit date', r.quoted_at ? String(r.quoted_at).slice(0, 10) : '', 'date')}
+          ${field('rb' + r.id, 'Bought date', r.bought_at ? String(r.bought_at).slice(0, 10) : '', 'date')}
+          ${field('ra' + r.id, 'Sale amount ($)', r.sale_amount, 'number')}
+          ${field('rf' + r.id, 'Your fee ($)', r.fee != null ? r.fee : 500, 'number')}
+          ${field('rp' + r.id, 'Fee paid date', r.fee_paid_at ? String(r.fee_paid_at).slice(0, 10) : '', 'date')}
+          <button class="btn solid" type="submit" style="margin-top:0.6rem">Save</button>
+        </form></details></li>`;
+    };
+    el.innerHTML = `
+      <div class="card-head"><div class="card-title">Referrals · Refuge</div><span class="pill">${num(t.open)} open</span></div>
+      <div class="card-body">
+        <div style="font-size:0.85rem;color:var(--stone);margin-bottom:0.5rem">${refs.on ? 'The quote form is <b style="color:var(--success)">on</b>.' : 'The quote form is <b>off</b> until the agreement is signed.'} Each customer counts as your referral for 12 months from the day they sent their info.</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:0.9rem;margin-bottom:0.6rem">
+          <span><b style="color:var(--chalk)">${num(t.all)}</b> referrals</span>
+          <span><b style="color:var(--chalk)">${num(t.bought)}</b> bought</span>
+          <span><b style="color:var(--chalk)">${money(t.fees_owed)}</b> owed</span>
+          <span><b style="color:var(--chalk)">${money(t.fees_paid)}</b> paid</span>
+        </div>
+        <div style="font-size:0.8rem;color:var(--stone);text-transform:uppercase;letter-spacing:0.08em;margin-top:0.4rem">Shelter installs posted, by month</div>
+        <div style="font-size:0.9rem;margin:0.2rem 0 0.6rem">${inst.length ? inst.map(m => `<span style="display:inline-block;margin-right:0.9rem">${new Date(m.month + '-15T12:00:00').toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}: <b style="color:var(--chalk)">${m.n}</b></span>`).join('') : '<span style="color:var(--stone)">None yet. Compare these to Refuge’s monthly sales report.</span>'}</div>
+        <ul class="todo">${refs.referrals.map(row).join('') || '<li><span class="t" style="color:var(--stone)">No referrals yet.</span></li>'}</ul>
+        ${refMsg ? `<div class="wait-note" style="color:var(--chalk)">${esc(refMsg)}</div>` : ''}
+      </div>`;
+  }
+  function refToggle(d) { const id = Number(d.dataset.ref); if (d.open) refOpen = id; else if (refOpen === id) refOpen = null; }
+  async function loadRefs() {
+    try { refs = await api('/api/referrals/admin'); } catch (e) { refs = { referrals: [], totals: { all: 0, open: 0, bought: 0, fees_owed: 0, fees_paid: 0 }, installs: [], on: false }; refMsg = e.message; }
+    renderRefs();
+  }
+  async function saveRef(e, id) {
+    e.preventDefault();
+    const v = k => document.getElementById(k + id).value.trim();
+    const body = { status: v('rs'), quoted_at: v('rq'), bought_at: v('rb'), sale_amount: v('ra'), fee: v('rf'), fee_paid_at: v('rp') };
+    try { await api('/api/referrals/admin/' + id, { method: 'POST', body: JSON.stringify(body) }); refMsg = '✓ Saved.'; refOpen = null; }
+    catch (err) { refMsg = err.message; }
+    await loadRefs();
   }
 
   // ── Waiting to hire: clients who tried to hire before payments were live ──
@@ -496,12 +557,13 @@
       render(d);
       loadWait();
       loadBids();
+      loadRefs();
     } catch (err) {
       document.getElementById('sub').textContent = '';
       document.getElementById('main').innerHTML = `<div class="card"><div class="err">${esc(err.message)}${/Admin/.test(err.message) ? ' — log in with daniel@dirtbidder.com.' : ''}</div></div>`;
     }
   }
-  if (token) { load(); setInterval(() => { const a = document.activeElement; if (!document.hidden && !(a && a.id === 'newTask') && !(document.getElementById('bidAdd') || {}).open) load(); }, 60000); }
+  if (token) { load(); setInterval(() => { const a = document.activeElement; if (!document.hidden && !(a && a.id === 'newTask') && !(document.getElementById('bidAdd') || {}).open && refOpen == null) load(); }, 60000); }
 </script>
 <script src="dirtbidder-viewonly.js"></script>
 </body>
