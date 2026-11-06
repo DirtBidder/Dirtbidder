@@ -1223,7 +1223,8 @@
   function jobRow(job, detailed) {
     const si = statusInfo(job);
     const meta = [esc(job.location)];
-    if (detailed && job.budget) meta.push('Budget: ' + money(job.budget));
+    if (detailed && Number(job.budget) > 0) meta.push('Budget: ' + money(job.budget));
+    else if (detailed && (job.status === 'open' || job.status === 'test')) meta.push('Budget: open to bids');
     meta.push(si.cls === 'progress' && job.hired_at ? 'Hired ' + ago(job.hired_at) : 'Posted ' + ago(job.created_at));
     let right = job.bid_count ? job.bid_count + (job.bid_count === 1 ? ' bid' : ' bids') : '0 bids';
     if (job.hired_operator_name || job.accepted_amount) right = money(Number(job.accepted_amount || 0) + coExtra(job.id)) || '—';
@@ -1266,6 +1267,7 @@
       // More detail and photos get better bids: both can be added any time before hiring
       const nPhotos = Array.isArray(job.photos) ? job.photos.length : 0;
       addr += `<div class="job-note"><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();addJobDetails(${job.id})">+ Add details for bidders</a>
+        <span style="color:var(--stone)"> · </span><a href="#" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();editBudget(${job.id})">💲 ${Number(job.budget) > 0 ? 'Change budget' : 'Set a budget'}</a>
         <span style="color:var(--stone)"> · </span><a href="#" id="jp-${job.id}" style="color:var(--amber)" onclick="event.preventDefault();event.stopPropagation();pickJobPhotos(${job.id})">📷 Add photos${nPhotos ? ' (' + nPhotos + ' so far)' : ''}</a></div>`;
       // On/off switch for new bids: the job stays up for the client and they can still hire from the bids they have
       addr += job.bids_paused
@@ -1763,6 +1765,22 @@
     if (!confirm(`Close "${job ? job.title : 'this job'}"? It comes down right away and any bids on it are declined. This is free.`)) return;
     try { await api('/api/jobs/' + jobId + '/close', { method: 'POST' }); if (job) job.status = 'closed'; await load(); }
     catch (err) { alert(err.message); }
+  }
+
+  // ── Change or remove the budget on a job that's still open ──
+  async function editBudget(jobId) {
+    const job = jobs.find(j => j.id === jobId);
+    const now = job && Number(job.budget) > 0 ? String(Math.round(job.budget)) : '';
+    const v = prompt('Your budget in dollars (for example 3500).\n\nLeave it blank to remove it and let operators price the job. A budget that’s too low can get fewer bids.', now);
+    if (v === null) return;
+    const clean = v.replace(/[$,\s]/g, '');
+    if (clean && !/^\d+(\.\d+)?$/.test(clean)) { alert('Type just a number, like 3500, or leave it blank.'); return; }
+    try {
+      const r = await api('/api/jobs/' + jobId + '/budget', { method: 'PUT', body: JSON.stringify({ budget: clean ? Number(clean) : null }) });
+      if (job) job.budget = r.budget;
+      render();
+      alert(r.budget ? 'Budget updated. Operators now see ' + money(r.budget) + '.' : 'Budget removed. Operators now see “Open to bids.”');
+    } catch (err) { alert(err.message || 'Could not save that'); }
   }
 
   // ── Add details or photos to a job that's still open ──

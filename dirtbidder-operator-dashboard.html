@@ -1310,7 +1310,7 @@
         ? `<span class="bid-status status-pending">Not taking new bids right now</span>`
         : `<button class="bid-btn" onclick="event.stopPropagation();openBidModal(${job.id})">Submit Bid</button>`;
     return `<div class="job-card" ${job.my_bid_id || job.bids_paused ? '' : `onclick="openBidModal(${job.id})"`}>
-      <div class="job-card-top"><div class="job-card-title">${esc(job.title)}</div><div class="job-budget">${job.budget ? money(job.budget) : ''}</div></div>
+      <div class="job-card-top"><div class="job-card-title">${esc(job.title)}</div><div class="job-budget">${Number(job.budget) > 0 ? money(job.budget) : '<span style="font-size:0.8em;opacity:0.85">Open to bids</span>'}</div></div>
       ${job.description ? descBlock(job) : ''}
       ${photoStrip(job)}
       <div class="job-tags">${tags.join('')}</div>
@@ -1848,7 +1848,7 @@
     document.getElementById('bidSubmitBtn').textContent = mine ? 'Update Bid →' : 'Submit Bid →';
     document.getElementById('bidAsk').href = 'dirtbidder-messaging.html?job=' + jobId;
     document.getElementById('bidAskWrap').style.display = mine ? 'none' : '';
-    document.getElementById('modalJobTitle').textContent = job.title + (job.budget ? ' · Budget: ' + money(job.budget) : '');
+    document.getElementById('modalJobTitle').textContent = job.title + (Number(job.budget) > 0 ? ' · Budget: ' + money(job.budget) : ' · Open to bids');
     const md = document.getElementById('modalJobDesc');
     md.textContent = job.description || '';
     md.style.display = job.description ? '' : 'none';

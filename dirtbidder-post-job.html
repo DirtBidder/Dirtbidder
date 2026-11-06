@@ -879,11 +879,12 @@
       <div class="step-header">
         <div class="step-eyebrow">Step 3 of 5</div>
         <div class="step-title">Budget &amp; <span>Timeline</span></div>
-        <div class="step-sub">Set your budget range and when you need the work done. Operators use this to decide whether to bid.</div>
+        <div class="step-sub">Tell operators when you need the work done. A budget is optional.</div>
       </div>
 
       <div class="form-card">
-        <div class="form-card-title" role="heading" aria-level="2">Budget Range <span class="field-req">*</span></div>
+        <div class="form-card-title" role="heading" aria-level="2">Budget Range <span style="font-weight:500;color:var(--stone);text-transform:none;letter-spacing:0">(optional)</span></div>
+        <div class="field-hint" style="margin:0 0 0.75rem;color:var(--dust)"><strong style="color:var(--chalk)">Not sure what it costs?</strong> Leave it blank and let operators price it. A budget that’s too low can get fewer bids, since operators often skip jobs that won’t cover moving their equipment.</div>
         <div class="budget-row">
           <div class="field">
             <label for="budgetMin">Minimum Budget ($)</label>
@@ -895,8 +896,8 @@
             <input type="number" id="budgetMax" placeholder="e.g. 6000" oninput="updateBudgetPreview()" />
           </div>
         </div>
-        <div id="budgetPreview" style="margin-top:0.75rem;font-size:0.82rem;color:var(--stone)">Enter your budget range above</div>
-        <div class="field-hint" style="margin-top:0.5rem">Setting a range helps operators submit more competitive bids. You're not locked in — bids can come in above or below.</div>
+        <div id="budgetPreview" style="margin-top:0.75rem;font-size:0.82rem;color:var(--stone)">No budget set. Operators will see “Open to bids” and price it themselves.</div>
+        <div class="field-hint" style="margin-top:0.5rem">If you do set one, you're not locked in. Bids can come in above or below it.</div>
       </div>
 
       <div class="form-card">
@@ -1207,7 +1208,7 @@
     } else if (min) {
       preview.textContent = `Budget minimum: $${Number(min).toLocaleString()}`;
     } else {
-      preview.textContent = 'Enter your budget range above';
+      preview.textContent = 'No budget set. Operators will see “Open to bids” and price it themselves.';
     }
   }
 
@@ -1359,7 +1360,7 @@
     const one = budgetMin || budgetMax;
     document.getElementById('previewBudget').textContent = budgetMin && budgetMax
       ? '$' + Number(budgetMin).toLocaleString() + ' – $' + Number(budgetMax).toLocaleString()
-      : one ? '$' + Number(one).toLocaleString() : 'Not set';
+      : one ? '$' + Number(one).toLocaleString() : 'Open to bids';
   }
 
   async function publishJob() {
